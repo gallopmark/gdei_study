@@ -17,8 +17,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/title">
+        android:layout_height="match_parent">
 
         <com.haoyu.app.view.LoadingView
             android:id="@+id/loadingView"
@@ -53,7 +52,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:layout_alignParentBottom="true"
-                android:background="#1a959595"
+                android:background="#0d757575"
                 android:orientation="horizontal">
 
                 <RelativeLayout
