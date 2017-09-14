@@ -8,8 +8,8 @@ android {
         applicationId "com.haoyu.app.gdei.student"
         minSdkVersion 14
         targetSdkVersion 26
-        versionCode 4
-        versionName "1.1.4"
+        versionCode 5
+        versionName "1.1.5"
         vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
@@ -38,7 +38,7 @@ dependencies {
     /*okHttp3*/
     compile 'com.squareup.okhttp3:okhttp:3.9.0'
     compile 'com.squareup.okhttp3:logging-interceptor:3.9.0'
-    /*compile 'com.squareup.okhttp3:okhttp-urlconnection:3.6.0'*/
+    compile 'com.squareup.okhttp3:okhttp-urlconnection:3.6.0'
     /*project*/
     compile project(':zxingLib')
     /*gson*/
