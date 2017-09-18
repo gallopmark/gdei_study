@@ -1232,7 +1232,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
 
 
     class NetReceiver extends BroadcastReceiver {
-
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
