@@ -18,8 +18,8 @@
 
         <ImageView
             android:id="@+id/ic_selection_activity_type"
-            android:layout_width="@dimen/margin_size_20"
-            android:layout_height="@dimen/margin_size_20"
+            android:layout_width="@dimen/margin_size_18"
+            android:layout_height="@dimen/margin_size_18"
             android:layout_gravity="center"
             android:layout_marginLeft="20dp"
             android:src="@drawable/course_video_default" />
@@ -31,14 +31,12 @@
             android:layout_gravity="center"
             android:layout_marginLeft="@dimen/margin_size_10"
             android:layout_marginRight="@dimen/margin_size_8"
-            android:layout_toLeftOf="@+id/ic_selection_activity_download"
             android:layout_weight="1"
             android:ellipsize="end"
             android:gravity="left|center"
             android:maxLines="2"
-            android:text="教育系统突发公共时间简介"
             android:textColor="@color/gray"
-            android:textSize="@dimen/font_size_16" />
+            android:textSize="@dimen/font_size_14" />
 
         <ImageView
             android:id="@+id/ic_download"

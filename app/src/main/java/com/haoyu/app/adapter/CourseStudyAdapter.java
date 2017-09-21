@@ -2,6 +2,11 @@ package com.haoyu.app.adapter;
 
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
+import android.text.Html;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.SubscriptSpan;
+import android.text.style.SuperscriptSpan;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -43,6 +48,7 @@ public class CourseStudyAdapter extends BaseArrayRecyclerAdapter<MultiItemEntity
     private Map<Integer, Boolean> collapses = new HashMap<>();
     private Map<String, View> viewMap = new HashMap<>();
     private OnItemClickListener onItemClickListener;
+    private OnItemLongClickListener onItemLongClickListener;
 
     public CourseStudyAdapter(Context context, List<MultiItemEntity> mDatas) {
         super(mDatas);
@@ -63,6 +69,10 @@ public class CourseStudyAdapter extends BaseArrayRecyclerAdapter<MultiItemEntity
         this.onItemClickListener = onActivityClickCallBack;
     }
 
+    public void setOnItemLongClickListener(OnItemLongClickListener onItemLongClickListener) {
+        this.onItemLongClickListener = onItemLongClickListener;
+    }
+
     public OnFileDownloadStatusListener getmOnFileDownloadStatusListener() {
         return mOnFileDownloadStatusListener;
     }
@@ -81,29 +91,38 @@ public class CourseStudyAdapter extends BaseArrayRecyclerAdapter<MultiItemEntity
     public void onBindHoder(RecyclerHolder holder, MultiItemEntity item, final int position) {
         int viewType = holder.getItemViewType();
         if (viewType == TYPE_LEVEL_0) {
-            CourseSectionEntity sectionEntity = (CourseSectionEntity) item;
+            final CourseSectionEntity sectionEntity = (CourseSectionEntity) item;
+            final TextView tv_title = holder.obtainView(R.id.section_title);
             if (sectionEntity.getTitle() != null && sectionEntity.getTitle().trim().length() > 0)
-                holder.setText(R.id.course_title, sectionEntity.getTitle());
+                tv_title.setText(getSpanned(sectionEntity.getTitle()));
             else
-                holder.setText(R.id.course_title, "无标题");
+                tv_title.setText("无标题");
+            holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    if (onItemLongClickListener != null)
+                        onItemLongClickListener.onItemLongClick(tv_title, getSpanned(sectionEntity.getTitle()));
+                    return false;
+                }
+            });
         } else if (viewType == TYPE_LEVEL_1) {
             final CourseChildSectionEntity childEntity = (CourseChildSectionEntity) item;
             ImageView ic_selection_state = holder.obtainView(R.id.ic_selection_state);
-            if (childEntity.getCompleteState() != null && childEntity.getCompleteState().equals("已完成")) {
+            final TextView tv_title = holder.obtainView(R.id.tv_selection_title);
+            if (childEntity.getCompleteState() != null && childEntity.getCompleteState().equals("已完成"))
                 ic_selection_state.setImageResource(R.drawable.state_solid_default);
-            } else if (childEntity.getCompleteState() != null && childEntity.getCompleteState().equals("complete")) {
+            else if (childEntity.getCompleteState() != null && childEntity.getCompleteState().equals("complete"))
                 ic_selection_state.setImageResource(R.drawable.state_solid_default);
-            } else if (childEntity.getCompleteState() != null && childEntity.getCompleteState().equals("进行中")) {
+            else if (childEntity.getCompleteState() != null && childEntity.getCompleteState().equals("进行中"))
                 ic_selection_state.setImageResource(R.drawable.state_semicircle_default);
-            } else if (childEntity.getCompleteState() != null && childEntity.getCompleteState().equals("in_progress")) {
+            else if (childEntity.getCompleteState() != null && childEntity.getCompleteState().equals("in_progress"))
                 ic_selection_state.setImageResource(R.drawable.state_semicircle_default);
-            } else {
-                ic_selection_state.setImageResource(R.drawable.state_hollow_default);
-            }
-            if (childEntity.getTitle() != null && childEntity.getTitle().trim().length() > 0)
-                holder.setText(R.id.tv_selection_title, childEntity.getTitle());
             else
-                holder.setText(R.id.tv_selection_title, "无标题");
+                ic_selection_state.setImageResource(R.drawable.state_hollow_default);
+            if (childEntity.getTitle() != null && childEntity.getTitle().trim().length() > 0)
+                tv_title.setText(getSpanned(childEntity.getTitle()));
+            else
+                tv_title.setText("无标题");
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -119,6 +138,14 @@ public class CourseStudyAdapter extends BaseArrayRecyclerAdapter<MultiItemEntity
                     notifyDataSetChanged();
                     if (onItemClickListener != null)
                         onItemClickListener.onChildSectionClick(position + childEntity.getActivities().size());
+                }
+            });
+            holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    if (onItemLongClickListener != null)
+                        onItemLongClickListener.onItemLongClick(tv_title, getSpanned(childEntity.getTitle()));
+                    return false;
                 }
             });
         } else {
@@ -199,7 +226,7 @@ public class CourseStudyAdapter extends BaseArrayRecyclerAdapter<MultiItemEntity
                     icState.setImageResource(R.drawable.state_hollow_default);
             }
             if (activity.getTitle() != null && activity.getTitle().trim().length() > 0)
-                tvTitle.setText(activity.getTitle());
+                tvTitle.setText(getSpanned(activity.getTitle()));
             else
                 tvTitle.setText("无标题");
             if (pressId != null && activity.getId() != null && pressId.equals(activity.getId()))
@@ -213,6 +240,14 @@ public class CourseStudyAdapter extends BaseArrayRecyclerAdapter<MultiItemEntity
                     if (onItemClickListener != null) {
                         onItemClickListener.onActivityClick(activity);
                     }
+                }
+            });
+            holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    if (onItemLongClickListener != null)
+                        onItemLongClickListener.onItemLongClick(tvTitle, getSpanned(activity.getTitle()));
+                    return false;
                 }
             });
             VideoMobileEntity video = activity.getmVideo();
@@ -283,6 +318,18 @@ public class CourseStudyAdapter extends BaseArrayRecyclerAdapter<MultiItemEntity
             });
             viewMap.put(url, holder.itemView);
         }
+    }
+
+    private Spanned getSpanned(String title) {
+        Spanned spanned = Html.fromHtml(title);
+        SpannableString ss = new SpannableString(spanned);
+        if (title.contains("<sup>"))
+            ss.setSpan(new SuperscriptSpan(), 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        else if (title.contains("<sub>"))
+            ss.setSpan(new SubscriptSpan(), 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        else
+            return spanned;
+        return ss;
     }
 
     private void beginDownload(final String url) {
@@ -370,5 +417,9 @@ public class CourseStudyAdapter extends BaseArrayRecyclerAdapter<MultiItemEntity
         void onChildSectionClick(int position);
 
         void onActivityClick(CourseSectionActivity activity);
+    }
+
+    public interface OnItemLongClickListener {
+        void onItemLongClick(TextView tv, CharSequence charSequence);
     }
 }
