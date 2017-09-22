@@ -7,14 +7,13 @@
     android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/ll_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/margin_size_12"
         android:layout_marginRight="@dimen/margin_size_12"
         android:background="@drawable/item_click_selector"
-        android:orientation="horizontal"
-        android:paddingBottom="@dimen/margin_size_12"
-        android:paddingTop="@dimen/margin_size_12">
+        android:orientation="horizontal">
 
         <ImageView
             android:id="@+id/ic_selection_activity_type"
@@ -30,7 +29,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginLeft="@dimen/margin_size_10"
-            android:layout_marginRight="@dimen/margin_size_8"
+            android:layout_marginRight="@dimen/margin_size_10"
             android:layout_weight="1"
             android:ellipsize="end"
             android:gravity="left|center"
