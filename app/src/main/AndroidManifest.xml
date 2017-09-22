@@ -324,7 +324,6 @@
             android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity android:name="com.haoyu.app.activity.AppWebViewActivity" />
 
-        <service android:name="com.haoyu.app.service.NetSpeedService" />
     </application>
 
 </manifest>
