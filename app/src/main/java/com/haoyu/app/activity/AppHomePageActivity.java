@@ -207,7 +207,6 @@ public class AppHomePageActivity extends BaseActivity implements View.OnClickLis
             tv_userName.setText("请填写用户名");
         else
             tv_userName.setText(getRealName());
-        tv_deptName = menuView.findViewById(R.id.tv_deptName);
         if (TextUtils.isEmpty(getDeptName()))
             tv_deptName.setText("请选择单位");
         else
