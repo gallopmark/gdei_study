@@ -165,7 +165,7 @@
                         android:layout_gravity="center"
                         android:layout_weight="1"
                         android:drawablePadding="@dimen/margin_size_6"
-                        android:drawableTop="@drawable/workshop_observation"
+                        android:drawableTop="@drawable/icon2"
                         android:gravity="center"
                         android:text="教学观摩"
                         android:textSize="@dimen/font_size_14" />
@@ -177,9 +177,9 @@
                         android:layout_gravity="center"
                         android:layout_weight="1"
                         android:drawablePadding="@dimen/margin_size_6"
-                        android:drawableTop="@drawable/workshop_observation"
+                        android:drawableTop="@drawable/icon1"
                         android:gravity="center"
-                        android:text="教学课件"
+                        android:text="听课评课"
                         android:textSize="@dimen/font_size_14" />
                 </LinearLayout>
             </RelativeLayout>

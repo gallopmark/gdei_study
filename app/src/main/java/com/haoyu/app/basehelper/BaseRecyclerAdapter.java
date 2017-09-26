@@ -7,11 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-/**
- * 创建日期：2016/12/7 on 9:34
- * 描述:
- * 作者:马飞奔 Administrator
- */
 public abstract class BaseRecyclerAdapter extends RecyclerView.Adapter<BaseRecyclerAdapter.RecyclerHolder> {
 
 

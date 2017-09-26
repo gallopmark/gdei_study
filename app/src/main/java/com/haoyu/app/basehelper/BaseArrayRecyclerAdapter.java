@@ -3,11 +3,7 @@ package com.haoyu.app.basehelper;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * 创建日期：2016/12/7 on 9:37
- * 描述:
- * 作者:马飞奔 Administrator
- */
+
 public abstract class BaseArrayRecyclerAdapter<T> extends BaseRecyclerAdapter {
     public  List<T> mDatas = new ArrayList<T>();
 
