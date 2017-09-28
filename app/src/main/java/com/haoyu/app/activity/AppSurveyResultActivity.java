@@ -123,9 +123,8 @@ public class AppSurveyResultActivity extends BaseActivity {
                             mUrl = Constants.OUTRT_NET + "/student_" + relationId + "/m/survey_result/" + questionId + "/submissions" + "?page=1&limit=2";
                         String mSubmissionStr = OkHttpClientManager.getAsString(context, mUrl);
                         SurveyAnswerSubmissionResult submissionResult = gson.fromJson(mSubmissionStr, SurveyAnswerSubmissionResult.class);
-                        if (submissionResult != null && submissionResult.getResponseData() != null
-                                && submissionResult.getResponseData().getmSubmissions() != null) {
-                            appSurveyResult.getResponseData().getmSurveyQuestions().get(i).setAnswerSubmissions(submissionResult.getResponseData().getmSubmissions());
+                        if (submissionResult != null && submissionResult.getResponseData() != null) {
+                            appSurveyResult.getResponseData().getmSurveyQuestions().get(i).setAnswerSubmissionData(submissionResult.getResponseData());
                         }
                     }
                 } catch (Exception e) {
