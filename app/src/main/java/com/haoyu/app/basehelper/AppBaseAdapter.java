@@ -8,11 +8,6 @@ import android.widget.BaseAdapter;
 
 import java.util.List;
 
-/**
- * 创建日期：2016/12/5 on 10:53
- * 描述:
- * 作者:马飞奔 Administrator
- */
 public abstract class AppBaseAdapter<T> extends BaseAdapter {
     protected LayoutInflater mInflater;
     protected Context mContext;
