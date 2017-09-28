@@ -293,9 +293,11 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         videoPlay.setImageResource(R.drawable.zanting);
         videoSeekBar.setOnSeekBarChangeListener(mSeekBarListener);
     }
+
     private String netType;//手机的网络状态,3表示是wifi ，0表示当前没有网络，4表示当前是手机流量2G/3G/4G
     private boolean isWarn = false;
     private boolean okWifi = false;
+
     @Override
     public void obBusEvent(MessageEvent event) {
         String action = event.getAction();
@@ -1116,7 +1118,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         msg.what = UPDATE_SEEKBAR;
         if (videoHandler != null)
             videoHandler.sendMessageDelayed(msg, 1000);
-
         return time;
     }
 
@@ -1139,7 +1140,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                 //横屏
                 Orieantation = 2;
             }
-
         }
 
     }
@@ -1193,10 +1193,8 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                     @Override
                     public void onResponse(String response) {
 
-
                     }
                 }, map));
-
 
             }
         }
@@ -1223,13 +1221,11 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                     @Override
                     public void onResponse(String response) {
 
-
                     }
                 }));
             }
         }
     }
-
 
     class NetReceiver extends BroadcastReceiver {
         @Override
