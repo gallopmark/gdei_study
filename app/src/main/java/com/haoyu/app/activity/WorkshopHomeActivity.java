@@ -442,7 +442,8 @@ public class WorkshopHomeActivity extends BaseActivity implements View.OnClickLi
             if (data != null && data.getSerializableExtra("section") != null
                     && data.getSerializableExtra("section") instanceof MWorkshopSection) {
                 MWorkshopSection section = (MWorkshopSection) data.getSerializableExtra("section");
-                sectionAdapter.add(section);
+                mWorkshopSections.add(section);
+                sectionAdapter.notifyDataSetChanged();
                 recyclerView.setVisibility(View.VISIBLE);
                 ll_empty.setVisibility(View.GONE);
             }
