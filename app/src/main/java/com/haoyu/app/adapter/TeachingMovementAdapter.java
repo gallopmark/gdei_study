@@ -13,7 +13,7 @@ import com.haoyu.app.activity.TeachingResearchATActivity;
 import com.haoyu.app.basehelper.BaseArrayRecyclerAdapter;
 import com.haoyu.app.entity.TeachingMovementEntity;
 import com.haoyu.app.imageloader.GlideImgManager;
-import com.haoyu.app.gdei.student.R;
+import com.haoyu.app.lego.teach.R;
 import com.haoyu.app.utils.ScreenUtils;
 import com.haoyu.app.utils.TimeUtil;
 
@@ -107,7 +107,7 @@ public class TeachingMovementAdapter extends BaseArrayRecyclerAdapter<TeachingMo
         if (entity.getCreator() != null && entity.getCreator().getRealName() != null) {
             tv_creator.setText(entity.getCreator().getRealName());
         } else {
-            tv_creator.setText("匿名用户");
+            tv_creator.setText("");
         }
         tv_host.setText(entity.getSponsor());
         bt_type.setOnClickListener(new View.OnClickListener() {

@@ -9,7 +9,7 @@ import android.widget.TextView;
 import com.haoyu.app.basehelper.BaseArrayRecyclerAdapter;
 import com.haoyu.app.entity.Message;
 import com.haoyu.app.entity.MobileUser;
-import com.haoyu.app.gdei.student.R;
+import com.haoyu.app.lego.teach.R;
 import com.haoyu.app.utils.TimeUtil;
 
 import java.util.List;
@@ -54,7 +54,7 @@ public class MessageAdapter extends BaseArrayRecyclerAdapter<Message> {
             if (entity.getSender() != null) {
                 message_type.setText(entity.getSender().getRealName());
             } else {
-                message_type.setText("匿名用户");
+                message_type.setText("");
             }
         } else if (entity.getType() != null && entity.getType().equals(Message.TYPE_DAILY_WARN)) {
             message_type.setBackgroundResource(R.drawable.message_system);
