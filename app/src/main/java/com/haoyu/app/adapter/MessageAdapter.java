@@ -9,7 +9,7 @@ import android.widget.TextView;
 import com.haoyu.app.basehelper.BaseArrayRecyclerAdapter;
 import com.haoyu.app.entity.Message;
 import com.haoyu.app.entity.MobileUser;
-import com.haoyu.app.lego.teach.R;
+import com.haoyu.app.gdei.student.R;
 import com.haoyu.app.utils.TimeUtil;
 
 import java.util.List;
