@@ -510,6 +510,7 @@ public class WorkshopHomeActivity extends BaseActivity implements View.OnClickLi
                 if (response != null && response.getResponseCode() != null && response.getResponseCode().equals("00")) {
                     mWorkshopSections.remove(position);
                     sectionAdapter.notifyItemRangeRemoved(position, 1);
+                    sectionAdapter.notifyItemRangeChanged(position, mWorkshopSections.size());
                     if (mWorkshopSections.size() == 0) {
                         ll_empty.setVisibility(View.VISIBLE);
                         recyclerView.setVisibility(View.GONE);
