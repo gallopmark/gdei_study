@@ -661,13 +661,10 @@ public class WorkshopHomeActivity extends BaseActivity implements View.OnClickLi
                 startActivity(intent);
             } else if (video != null && video.getVideoFiles() != null && video.getVideoFiles().size() > 0) {
                 intent.putExtra("videoUrl", video.getVideoFiles().get(0).getUrl());
-                intent.putExtra("fileName", video.getVideoFiles().get(0).getFileName());
-
                 startActivity(intent);
             } else if (video != null && video.getAttchFiles() != null && video.getAttchFiles().size() > 0) {
                 //教学观摩
                 intent.putExtra("videoUrl", video.getAttchFiles().get(0).getUrl());
-                intent.putExtra("fileName", video.getAttchFiles().get(0).getFileName());
                 startActivity(intent);
             } else {
                 toast(context, "系统暂不支持浏览，请到网站完成。");
