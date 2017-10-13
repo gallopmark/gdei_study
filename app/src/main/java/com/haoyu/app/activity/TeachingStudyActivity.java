@@ -41,6 +41,7 @@ import com.haoyu.app.view.GoodView;
 import com.haoyu.app.view.LoadFailView;
 import com.haoyu.app.view.LoadingView;
 
+import org.sufficientlysecure.htmltextview.HtmlHttpImageGetter;
 import org.sufficientlysecure.htmltextview.HtmlTextView;
 
 import java.util.ArrayList;
@@ -87,8 +88,12 @@ public class TeachingStudyActivity extends BaseActivity implements View.OnClickL
     LinearLayout ll_video;  //视频文件
     @BindView(R.id.tv_videoName)
     TextView tv_videoName;  //视频名称
-    @BindView(R.id.htv)
-    HtmlTextView htv;
+    @BindView(R.id.ll_evaluation)
+    LinearLayout ll_evaluation;
+    @BindView(R.id.iv_expand)
+    ImageView iv_expand;
+    @BindView(R.id.tv_content)
+    HtmlTextView tv_content;
     @BindView(R.id.ll_discussion)
     LinearLayout ll_discussion;
     @BindView(R.id.tv_discussCount)
@@ -120,6 +125,7 @@ public class TeachingStudyActivity extends BaseActivity implements View.OnClickL
     private AppCommentAdapter adapter;
     private List<CommentEntity> mComments = new ArrayList<>();
     private int replyPosition, childPosition;
+    private String activityTitle;
 
     @Override
     public int setLayoutResID() {
@@ -132,6 +138,7 @@ public class TeachingStudyActivity extends BaseActivity implements View.OnClickL
         timePeriod = (TimePeriod) getIntent().getSerializableExtra("timePeriod");
         workshopId = getIntent().getStringExtra("workshopId");
         activityId = getIntent().getStringExtra("activityId");
+        activityTitle = getIntent().getStringExtra("activityTitle");
         lcecEntity = (AppActivityViewEntity.MLcecMobileEntity) getIntent().getSerializableExtra("mlcec");
         setSupportToolbar();
         showData();
@@ -144,8 +151,7 @@ public class TeachingStudyActivity extends BaseActivity implements View.OnClickL
     }
 
     private void setSupportToolbar() {
-        String activityTitle = getIntent().getStringExtra("activityTitle");
-        toolBar.setTitle_text(activityTitle);
+        toolBar.setTitle_text("听课评课");
         toolBar.setOnLeftClickListener(new AppToolBar.OnLeftClickListener() {
             @Override
             public void onLeftClick(View view) {
@@ -176,8 +182,25 @@ public class TeachingStudyActivity extends BaseActivity implements View.OnClickL
             ll_insert.setVisibility(View.VISIBLE);
             ll_detail.setVisibility(View.GONE);
         }
-        tv_study_title.setText(lcecEntity.getTitle());
-        htv.setHtml(lcecEntity.getContent());
+        if (lcecEntity.getTitle() != null)
+            tv_study_title.setText(Html.fromHtml(lcecEntity.getTitle()));
+        tv_content.setHtml(lcecEntity.getContent(), new HtmlHttpImageGetter(tv_content, Constants.REFERER));
+        ll_evaluation.setOnClickListener(new View.OnClickListener() {
+            private boolean isExpand = true;
+
+            @Override
+            public void onClick(View view) {
+                if (isExpand) {
+                    tv_content.setVisibility(View.VISIBLE);
+                    iv_expand.setImageResource(R.drawable.course_dictionary_shouqi);
+                    isExpand = false;
+                } else {
+                    tv_content.setVisibility(View.GONE);
+                    iv_expand.setImageResource(R.drawable.course_dictionary_xiala);
+                    isExpand = true;
+                }
+            }
+        });
         String activityType = "活动类型：";
         if (lcecEntity.getType() != null && lcecEntity.getType().equals("offLine"))
             tv_activity_type.setText(activityType + "现场评课");
@@ -474,9 +497,9 @@ public class TeachingStudyActivity extends BaseActivity implements View.OnClickL
                 if (NetStatusUtil.isConnected(context)) {
                     if (NetStatusUtil.isWifi(context)) {
                         intent.setClass(context, VideoPlayerActivity.class);
-                        if (lcecEntity.getmVideo().getFileName() != null) {
-                            intent.putExtra("fileName", lcecEntity.getmVideo().getFileName());
-                        }
+
+                        intent.putExtra("activityTitle", activityTitle);
+
                         intent.putExtra("videoUrl", lcecEntity.getmVideo().getUrl());
                         startActivity(intent);
                     } else {
