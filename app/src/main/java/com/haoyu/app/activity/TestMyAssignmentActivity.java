@@ -4,7 +4,6 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -14,8 +13,8 @@ import com.haoyu.app.view.AppToolBar;
 
 import butterknife.BindView;
 
-public class TestMyAssignmentActivity extends BaseActivity {
 
+public class TestMyAssignmentActivity extends BaseActivity {
     @BindView(R.id.toolBar)
     AppToolBar toolBar;
     @BindView(R.id.test_responoseScore)
@@ -121,8 +120,7 @@ public class TestMyAssignmentActivity extends BaseActivity {
         return mSpannableStringBuilder;
 
 
-
-}
+    }
 
     @Override
     protected void onDestroy() {
