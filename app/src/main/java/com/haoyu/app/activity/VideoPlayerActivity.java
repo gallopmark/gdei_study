@@ -466,6 +466,10 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         popClose = getView(view, R.id.pop_close);
         TextView read_guide_content = getView(view, R.id.read_guide_content);
         RecyclerView recyclerView = getView(view, R.id.recyclerView);
+        if (summary == null && mFileInfoList.size() == 0) {
+            mRead.setVisibility(View.GONE);
+        }
+
         if (summary != null) {
             read_guide_content.setText(summary);
         }
