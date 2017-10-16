@@ -409,19 +409,16 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
 
     private long seekTime;
     private double interval;//更新时间间隔
+    private String activityTitle;
 
     private void initContent() {
         mVideoPath = getIntent().getStringExtra("videoUrl");
         summary = getIntent().getStringExtra("summary");
-        String fileName = getIntent().getStringExtra("fileName");
-        String activityTitle = getIntent().getStringExtra("activityTitle");
+        activityTitle = getIntent().getStringExtra("activityTitle");
         seekTime = getIntent().getIntExtra("lastViewTime", 0);
         interval = getIntent().getDoubleExtra("interval", 30.0);
-        if (fileName != null) {
-            videoTitle.setText(fileName);
-        } else {
-            videoTitle.setText(activityTitle);
-        }
+        videoTitle.setText(activityTitle);
+
         AVOptions options = new AVOptions();
         // 设置链接超时时间
         options.setInteger(AVOptions.KEY_PREPARE_TIMEOUT, 20 * 1000);

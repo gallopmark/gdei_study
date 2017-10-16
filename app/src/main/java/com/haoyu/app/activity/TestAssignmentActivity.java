@@ -312,9 +312,7 @@ public class TestAssignmentActivity extends BaseActivity implements OnClickListe
                 }
 
                 if (mAssignmentEntity != null && mAssignmentEntity.getContent() != null) {
-
                     htv.setHtml(mAssignmentEntity.getContent(), new HtmlHttpImageGetter(htv, Constants.REFERER));
-
                 } else {
                     htv.setHtml("暂无内容");
                 }
