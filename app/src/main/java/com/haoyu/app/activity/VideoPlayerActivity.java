@@ -247,6 +247,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     public void initView() {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+
         videoId = getIntent().getStringExtra("videoId");
         activityId = getIntent().getStringExtra("activityId");
         workshopId = getIntent().getStringExtra("workshopId");
@@ -256,6 +257,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         if (entity != null && entity.getAttchFiles() != null && entity.getAttchFiles().size() > 0) {
             mFileInfoList.addAll(entity.getAttchFiles());
         }
+        initContent();
         mVideoView.setBufferingIndicator(loadingView);
         linear_centercontroll.getBackground().setAlpha(80);
         screenWidthPixels = MyUtils.screenWidthPixels(context);
@@ -267,7 +269,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         mMaxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         updateVideoCatch();
         //开启播放
-        initContent();
+
         MyUtils.Land(context);//取消手机的状态栏
         MyUtils.hideBottomUIMenu(context);//如果手机又虚拟按键则隐藏改虚拟按键
         myOrientationListener = new MyOrientationListener(context);//设置手机屏幕旋转监听
@@ -417,6 +419,10 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         seekTime = getIntent().getIntExtra("lastViewTime", 0);
         interval = getIntent().getDoubleExtra("interval", 30.0);
         videoTitle.setText(activityTitle);
+        if (summary == null && mFileInfoList.size() == 0) {
+            mRead.setVisibility(View.GONE);
+        }
+
 
         AVOptions options = new AVOptions();
         // 设置链接超时时间
@@ -466,14 +472,9 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         popClose = getView(view, R.id.pop_close);
         TextView read_guide_content = getView(view, R.id.read_guide_content);
         RecyclerView recyclerView = getView(view, R.id.recyclerView);
-        if (summary == null && mFileInfoList.size() == 0) {
-            mRead.setVisibility(View.GONE);
-        }
-
         if (summary != null) {
             read_guide_content.setText(summary);
         }
-
         if (mFileInfoList.size() > 0) {
             LinearLayoutManager manager = new LinearLayoutManager(context);
             manager.setOrientation(LinearLayoutManager.VERTICAL);
