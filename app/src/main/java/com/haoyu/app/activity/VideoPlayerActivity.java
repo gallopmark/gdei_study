@@ -423,7 +423,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
             mRead.setVisibility(View.GONE);
         }
 
-
         AVOptions options = new AVOptions();
         // 设置链接超时时间
         options.setInteger(AVOptions.KEY_PREPARE_TIMEOUT, 20 * 1000);
