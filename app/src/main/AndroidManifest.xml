@@ -318,12 +318,14 @@
 
         <!--多媒体选择器-->
         <!--文件预览-->
-        <activity android:name="com.haoyu.app.activity.MFileInfosActivity"/>
+        <activity android:name="com.haoyu.app.activity.MFileInfosActivity" />
         <activity android:name="com.haoyu.app.activity.MFileInfoActivity" />
         <activity
             android:name="com.haoyu.app.activity.MFileInfoPreViewActivity"
             android:windowSoftInputMode="stateHidden|adjustResize" />
-        <activity android:name="com.haoyu.app.activity.WebActivity" />
+        <activity
+            android:name="com.haoyu.app.activity.WebActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
 
     </application>
 
