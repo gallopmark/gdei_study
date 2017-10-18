@@ -323,7 +323,7 @@
         <activity
             android:name="com.haoyu.app.activity.MFileInfoPreViewActivity"
             android:windowSoftInputMode="stateHidden|adjustResize" />
-        <activity android:name="com.haoyu.app.activity.AppWebViewActivity" />
+        <activity android:name="com.haoyu.app.activity.WebActivity" />
 
     </application>
 

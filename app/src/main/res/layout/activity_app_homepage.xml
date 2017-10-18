@@ -55,7 +55,7 @@
             android:background="@drawable/app_toolbar_selector"
             android:paddingLeft="@dimen/margin_size_16"
             android:paddingRight="@dimen/margin_size_16"
-            android:visibility="gone"
+            android:visibility="visible"
             android:src="@drawable/shaoshao" />
     </RelativeLayout>
 
