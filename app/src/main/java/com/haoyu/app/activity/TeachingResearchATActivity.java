@@ -8,6 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
@@ -45,6 +46,7 @@ import com.haoyu.app.rxBus.MessageEvent;
 import com.haoyu.app.rxBus.RxBus;
 import com.haoyu.app.utils.Action;
 import com.haoyu.app.utils.Constants;
+import com.haoyu.app.utils.HtmlTagHandler;
 import com.haoyu.app.utils.MediaFile;
 import com.haoyu.app.utils.OkHttpClientManager;
 import com.haoyu.app.utils.ScreenUtils;
@@ -252,7 +254,20 @@ public class TeachingResearchATActivity extends BaseActivity implements View.OnC
         }
         if (entity.getContent() != null && entity.getContent().length() > 0) {
             ll_content.setVisibility(View.VISIBLE);
-            Spanned spanned = Html.fromHtml(entity.getContent(), new HtmlHttpImageGetter(at_content, Constants.REFERER), null);
+            HtmlTagHandler tagHandler = new HtmlTagHandler(new HtmlTagHandler.OnImageClickListener() {
+                @Override
+                public void onImageClick(View view, String url) {
+                    ArrayList<String> imgList = new ArrayList<>();
+                    imgList.add(Constants.REFERER + url);
+                    Intent intent = new Intent(context, AppMultiImageShowActivity.class);
+                    intent.putStringArrayListExtra("photos", imgList);
+                    context.startActivity(intent);
+                    context.overridePendingTransition(R.anim.zoom_in, 0);
+                }
+            });
+            Html.ImageGetter imageGetter = new HtmlHttpImageGetter(at_content, Constants.REFERER, true);
+            Spanned spanned = Html.fromHtml(entity.getContent(), imageGetter, tagHandler);
+            at_content.setMovementMethod(LinkMovementMethod.getInstance());
             at_content.setText(spanned);
             at_content.setVisibility(View.VISIBLE);
             iv_expand.setImageResource(R.drawable.course_dictionary_shouqi);

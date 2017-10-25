@@ -8,6 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
@@ -37,6 +38,7 @@ import com.haoyu.app.rxBus.MessageEvent;
 import com.haoyu.app.rxBus.RxBus;
 import com.haoyu.app.utils.Action;
 import com.haoyu.app.utils.Constants;
+import com.haoyu.app.utils.HtmlTagHandler;
 import com.haoyu.app.utils.OkHttpClientManager;
 import com.haoyu.app.utils.ScreenUtils;
 import com.haoyu.app.utils.TimeUtil;
@@ -178,7 +180,19 @@ public class TeachingResearchSSActivity extends BaseActivity implements View.OnC
             tv_commentNum.setText("共有" + replyNum + "条评论");
         }
         tv_trTitle.setText(entity.getTitle());
-        Spanned spanned = Html.fromHtml(entity.getContent(), new HtmlHttpImageGetter(tv_content, Constants.REFERER), null);
+        Html.ImageGetter imageGetter = new HtmlHttpImageGetter(tv_content, Constants.REFERER, true);
+        Spanned spanned = Html.fromHtml(entity.getContent(), imageGetter, new HtmlTagHandler(new HtmlTagHandler.OnImageClickListener() {
+            @Override
+            public void onImageClick(View view, String url) {
+                ArrayList<String> imgList = new ArrayList<>();
+                imgList.add(Constants.REFERER + url);
+                Intent intent = new Intent(context, AppMultiImageShowActivity.class);
+                intent.putStringArrayListExtra("photos", imgList);
+                context.startActivity(intent);
+                context.overridePendingTransition(R.anim.zoom_in, 0);
+            }
+        }));
+        tv_content.setMovementMethod(LinkMovementMethod.getInstance());
         tv_content.setText(spanned);
         if (entity.getmFileInfos() != null && entity.getmFileInfos().size() > 0) {
             GlideImgManager.loadImage(context, entity.getmFileInfos().get(0).getUrl(),
