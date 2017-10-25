@@ -165,8 +165,15 @@ public class MediaGridAdapter extends BaseArrayRecyclerAdapter<MediaItem> {
                         checkBox.setChecked(false);
                         mSelects.remove(item);
                     } else {
-                        checkBox.setChecked(true);
-                        mSelects.add(item);
+                        if (mSelects.size() < limit) {
+                            mSelects.add(item);
+                            checkBox.setChecked(true);
+                        } else {
+                            checkBox.setChecked(false);
+                            if (onItemClickListener != null) {
+                                onItemClickListener.onOverChoice(limit);
+                            }
+                        }
                     }
                     if (onItemClickListener != null) {
                         onItemClickListener.onMultipleChoice(mSelects);

@@ -638,6 +638,9 @@ public class TeachingResearchCCActivity extends BaseActivity implements View.OnC
                     bt_supportNum.setText("赞（" + supportNum + "）");
                     MessageEvent event = new MessageEvent();
                     event.action = Action.SUPPORT_STUDY_CLASS;
+                    if (lessonEntity.getmDiscussionRelations() != null && lessonEntity.getmDiscussionRelations().size() > 0) {
+                        lessonEntity.getmDiscussionRelations().get(0).setSupportNum(supportNum);
+                    }
                     event.obj = lessonEntity;
                     RxBus.getDefault().post(event);
                 } else if (response != null && response.getResponseMsg() != null) {
@@ -950,6 +953,9 @@ public class TeachingResearchCCActivity extends BaseActivity implements View.OnC
                     tv_advise.setText("收到" + adviseNum + "条建议");
                     MessageEvent event = new MessageEvent();
                     event.action = Action.GIVE_STUDY_ADVICE;
+                    if (lessonEntity.getmDiscussionRelations() != null && lessonEntity.getmDiscussionRelations().size() > 0) {
+                        lessonEntity.getmDiscussionRelations().get(0).setReplyNum(adviseNum);
+                    }
                     event.obj = lessonEntity;
                     RxBus.getDefault().post(event);
                 } else {
