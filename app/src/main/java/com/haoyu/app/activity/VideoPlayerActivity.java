@@ -422,7 +422,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         if (summary == null && mFileInfoList.size() == 0) {
             mRead.setVisibility(View.GONE);
         }
-
         AVOptions options = new AVOptions();
         // 设置链接超时时间
         options.setInteger(AVOptions.KEY_PREPARE_TIMEOUT, 20 * 1000);
@@ -736,6 +735,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                     break;
                 case PLMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START:
                     // 缓存完成，继续播放
+                    hideLoading();
                     if (mVideoView != null) {
                         mVideoView.start();
                     }
@@ -990,9 +990,9 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
             case R.id.video_centerpause:
                 //屏幕中间播放按钮
                 if (mVideoView != null) {
-                    if (mVideoView.getCurrentPosition() == mVideoView.getDuration())
+                    if (mVideoView.getCurrentPosition() == mVideoView.getDuration()) {
                         mVideoView.seekTo(0);
-                    else {
+                    } else {
                         if (mVideoView.getCurrentPosition() > 0) {
                             mVideoView.start();
                         } else {
