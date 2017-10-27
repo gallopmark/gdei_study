@@ -36,8 +36,8 @@ import com.haoyu.app.entity.Paginator;
 import com.haoyu.app.entity.ReplyEntity;
 import com.haoyu.app.entity.ReplyListResult;
 import com.haoyu.app.entity.ReplyResult;
+import com.haoyu.app.entity.TeachingLessonData;
 import com.haoyu.app.entity.TeachingLessonEntity;
-import com.haoyu.app.entity.TeachingLessonSingleResult;
 import com.haoyu.app.filePicker.LFilePicker;
 import com.haoyu.app.gdei.student.R;
 import com.haoyu.app.imageloader.GlideImgManager;
@@ -176,7 +176,7 @@ public class TeachingResearchCCActivity extends BaseActivity implements View.OnC
 
     public void initData() {
         final String url = Constants.OUTRT_NET + "/m/lesson/cmts/view/" + id;
-        addSubscription(OkHttpClientManager.getAsyn(context, url, new OkHttpClientManager.ResultCallback<TeachingLessonSingleResult>() {
+        addSubscription(OkHttpClientManager.getAsyn(context, url, new OkHttpClientManager.ResultCallback<BaseResponseResult<TeachingLessonData>>() {
             @Override
             public void onBefore(Request request) {
                 loadingView.setVisibility(View.VISIBLE);
@@ -189,11 +189,11 @@ public class TeachingResearchCCActivity extends BaseActivity implements View.OnC
             }
 
             @Override
-            public void onResponse(TeachingLessonSingleResult singleResult) {
+            public void onResponse(BaseResponseResult<TeachingLessonData> result) {
                 loadingView.setVisibility(View.VISIBLE);
-                if (singleResult != null && singleResult.getResponseData() != null && singleResult.getResponseData().getmLesson() != null) {
+                if (result != null && result.getResponseData() != null && result.getResponseData().getmLesson() != null) {
                     contentView.setVisibility(View.VISIBLE);
-                    updateUI(singleResult.getResponseData().getmLesson());
+                    updateUI(result.getResponseData().getmLesson());
                     getFiles();
                     getAdvise();
                 } else {

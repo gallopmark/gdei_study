@@ -36,7 +36,6 @@ import com.haoyu.app.entity.MFileInfo;
 import com.haoyu.app.entity.MobileUser;
 import com.haoyu.app.entity.Paginator;
 import com.haoyu.app.entity.TeachingMovementEntity;
-import com.haoyu.app.entity.TeachingMovementSingleResult;
 import com.haoyu.app.entity.TeachingRegistAtResult;
 import com.haoyu.app.gdei.student.R;
 import com.haoyu.app.imageloader.GlideImgManager;
@@ -184,7 +183,7 @@ public class TeachingResearchATActivity extends BaseActivity implements View.OnC
 
     public void initData() {
         String url = Constants.OUTRT_NET + "/m/movement/view/" + acId;
-        addSubscription(OkHttpClientManager.getAsyn(context, url, new OkHttpClientManager.ResultCallback<TeachingMovementSingleResult>() {
+        addSubscription(OkHttpClientManager.getAsyn(context, url, new OkHttpClientManager.ResultCallback<BaseResponseResult<TeachingMovementEntity>>() {
             @Override
             public void onBefore(Request request) {
                 loadingView.setVisibility(View.VISIBLE);
@@ -197,7 +196,7 @@ public class TeachingResearchATActivity extends BaseActivity implements View.OnC
             }
 
             @Override
-            public void onResponse(TeachingMovementSingleResult singleResult) {
+            public void onResponse(BaseResponseResult<TeachingMovementEntity> singleResult) {
                 loadingView.setVisibility(View.GONE);
                 if (singleResult != null && singleResult.getResponseData() != null) {
                     updateUI(singleResult.getResponseData());
