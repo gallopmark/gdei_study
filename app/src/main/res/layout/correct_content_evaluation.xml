@@ -18,7 +18,6 @@
             android:layout_height="wrap_content"
             android:lineSpacingExtra="1.5dip"
             android:text="教学活动符合现代教育理念,体现新教材教学方法，教学课程深入浅出，形象生动，精彩有趣，启发引导性强。"
-            android:textColor="@color/faq_title"
             android:textSize="@dimen/font_size_16" />
 
         <TextView
