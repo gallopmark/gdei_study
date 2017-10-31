@@ -38,7 +38,7 @@ import okhttp3.Request;
  * 描述:全部研说
  * 作者:马飞奔 Administrator
  */
-public class TeachStudyAllSSFragment extends BaseFragment implements XRecyclerView.LoadingListener {
+public class TSSaysChildFragment extends BaseFragment implements XRecyclerView.LoadingListener {
     @BindView(R.id.loadingView)
     LoadingView loadingView;
     @BindView(R.id.loadFailView)
@@ -51,6 +51,8 @@ public class TeachStudyAllSSFragment extends BaseFragment implements XRecyclerVi
     private TeachingSSaysAdapter adapter;
     private boolean isRefresh, isLoadMore;
     private int page = 1;
+    private String baseUrl;
+    private int type = 1;
     private OnResponseListener onResponseListener;
 
     @Override
@@ -67,12 +69,20 @@ public class TeachStudyAllSSFragment extends BaseFragment implements XRecyclerVi
         xRecyclerView.setAdapter(adapter);
         xRecyclerView.setLoadingListener(this);
         emptyView.setText(getResources().getString(R.string.study_says_emptylist));
+        type = getArguments().getInt("type", 1);
+        if (type == 1) {
+            baseUrl = Constants.OUTRT_NET + "/m/discussion/cmts?discussionRelations[0].relation.id=cmts"
+                    + "&discussionRelations[0].relation.type=discussion&orders=CREATE_TIME.DESC";
+        } else {
+            baseUrl = Constants.OUTRT_NET + "/m/discussion/cmts?discussionRelations[0].relation.id=cmts"
+                    + "&discussionRelations[0].relation.type=discussion&orders=CREATE_TIME.DESC"
+                    + "&creator.id=" + getUserId();
+        }
     }
 
     @Override
     public void initData() {
-        String url = Constants.OUTRT_NET + "/m/discussion/cmts?discussionRelations[0].relation.id=cmts"
-                + "&discussionRelations[0].relation.type=discussion" + "&orders=CREATE_TIME.DESC" + "&page=" + page;
+        String url = baseUrl + "&page=" + page;
         addSubscription(OkHttpClientManager.getAsyn(context, url, new OkHttpClientManager.ResultCallback<DiscussListResult>() {
             @Override
             public void onBefore(Request request) {
