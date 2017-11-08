@@ -73,7 +73,6 @@
                     android:id="@+id/tv_lecture"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
                     android:textColor="@color/blow_gray"
                     android:textSize="@dimen/font_size_16" />
 
