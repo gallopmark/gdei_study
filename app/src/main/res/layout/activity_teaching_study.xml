@@ -53,7 +53,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/margin_size_12"
                 android:layout_marginRight="@dimen/margin_size_12"
-                android:orientation="horizontal">
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/tv_activity_type"
