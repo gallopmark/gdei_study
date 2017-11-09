@@ -78,8 +78,8 @@ import okhttp3.Request;
  * 描述: 社区创课详情
  * 作者:马飞奔 Administrator
  */
-public class TeachingResearchCCActivity extends BaseActivity implements View.OnClickListener {
-    private TeachingResearchCCActivity context = this;
+public class CmtsLessonActivity extends BaseActivity implements View.OnClickListener {
+    private CmtsLessonActivity context = this;
     @BindView(R.id.toolBar)
     AppToolBar toolBar;
     @BindView(R.id.loadingView)

@@ -535,7 +535,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         communityAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseRecyclerAdapter adapter, BaseRecyclerAdapter.RecyclerHolder holder, View view, int position) {
-                startActivity(new Intent(context, TeachingResearchActivity.class));
+                startActivity(new Intent(context, CmtsMainActivity.class));
             }
         });
     }
@@ -611,7 +611,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 startActivity(intent);
                 break;
             case R.id.commuity_learn:
-                startActivity(new Intent(context, TeachingResearchActivity.class));
+                startActivity(new Intent(context, CmtsMainActivity.class));
                 break;
             case R.id.ll_selectCourse:
                 intent.setClass(context, RegistCouseActivity.class);
@@ -646,7 +646,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 menu.toggle(true);
                 break;
             case R.id.tv_teaching:  //侧滑菜单教研
-                startActivity(new Intent(context, TeachingResearchActivity.class));
+                startActivity(new Intent(context, CmtsMainActivity.class));
                 break;
             case R.id.tv_workshop:  //侧滑菜单工作坊群
                 intent.setClass(context, WorkshopGroupActivity.class);
