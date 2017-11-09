@@ -302,7 +302,7 @@
         <!--填写听课评课-->
         <activity
             android:name="com.haoyu.app.activity.TeachingStudyFillActivity"
-            android:windowSoftInputMode="adjustPan|stateHidden|adjustResize" />
+            android:windowSoftInputMode="stateHidden|adjustResize" />
 
         <!--评价总结及建议列表-->
         <activity android:name="com.haoyu.app.activity.EValuationSummaryActivity" />
@@ -324,7 +324,7 @@
             android:name="com.haoyu.app.activity.MFileInfoPreViewActivity"
             android:windowSoftInputMode="stateHidden|adjustResize" />
 
-
+        <service android:name="com.haoyu.app.service.DownloadService" />
 
     </application>
 

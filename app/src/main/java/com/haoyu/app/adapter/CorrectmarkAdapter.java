@@ -70,7 +70,6 @@ public class CorrectmarkAdapter extends BaseArrayRecyclerAdapter<CorrectResult> 
                 holder.obtainView(R.id.assignment_num);
         final TextView mAssignmentScore =
                 holder.obtainView(R.id.assignment_score);
-        ;
         RecyclerView EvealuationList =
                 holder.obtainView(R.id.content_evaluation_list);
         FullyLinearLayoutManager manager = new FullyLinearLayoutManager(mContext);
