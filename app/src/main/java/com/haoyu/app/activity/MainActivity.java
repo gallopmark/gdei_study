@@ -159,7 +159,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     @Override
     public int setLayoutResID() {
-        return R.layout.activity_app_homepage;
+        return R.layout.activity_main;
     }
 
     @Override

@@ -53,6 +53,9 @@
     <string name="gen_class">创课</string>
     <string name="gen_class_emptylist">没有创课信息~</string>
     <string name="gen_class_detail">创课详情</string>
+    <string name="gen_class_course_resource">课程资源</string>
+    <string name="gen_class_empty_resource">没有课程资源</string>
+    <string name="gen_class_teach_advise">建议</string>
     <string name="gen_class_all">全部创课</string>
     <string name="gen_class_my">我的</string>
     <string name="teach_active">活动</string>
