@@ -82,7 +82,7 @@ public class CmtsMainActivity extends BaseActivity {
                 line_class.setVisibility(View.VISIBLE);
                 break;
             case 3:
-                toolBar.setShow_right_button(true);
+                toolBar.setShow_right_button(false);
                 line_activity.setVisibility(View.VISIBLE);
                 break;
         }
