@@ -153,7 +153,7 @@ public class CmtsLessonActivity extends BaseActivity implements View.OnClickList
 
     @Override
     public int setLayoutResID() {
-        return R.layout.activity_teaching_research_cc;
+        return R.layout.activity_cmts_lesson;
     }
 
     @Override
