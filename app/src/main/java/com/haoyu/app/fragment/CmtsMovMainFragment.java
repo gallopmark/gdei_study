@@ -15,22 +15,22 @@ import butterknife.BindString;
 import butterknife.BindView;
 
 /**
- * 创建日期：2017/8/15 on 10:35
- * 描述:教研创课
+ * 创建日期：2017/8/15 on 10:47
+ * 描述:教研活动
  * 作者:马飞奔 Administrator
  */
-public class TSLessonMainFragment extends BaseFragment {
+public class CmtsMovMainFragment extends BaseFragment {
     @BindView(R.id.radioGroup)
     RadioGroup radioGroup;
     @BindView(R.id.rb_all)
     RadioButton rb_all;
     @BindView(R.id.rb_my)
     RadioButton rb_my;
-    @BindString(R.string.gen_class_all)
+    @BindString(R.string.teach_active_all)
     String text_all;
-    @BindString(R.string.gen_class_my)
+    @BindString(R.string.teach_active_my)
     String text_my;
-    private TSLessonChildFragment f1, f2;
+    private CmtsMovChildFragment f1, f2;
     private FragmentManager fragmentManager;
     private int checkIndex = 1;
 
@@ -53,11 +53,11 @@ public class TSLessonMainFragment extends BaseFragment {
         switch (checkIndex) {
             case 1:
                 if (f1 == null) {
-                    f1 = new TSLessonChildFragment();
+                    f1 = new CmtsMovChildFragment();
                     Bundle bundle = new Bundle();
                     bundle.putInt("type", 1);
                     f1.setArguments(bundle);
-                    f1.setOnResponseListener(new TSLessonChildFragment.OnResponseListener() {
+                    f1.setOnResponseListener(new CmtsMovChildFragment.OnResponseListener() {
                         @Override
                         public void getTotalCount(int totalCount) {
                             rb_all.setText(text_all + "（" + getCount(totalCount) + "）");
@@ -70,11 +70,11 @@ public class TSLessonMainFragment extends BaseFragment {
                 break;
             case 2:
                 if (f2 == null) {
-                    f2 = new TSLessonChildFragment();
+                    f2 = new CmtsMovChildFragment();
                     Bundle bundle = new Bundle();
                     bundle.putInt("type", 2);
                     f2.setArguments(bundle);
-                    f2.setOnResponseListener(new TSLessonChildFragment.OnResponseListener() {
+                    f2.setOnResponseListener(new CmtsMovChildFragment.OnResponseListener() {
                         @Override
                         public void getTotalCount(int totalCount) {
                             rb_my.setText(text_my + "（" + getCount(totalCount) + "）");
