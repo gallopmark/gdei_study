@@ -60,15 +60,15 @@ public class CmtsLessonActivity extends BaseActivity {
     LoadingView loadingView;
     @BindView(R.id.loadFailView)
     LoadFailView loadFailView;
-    @BindView(R.id.empty_detail)
-    TextView empty_detail;
+    @BindView(R.id.tv_empty)
+    TextView tv_empty;
     private TeachingLessonEntity lessonEntity;
     private String lessonId;
     private CmtsLessonFragment fragment;
 
     @Override
     public int setLayoutResID() {
-        return R.layout.activity_cmts_detail;
+        return R.layout.activity_currency;
     }
 
     @Override
@@ -76,7 +76,8 @@ public class CmtsLessonActivity extends BaseActivity {
         String title = getResources().getString(R.string.gen_class_detail);
         String empty_text = getResources().getString(R.string.gen_class_emptylist);
         toolBar.setTitle_text(title);
-        empty_detail.setText(empty_text);
+        toolBar.getIv_rightImage().setImageResource(R.drawable.teaching_research_dot);
+        tv_empty.setText(empty_text);
     }
 
     @Override
@@ -103,7 +104,7 @@ public class CmtsLessonActivity extends BaseActivity {
                 if (result != null && result.getResponseData() != null && result.getResponseData().getmLesson() != null) {
                     setSupportFragment(result.getResponseData().getmLesson());
                 } else {
-                    empty_detail.setVisibility(View.VISIBLE);
+                    tv_empty.setVisibility(View.VISIBLE);
                 }
             }
         }));
