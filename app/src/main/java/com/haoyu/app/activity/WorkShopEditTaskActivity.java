@@ -82,6 +82,11 @@ public class WorkShopEditTaskActivity extends BaseActivity implements View.OnCli
     public void initView() {
         workShopId = getIntent().getStringExtra("workShopId");
         create = getIntent().getBooleanExtra("create", false);
+        if (create) {
+            toolBar.setTitle_text("添加新阶段");
+        } else {
+            toolBar.setTitle_text("修改阶段");
+        }
         taskId = getIntent().getStringExtra("relationId");
         oldTitle = getIntent().getStringExtra("title");
         oldStartTime = getIntent().getLongExtra("startTime", -1);
