@@ -865,7 +865,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             public void onClick(View v, AlertDialog dialog) {
                 Intent intent = new Intent(context, DownloadService.class);
                 intent.putExtra("url", versionEntity.getDownurl());
-                intent.putExtra("versionCode", versionEntity.getVersionCode());
+                intent.putExtra("versionName", versionEntity.getVersionName());
 
                 startService(intent);
             }
@@ -875,16 +875,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
 
     private void specifyApkVersion(VersionEntity versionEntity) {
-        String apkUrl = Constants.fileDownDir + "/gdei_study_" + versionEntity.getVersionCode() + ".apk";
+        String apkUrl = Constants.fileDownDir + "/gdei_study_" + versionEntity.getVersionName() + ".apk";
         File file = new File(apkUrl);
         if (versionEntity.getVersionCode() > MyUtils.getVersionCode(context)) {
-            if (file.exists() && file.length() > 0) {
+            if (file.exists()) {
                 MyUtils.installAPK(context, file);
             } else {
                 alertVersionUpdate(versionEntity);
             }
+        } else {
+            toast(context, "已经是最新版本啦！");
         }
-
     }
 
 }

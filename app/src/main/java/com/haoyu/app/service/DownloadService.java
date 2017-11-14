@@ -35,13 +35,13 @@ public class DownloadService extends Service {
     private String url;
     private final String STATUS_BAR_COVER_CLICK_ACTION = "RETRY";
     private final int NOTIFY = 1;
-    private String versionCode;
+    private String versionName;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         url = intent.getStringExtra("url");
-        versionCode = intent.getStringExtra("versionCode");
-        fileName = "gdei_study_" + versionCode + ".apk";
+        versionName = intent.getStringExtra("versionName");
+        fileName = "gdei_study_" + versionName + ".apk";
         savePath = Constants.fileDownDir;
         download(url, savePath, fileName);
         notification();
