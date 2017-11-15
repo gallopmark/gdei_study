@@ -883,8 +883,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             } else {
                 alertVersionUpdate(versionEntity);
             }
-        } else {
-            toast(context, "已经是最新版本啦！");
         }
     }
 
