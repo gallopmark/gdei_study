@@ -689,7 +689,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                     break;
                 case PLMediaPlayer.MEDIA_INFO_BUFFERING_BYTES_UPDATE:
                     // 显示 下载速度
-                    System.out.println("-----------speed:"+extra);
                     break;
 
             }
