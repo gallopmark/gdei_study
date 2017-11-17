@@ -16,9 +16,7 @@ import com.google.gson.GsonBuilder;
 import com.haoyu.app.activity.AppSurveyHomeActivity;
 import com.haoyu.app.activity.AppTestHomeActivity;
 import com.haoyu.app.activity.AppTestResultActivity;
-import com.haoyu.app.activity.CoursewareEditorActivity;
-import com.haoyu.app.activity.CoursewareFileActivity;
-import com.haoyu.app.activity.CoursewareLinkActivity;
+import com.haoyu.app.activity.CoursewareViewerActivity;
 import com.haoyu.app.activity.TeachingDiscussionActivity;
 import com.haoyu.app.activity.TestAssignmentActivity;
 import com.haoyu.app.activity.VideoPlayerActivity;
@@ -390,6 +388,7 @@ public class PageCourseFragment extends BaseFragment {
                 DownloadFileInfo fileInfo = FileDownloader.getDownloadFile(video.getUrls());
                 if (fileInfo != null && fileInfo.getFilePath() != null && new File(fileInfo.getFilePath()).exists()) {
                     intent.putExtra("videoUrl", fileInfo.getFilePath());
+                    intent.putExtra("fileName", fileInfo.getFileName());
                 } else
                     intent.putExtra("videoUrl", video.getUrls());
                 startActivity(intent);
@@ -398,10 +397,10 @@ public class PageCourseFragment extends BaseFragment {
                 DownloadFileInfo fileInfo = FileDownloader.getDownloadFile(url);
                 if (fileInfo != null && fileInfo.getFilePath() != null && new File(fileInfo.getFilePath()).exists()) {
                     intent.putExtra("videoUrl", fileInfo.getFilePath());
-
+                    intent.putExtra("fileName", fileInfo.getFileName());
                 } else {
                     intent.putExtra("videoUrl", url);
-
+                    intent.putExtra("fileName", video.getVideoFiles().get(0).getFileName());
                 }
                 startActivity(intent);
             } else if (video != null && video.getAttchFiles() != null && video.getAttchFiles().size() > 0) {
@@ -410,10 +409,10 @@ public class PageCourseFragment extends BaseFragment {
                 DownloadFileInfo fileInfo = FileDownloader.getDownloadFile(url);
                 if (fileInfo != null && fileInfo.getFilePath() != null && new File(fileInfo.getFilePath()).exists()) {
                     intent.putExtra("videoUrl", fileInfo.getFilePath());
-
+                    intent.putExtra("fileName", fileInfo.getFileName());
                 } else {
                     intent.putExtra("videoUrl", video.getAttchFiles().get(0).getUrl());
-
+                    intent.putExtra("fileName", video.getAttchFiles().get(0).getFileName());
                 }
                 startActivity(intent);
             } else {
@@ -449,24 +448,29 @@ public class PageCourseFragment extends BaseFragment {
             if (mTextInfoUser.getmTextInfo() != null && mTextInfoUser.getmTextInfo().getType() != null
                     && mTextInfoUser.getmTextInfo().getType().equals("file")) {  //课件类型为pdf文件
                 String pdfUrl = mTextInfoUser.getmTextInfo().getPdfUrl();
-                intent.putExtra("file", pdfUrl);
-                intent.setClass(context, CoursewareFileActivity.class);
+                intent.putExtra("type", "file");
+                intent.putExtra("url", pdfUrl);
+                intent.setClass(context, CoursewareViewerActivity.class);
                 startActivityForResult(intent, STUDY_CODE);
             } else if (mTextInfoUser.getmTextInfo() != null && mTextInfoUser.getmTextInfo().getType() != null
                     && mTextInfoUser.getmTextInfo().getType().equals("link")) {  //课件类型为外链
                 String webUrl = mTextInfoUser.getmTextInfo().getContent();
-                intent.setClass(context, CoursewareLinkActivity.class);
-                intent.putExtra("link", webUrl);
+                intent.setClass(context, CoursewareViewerActivity.class);
+                intent.putExtra("type", "link");
+                intent.putExtra("url", webUrl);
                 startActivityForResult(intent, STUDY_CODE);
             } else if (mTextInfoUser.getmTextInfo() != null && mTextInfoUser.getmTextInfo().getType() != null
                     && mTextInfoUser.getmTextInfo().getType().equals("editor")) {  // 课件类型为文本
                 String editor = mTextInfoUser.getmTextInfo().getContent();
-                intent.setClass(context, CoursewareEditorActivity.class);
+                intent.setClass(context, CoursewareViewerActivity.class);
+                intent.putExtra("type", "editor");
                 intent.putExtra("editor", editor);
                 startActivityForResult(intent, STUDY_CODE);
             } else {
                 toast("系统暂不支持浏览，请到网站完成。");
             }
+        } else {
+            toast("系统暂不支持浏览，请到网站完成。");
         }
     }
 
