@@ -172,14 +172,6 @@
                     android:layout_height="match_parent"
                     android:descendantFocusability="blocksDescendants">
 
-                    <com.haoyu.app.view.LoadingView
-                        android:id="@+id/loadingView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerInParent="true"
-                        android:layout_margin="@dimen/margin_size_30"
-                        android:visibility="gone" />
-
                     <com.haoyu.app.view.LoadFailView
                         android:id="@+id/loadFailView"
                         android:layout_width="wrap_content"

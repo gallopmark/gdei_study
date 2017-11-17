@@ -36,13 +36,13 @@ import com.haoyu.app.entity.AttitudeMobileResult;
 import com.haoyu.app.entity.CommentEntity;
 import com.haoyu.app.entity.CommentListResult;
 import com.haoyu.app.entity.MFileInfo;
+import com.haoyu.app.entity.MobileUser;
 import com.haoyu.app.entity.TimePeriod;
 import com.haoyu.app.fragment.VideoPlayerFragment;
 import com.haoyu.app.gdei.student.R;
 import com.haoyu.app.rxBus.MessageEvent;
 import com.haoyu.app.utils.Action;
 import com.haoyu.app.utils.Constants;
-import com.haoyu.app.utils.HtmlTagHandler;
 import com.haoyu.app.utils.OkHttpClientManager;
 import com.haoyu.app.utils.ScreenUtils;
 import com.haoyu.app.utils.TimeUtil;
@@ -50,7 +50,6 @@ import com.haoyu.app.view.AppToolBar;
 import com.haoyu.app.view.FullyLinearLayoutManager;
 import com.haoyu.app.view.GoodView;
 import com.haoyu.app.view.LoadFailView;
-import com.haoyu.app.view.LoadingView;
 
 import org.sufficientlysecure.htmltextview.HtmlHttpImageGetter;
 
@@ -110,8 +109,6 @@ public class TeachingStudyActivity extends BaseActivity implements View.OnClickL
     LinearLayout ll_discussion;
     @BindView(R.id.tv_discussCount)
     TextView tv_discussCount;   //评论总数
-    @BindView(R.id.loadingView)
-    LoadingView loadingView;
     @BindView(R.id.loadFailView)
     LoadFailView loadFailView;
     @BindView(R.id.recyclerView)
@@ -258,17 +255,7 @@ public class TeachingStudyActivity extends BaseActivity implements View.OnClickL
     private void setContext_text(String content) {
         if (content != null && content.trim().length() > 0) {
             Html.ImageGetter imageGetter = new HtmlHttpImageGetter(tv_content, Constants.REFERER, true);
-            HtmlTagHandler tagHandler = new HtmlTagHandler(new HtmlTagHandler.OnImageClickListener() {
-                @Override
-                public void onImageClick(View view, String url) {
-                    ArrayList<String> imgList = new ArrayList<>();
-                    imgList.add(Constants.REFERER + url);
-                    Intent intent = new Intent(context, AppMultiImageShowActivity.class);
-                    intent.putStringArrayListExtra("photos", imgList);
-                    startActivity(intent);
-                }
-            });
-            Spanned spanned = Html.fromHtml(content, imageGetter, tagHandler);
+            Spanned spanned = Html.fromHtml(content, imageGetter, null);
             tv_content.setMovementMethod(LinkMovementMethod.getInstance());
             tv_content.setText(spanned);
             tv_content.setVisibility(View.VISIBLE);
@@ -363,7 +350,7 @@ public class TeachingStudyActivity extends BaseActivity implements View.OnClickL
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE && videoFragment != null) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             return true;
         }
@@ -373,7 +360,7 @@ public class TeachingStudyActivity extends BaseActivity implements View.OnClickL
     @Override
     public void initData() {
         tv_more_reply.setVisibility(View.GONE);
-        loadingView.setVisibility(View.VISIBLE);
+        showTipDialog();
         String url = Constants.OUTRT_NET + "/m/comment?relation.id=" + activityId + "&relation.type=lcec&orders=CREATE_TIME.ASC&limit=5";
         addSubscription(Flowable.just(url).map(new Function<String, CommentListResult>() {
             @Override
@@ -384,13 +371,13 @@ public class TeachingStudyActivity extends BaseActivity implements View.OnClickL
                 .subscribe(new Consumer<CommentListResult>() {
                     @Override
                     public void accept(CommentListResult response) throws Exception {
-                        loadingView.setVisibility(View.GONE);
+                        hideTipDialog();
                         updateUI(response);
                     }
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable throwable) throws Exception {
-                        loadingView.setVisibility(View.GONE);
+                        hideTipDialog();
                         loadFailView.setVisibility(View.VISIBLE);
                     }
                 }));
@@ -467,7 +454,7 @@ public class TeachingStudyActivity extends BaseActivity implements View.OnClickL
     }
 
     private void setDiscussCount(int discussNum) {
-        String text = "已有\u1500" + discussNum + "\u1500回复";
+        String text = "已有 " + discussNum + " 回复";
         tv_discussCount.setText(text);
     }
 
@@ -603,7 +590,9 @@ public class TeachingStudyActivity extends BaseActivity implements View.OnClickL
                     recyclerView.setVisibility(View.VISIBLE);
                     tv_emptyComment.setVisibility(View.GONE);
                     if (mComments.size() < 5) {
-                        mComments.add(response.getResponseData());
+                        CommentEntity entity = response.getResponseData();
+                        entity.setCreator(getCreator(entity.getCreator()));
+                        mComments.add(entity);
                         adapter.notifyDataSetChanged();
                     } else {
                         tv_more_reply.setVisibility(View.VISIBLE);
@@ -616,6 +605,20 @@ public class TeachingStudyActivity extends BaseActivity implements View.OnClickL
                 }
             }
         }, map));
+    }
+
+    private MobileUser getCreator(MobileUser creaotr) {
+        if (creaotr == null) {
+            creaotr = new MobileUser();
+            creaotr.setId(getUserId());
+            creaotr.setAvatar(getAvatar());
+            creaotr.setRealName(getRealName());
+        } else {
+            creaotr.setId(getUserId());
+            creaotr.setAvatar(getAvatar());
+            creaotr.setRealName(getRealName());
+        }
+        return creaotr;
     }
 
     /*发送子评论*/
@@ -647,7 +650,9 @@ public class TeachingStudyActivity extends BaseActivity implements View.OnClickL
                     if (mComments.get(childPosition).getChildList().size() >= 10) {
                         toastFullScreen("评论成功", true);
                     } else {
-                        mComments.get(childPosition).getChildList().add(response.getResponseData());
+                        CommentEntity entity = response.getResponseData();
+                        entity.setCreator(getCreator(entity.getCreator()));
+                        mComments.get(childPosition).getChildList().add(entity);
                         adapter.notifyDataSetChanged();
                     }
                 } else {
@@ -667,7 +672,7 @@ public class TeachingStudyActivity extends BaseActivity implements View.OnClickL
         map.put("attitude", "support");
         map.put("relation.id", relationId);
         map.put("relation.type", "discussion_post");
-        OkHttpClientManager.postAsyn(context, url, new OkHttpClientManager.ResultCallback<AttitudeMobileResult>() {
+        addSubscription(OkHttpClientManager.postAsyn(context, url, new OkHttpClientManager.ResultCallback<AttitudeMobileResult>() {
             public void onError(Request request, Exception exception) {
                 toast(context, "点赞失败");
             }
@@ -687,7 +692,7 @@ public class TeachingStudyActivity extends BaseActivity implements View.OnClickL
                     toast(context, "点赞失败");
                 }
             }
-        }, map);
+        }, map));
     }
 
     /**
@@ -700,7 +705,7 @@ public class TeachingStudyActivity extends BaseActivity implements View.OnClickL
         String url = Constants.OUTRT_NET + "/m/comment/" + id;
         Map<String, String> map = new HashMap<>();
         map.put("_method", "delete");
-        OkHttpClientManager.postAsyn(context, url, new OkHttpClientManager.ResultCallback<BaseResponseResult>() {
+        addSubscription(OkHttpClientManager.postAsyn(context, url, new OkHttpClientManager.ResultCallback<BaseResponseResult>() {
             @Override
             public void onBefore(Request request) {
                 showTipDialog();
@@ -725,7 +730,7 @@ public class TeachingStudyActivity extends BaseActivity implements View.OnClickL
                     initData();
                 }
             }
-        }, map);
+        }, map));
     }
 
     @Override
