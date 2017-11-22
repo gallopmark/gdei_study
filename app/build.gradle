@@ -8,8 +8,8 @@ android {
         applicationId "com.haoyu.app.gdei.student"
         minSdkVersion 14
         targetSdkVersion 27
-        versionCode 6
-        versionName "2.1.5"
+        versionCode 7
+        versionName "2.2.0"
         vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
