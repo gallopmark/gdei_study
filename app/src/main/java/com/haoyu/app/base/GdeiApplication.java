@@ -16,6 +16,7 @@ import com.tencent.bugly.crashreport.CrashReport;
 import com.uuzuche.lib_zxing.activity.ZXingLibrary;
 
 import org.wlf.filedownloader.FileDownloadConfiguration;
+import org.wlf.filedownloader.FileDownloader;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -61,7 +62,7 @@ public class GdeiApplication extends Application {
         builder.configConnectTimeout(25000);// 25秒
 // 3、使用配置文件初始化FileDownloader
         FileDownloadConfiguration configuration = builder.build();
-        org.wlf.filedownloader.FileDownloader.init(configuration);
+        FileDownloader.init(configuration);
     }
 
     public static GdeiApplication getInstance() {
