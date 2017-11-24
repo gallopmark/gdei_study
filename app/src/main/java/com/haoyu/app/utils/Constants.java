@@ -62,7 +62,7 @@ public class Constants {
         /* 全局异常捕获信息存放的路径 */
         exceptionCrash = rootDir + "/crash/";
         dbPath = rootDir + "/db";
-        downloadApkPath = fileDownDir + "/gdei_study.apk";
+        downloadApkPath = rootDir + "/apk";
 //        /*工作坊域名*/
 //        WORK_SHOP_NET = "http://app.wsts.haoyuinfo.com";
 //        /*社区域名*/

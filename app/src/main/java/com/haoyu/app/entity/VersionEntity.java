@@ -1,10 +1,12 @@
 package com.haoyu.app.entity;
 
+import java.io.Serializable;
+
 /**
  * Created by acer1 on 2017/10/24.
  */
 
-public class VersionEntity {
+public class VersionEntity implements Serializable{
     private String versionName;
     private int versionCode;
     private String downurl;
