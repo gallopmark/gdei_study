@@ -76,7 +76,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
     @Override
     public int setLayoutResID() {
-        return R.layout.activity_gdei_login;
+        return R.layout.activity_login;
     }
 
     @Override
