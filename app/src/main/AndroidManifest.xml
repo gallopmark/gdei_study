@@ -316,7 +316,6 @@
         <activity android:name="com.haoyu.app.activity.MFileInfoActivity" />
 
         <service android:name="com.haoyu.app.service.VersionUpdateService" />
-
     </application>
 
 </manifest>
