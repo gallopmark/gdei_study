@@ -392,10 +392,10 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         AVOptions options = new AVOptions();
         // 设置链接超时时间
         options.setInteger(AVOptions.KEY_PREPARE_TIMEOUT, 20 * 1000);
-        options.setInteger(AVOptions.KEY_GET_AV_FRAME_TIMEOUT, 20 * 1000);
+//        options.setInteger(AVOptions.KEY_GET_AV_FRAME_TIMEOUT, 20 * 1000);
         int codec = getIntent().getIntExtra("mediaCodec", 0);
         options.setInteger(AVOptions.KEY_MEDIACODEC, codec);
-        options.setInteger(AVOptions.KEY_START_ON_PREPARED, 0);
+//        options.setInteger(AVOptions.KEY_START_ON_PREPARED, 0);
         mVideoView.setAVOptions(options);
         mVideoView.setOnInfoListener(mOnInfoListener);
         mVideoView.setOnBufferingUpdateListener(mOnBufferingUpdateListener);
@@ -490,61 +490,61 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
             mVideoView.pause();
             String message;
             switch (errorCode) {
-                case PLMediaPlayer.ERROR_CODE_INVALID_URI:
-                    message = "该视频暂时无法播放";
-                    showToastTips(message);
-                    mVideoView.pause();
-                    videoHandler.sendEmptyMessageDelayed(VIDEO_WARN_MESSAGE, 2000);
-                    break;
-                case PLMediaPlayer.ERROR_CODE_404_NOT_FOUND:
-                    // showToastTips("404 resource not found !");
-                    message = "该视频暂时无法播放";
-                    showToastTips(message);
-                    videoHandler.sendEmptyMessageDelayed(VIDEO_WARN_MESSAGE, 2000);
-                    break;
-
-                case PLMediaPlayer.ERROR_CODE_CONNECTION_REFUSED:
-                    //   showToastTips("Connection refused !");
-                    message = "该视频暂时无法播放";
-                    showToastTips(message);
-                    videoHandler.sendEmptyMessageDelayed(VIDEO_WARN_MESSAGE, 2000);
-                    break;
-                case PLMediaPlayer.ERROR_CODE_CONNECTION_TIMEOUT:
-
-
-                    showLoading();
-                    videoHandler.sendEmptyMessageDelayed(VIDEO_WARN_MESSAGE, 2000);
-                    break;
-                case PLMediaPlayer.ERROR_CODE_EMPTY_PLAYLIST:
-
-                    showToastTips("Empty playlist !");
-                    showWarn();
-                    break;
-                case PLMediaPlayer.ERROR_CODE_STREAM_DISCONNECTED:
-                    showToastTips("Stream disconnected !");
-                    videoHandler.sendEmptyMessageDelayed(VIDEO_WARN_MESSAGE, 2000);
-                    break;
-                case PLMediaPlayer.ERROR_CODE_IO_ERROR:
-                    showToastTips("该视频暂时无法播放！");
-                    hideLoading();
-                    videoHandler.sendEmptyMessageDelayed(VIDEO_WARN_MESSAGE, 2000);
-                    break;
-                case PLMediaPlayer.ERROR_CODE_UNAUTHORIZED:
-
-                    showToastTips("Unauthorized Error !");
-                    break;
-                case PLMediaPlayer.ERROR_CODE_PREPARE_TIMEOUT:
-
-                    showToastTips("Prepare timeout !");
-                    videoHandler.sendEmptyMessageDelayed(VIDEO_WARN_MESSAGE, 2000);
-                    break;
-                case PLMediaPlayer.ERROR_CODE_READ_FRAME_TIMEOUT:
-
-                    // showToastTips("Read frame timeout !");
-                    message = "该视频暂时无法播放";
-                    showToastTips(message);
-                    videoHandler.sendEmptyMessageDelayed(VIDEO_WARN_MESSAGE, 2000);
-                    break;
+//                case PLMediaPlayer.ERROR_CODE_INVALID_URI:
+//                    message = "该视频暂时无法播放";
+//                    showToastTips(message);
+//                    mVideoView.pause();
+//                    videoHandler.sendEmptyMessageDelayed(VIDEO_WARN_MESSAGE, 2000);
+//                    break;
+//                case PLMediaPlayer.ERROR_CODE_404_NOT_FOUND:
+//                    // showToastTips("404 resource not found !");
+//                    message = "该视频暂时无法播放";
+//                    showToastTips(message);
+//                    videoHandler.sendEmptyMessageDelayed(VIDEO_WARN_MESSAGE, 2000);
+//                    break;
+//
+//                case PLMediaPlayer.ERROR_CODE_CONNECTION_REFUSED:
+//                    //   showToastTips("Connection refused !");
+//                    message = "该视频暂时无法播放";
+//                    showToastTips(message);
+//                    videoHandler.sendEmptyMessageDelayed(VIDEO_WARN_MESSAGE, 2000);
+//                    break;
+//                case PLMediaPlayer.ERROR_CODE_CONNECTION_TIMEOUT:
+//
+//
+//                    showLoading();
+//                    videoHandler.sendEmptyMessageDelayed(VIDEO_WARN_MESSAGE, 2000);
+//                    break;
+//                case PLMediaPlayer.ERROR_CODE_EMPTY_PLAYLIST:
+//
+//                    showToastTips("Empty playlist !");
+//                    showWarn();
+//                    break;
+//                case PLMediaPlayer.ERROR_CODE_STREAM_DISCONNECTED:
+//                    showToastTips("Stream disconnected !");
+//                    videoHandler.sendEmptyMessageDelayed(VIDEO_WARN_MESSAGE, 2000);
+//                    break;
+//                case PLMediaPlayer.ERROR_CODE_IO_ERROR:
+//                    showToastTips("该视频暂时无法播放！");
+//                    hideLoading();
+//                    videoHandler.sendEmptyMessageDelayed(VIDEO_WARN_MESSAGE, 2000);
+//                    break;
+//                case PLMediaPlayer.ERROR_CODE_UNAUTHORIZED:
+//
+//                    showToastTips("Unauthorized Error !");
+//                    break;
+//                case PLMediaPlayer.ERROR_CODE_PREPARE_TIMEOUT:
+//
+//                    showToastTips("Prepare timeout !");
+//                    videoHandler.sendEmptyMessageDelayed(VIDEO_WARN_MESSAGE, 2000);
+//                    break;
+//                case PLMediaPlayer.ERROR_CODE_READ_FRAME_TIMEOUT:
+//
+//                    // showToastTips("Read frame timeout !");
+//                    message = "该视频暂时无法播放";
+//                    showToastTips(message);
+//                    videoHandler.sendEmptyMessageDelayed(VIDEO_WARN_MESSAGE, 2000);
+//                    break;
                 case PLMediaPlayer.MEDIA_ERROR_UNKNOWN:
 
                     message = "该视频暂时无法播放";
@@ -593,7 +593,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
 
     private PLMediaPlayer.OnPreparedListener mOnPreparedListener = new PLMediaPlayer.OnPreparedListener() {
         @Override
-        public void onPrepared(PLMediaPlayer plMediaPlayer) {
+        public void onPrepared(PLMediaPlayer plMediaPlayer,int preparedTime) {
             if (mVideoView != null && mVideoView.getDuration() != -1) {
                 setVideoProgress();
                 hideLoading();
@@ -687,9 +687,9 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                         mVideoView.start();
                     }
                     break;
-                case PLMediaPlayer.MEDIA_INFO_BUFFERING_BYTES_UPDATE:
+//                case PLMediaPlayer.MEDIA_INFO_BUFFERING_BYTES_UPDATE:
                     // 显示 下载速度
-                    break;
+//                    break;
 
             }
             return false;

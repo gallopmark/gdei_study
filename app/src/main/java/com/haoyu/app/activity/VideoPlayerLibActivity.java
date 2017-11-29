@@ -138,7 +138,15 @@ public class VideoPlayerLibActivity extends BaseActivity implements View.OnClick
         currentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC); // 获取当前值
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         AVOptions options = new AVOptions();
-        options.setInteger(AVOptions.KEY_GET_AV_FRAME_TIMEOUT, 20 * 1000);
+        // 准备超时时间，包括创建资源、建立连接、请求码流等，单位是 ms
+        // 默认值是：无
+        options.setInteger(AVOptions.KEY_PREPARE_TIMEOUT, 20 * 1000);
+        // 默认的缓存大小，单位是 ms
+        // 默认值是：500
+        options.setInteger(AVOptions.KEY_CACHE_BUFFER_DURATION, 500);
+        // 最大的缓存大小，单位是 ms
+        // 默认值是：2000
+        options.setInteger(AVOptions.KEY_MAX_CACHE_BUFFER_DURATION, 4000);
         options.setInteger(AVOptions.KEY_PREPARE_TIMEOUT, 20 * 1000);
         videoView.setAVOptions(options);
         videoView.setScreenOnWhilePlaying(true);
@@ -424,7 +432,7 @@ public class VideoPlayerLibActivity extends BaseActivity implements View.OnClick
         videoView.setVideoPath(videoUrl);
         videoView.setOnPreparedListener(new PLMediaPlayer.OnPreparedListener() {
             @Override
-            public void onPrepared(PLMediaPlayer plMediaPlayer) {
+            public void onPrepared(PLMediaPlayer plMediaPlayer, int preparedTime) {
                 prepared();
                 if (lastDuration > 0) {
                     videoView.seekTo(lastDuration);
@@ -542,14 +550,14 @@ public class VideoPlayerLibActivity extends BaseActivity implements View.OnClick
     }
 
     private void error(int errorCode) {
-        if (errorCode == PLMediaPlayer.ERROR_CODE_IO_ERROR) {
-            errorMsg = "当前网络不稳定，请检查网络设置";
-        } else if (errorCode == PLMediaPlayer.ERROR_CODE_CONNECTION_TIMEOUT) {
-            errorMsg = "当前网络不稳定，请检查网络设置";
-        } else if (errorCode == PLMediaPlayer.ERROR_CODE_INVALID_URI) {
-            errorMsg = "视频文件已失效";
-        } else if (errorCode == PLMediaPlayer.ERROR_CODE_404_NOT_FOUND) {
-            errorMsg = "视频文件不存在";
+        if (errorCode == PLMediaPlayer.MEDIA_ERROR_UNKNOWN) {
+            errorMsg = "未知错误";
+        } else if (errorCode == PLMediaPlayer.ERROR_CODE_OPEN_FAILED) {
+            errorMsg = "播放器打开失败";
+        } else if (errorCode == PLMediaPlayer.ERROR_CODE_IO_ERROR) {
+            errorMsg = "网络异常";
+        } else if (errorCode == PLMediaPlayer.ERROR_CODE_HW_DECODE_FAILURE) {
+            errorMsg = "硬解失败";
         } else {
             errorMsg = "视频播放出错了~";
         }
