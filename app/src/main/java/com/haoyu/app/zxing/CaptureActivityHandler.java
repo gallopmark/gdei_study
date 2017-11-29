@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.uuzuche.lib_zxing.decoding;
+package com.haoyu.app.zxing;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -27,11 +27,9 @@ import android.util.Log;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Result;
+import com.haoyu.app.view.ViewfinderView;
 import com.uuzuche.lib_zxing.R;
-import com.uuzuche.lib_zxing.activity.CaptureFragment;
 import com.uuzuche.lib_zxing.camera.CameraManager;
-import com.uuzuche.lib_zxing.view.ViewfinderResultPointCallback;
-import com.uuzuche.lib_zxing.view.ViewfinderView;
 
 import java.util.Vector;
 
