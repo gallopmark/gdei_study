@@ -99,7 +99,7 @@ public abstract class BaseActivity extends FragmentActivity {
         super.onCreate(bundle);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        GdeiApplication.getInstance().addActivity(this);
+        GdeiApplication.addActivity(this);
         setContentView(setLayoutResID());
         ButterKnife.bind(this);
         initView();
@@ -195,7 +195,7 @@ public abstract class BaseActivity extends FragmentActivity {
         cancelToast();
         unRegistRxBus();
         unsubscribe();
-        GdeiApplication.getInstance().remove(this);
+        GdeiApplication.remove(this);
     }
 
     private SharedPreferences getPreferences() {

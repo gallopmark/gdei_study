@@ -569,7 +569,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 toast(context, "再按一次退出" + getResources().getString(R.string.app_name));
                 mExitTime = System.currentTimeMillis();
             } else {
-                GdeiApplication.getInstance().exit();
+                GdeiApplication.exit();
             }
             return true;
         }
