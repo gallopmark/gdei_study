@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import butterknife.BindView;
 import okhttp3.Request;
 
@@ -95,8 +94,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     TextView warnContinue;
     @BindView(R.id.warn_content)
     TextView warnContent;
-    @BindView(R.id.video_lock)
-    ImageView mVideoLock;//视频锁，可以让屏幕不跟随旋转
+
 
     private boolean running;
     private boolean isShowing;  //控制栏是否是显示
@@ -145,7 +143,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     //课前指导
     private PopupWindow window;
     private ImageView popClose;//关闭课前指导弹出页
-    private MyOrientationListener myOrientationListener;
     private List<MFileInfo> mFileInfoList = new ArrayList<>();
     private MyHandler videoHandler = new MyHandler(context);
 
@@ -243,8 +240,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
 
         MyUtils.Land(context);//取消手机的状态栏
         MyUtils.hideBottomUIMenu(context);//如果手机又虚拟按键则隐藏改虚拟按键
-        myOrientationListener = new MyOrientationListener(context);//设置手机屏幕旋转监听
-        myOrientationListener.enable();
+
         isLocal = !(mVideoPath != null && (mVideoPath.startsWith("http://") || mVideoPath.startsWith("https://")));
         netReceiver = new NetReceiver();
         IntentFilter fileter = new IntentFilter(Constants.speedAction);
@@ -256,7 +252,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     @Override
     public void setListener() {
         mRead.setOnClickListener(context);
-        mVideoLock.setOnClickListener(context);
         warnContinue.setOnClickListener(context);
         framelayout.setClickable(true);
         iv_back.setOnClickListener(context);
@@ -372,7 +367,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         updateVideoTime(length);
         mVideoView.stopPlayback();
         videoHandler.removeCallbacksAndMessages(null);
-        myOrientationListener.disable();
     }
 
     private long seekTime;
@@ -392,10 +386,8 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         AVOptions options = new AVOptions();
         // 设置链接超时时间
         options.setInteger(AVOptions.KEY_PREPARE_TIMEOUT, 20 * 1000);
-//        options.setInteger(AVOptions.KEY_GET_AV_FRAME_TIMEOUT, 20 * 1000);
-        int codec = getIntent().getIntExtra("mediaCodec", 0);
-        options.setInteger(AVOptions.KEY_MEDIACODEC, codec);
-//        options.setInteger(AVOptions.KEY_START_ON_PREPARED, 0);
+
+
         mVideoView.setAVOptions(options);
         mVideoView.setOnInfoListener(mOnInfoListener);
         mVideoView.setOnBufferingUpdateListener(mOnBufferingUpdateListener);
@@ -599,7 +591,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                 hideLoading();
                 isReCheck = false;
                 length = mVideoView.getDuration();
-                mVideoView.setDisplayAspectRatio(mVideoView.ASPECT_RATIO_16_9);
+                mVideoView.setDisplayAspectRatio(0);
                 mVideoView.start();
                 videoSeekBar.setMax((int) mVideoView.getDuration());
                 if (seekTime > 0) {
@@ -847,8 +839,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                 videoHandler.sendEmptyMessageDelayed(VIDEO_HIDECENTERBOX, 1 * 500);
 
             }
-
-
         }
     }
 
@@ -997,21 +987,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                 videoPlay.setImageResource(R.drawable.zanting);
                 break;
 
-            case R.id.video_lock:
-                if (lockVideo == true) {
-                    context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-                    lockVideo = false;
-                    mVideoLock.setImageResource(R.drawable.playerunlocked);
-                } else {
-                    lockVideo = true;
-                    mVideoLock.setImageResource(R.drawable.playerlocked);
-                    if (Orieantation == 1) {
-                        context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
-                    } else if (Orieantation == 2) {
-                        context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                    }
-                }
-                break;
+
             case R.id.pop_close:
                 //课前指导
                 if (window != null && window.isShowing())

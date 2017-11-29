@@ -6,7 +6,6 @@
     android:background="@color/white"
     android:orientation="vertical">
 
-
   <com.haoyu.app.view.AppToolBar
     android:id="@+id/toolBar"
     android:layout_width="match_parent"
