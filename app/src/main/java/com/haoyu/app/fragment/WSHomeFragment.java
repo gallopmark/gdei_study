@@ -26,8 +26,9 @@ import com.haoyu.app.activity.FreeChatActiviy;
 import com.haoyu.app.activity.TeachingDiscussionActivity;
 import com.haoyu.app.activity.TeachingStudyActivity;
 import com.haoyu.app.activity.VideoPlayerActivity;
+import com.haoyu.app.activity.WSClassDiscussEditActivity;
+import com.haoyu.app.activity.WSClassDiscussInfoActivity;
 import com.haoyu.app.activity.WSTeachingDiscussActivity;
-import com.haoyu.app.activity.WSTeachingEmulateActivity;
 import com.haoyu.app.activity.WSTeachingStudyEditActivity;
 import com.haoyu.app.activity.WorkShopEditTaskActivity;
 import com.haoyu.app.activity.WorkshopQuestionActivity;
@@ -324,7 +325,7 @@ public class WSHomeFragment extends BaseFragment implements View.OnClickListener
                 if (type == 1) {
                     intent.setClass(context, WSTeachingDiscussActivity.class);
                 } else if (type == 2) {
-                    intent.setClass(context, WSTeachingEmulateActivity.class);
+                    intent.setClass(context, WSClassDiscussEditActivity.class);
                 } else {
                     intent.setClass(context, WSTeachingStudyEditActivity.class);
                 }
@@ -424,7 +425,8 @@ public class WSHomeFragment extends BaseFragment implements View.OnClickListener
             mWorkshopSections.get(alterPosition).setTimePeriod(timePeriod);
             sectionAdapter.notifyItemChanged(alterPosition);
         } else if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_SECTION) {
-            if (data != null) {
+            if (data != null && data.getSerializableExtra("section") != null
+                    && data.getSerializableExtra("section") instanceof MWorkshopSection) {
                 MWorkshopSection section = (MWorkshopSection) data.getSerializableExtra("section");
                 mWorkshopSections.add(section);
                 sectionAdapter.notifyItemInserted(mWorkshopSections.indexOf(section));
@@ -432,7 +434,7 @@ public class WSHomeFragment extends BaseFragment implements View.OnClickListener
                 tv_empty.setVisibility(View.GONE);
             }
         } else if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_ACTIVITY) {
-            if (data != null) {
+            if (data != null && data.getSerializableExtra("activity") != null && data.getSerializableExtra("activity") instanceof MWorkshopActivity) {
                 MWorkshopActivity mWorkshopActivity = (MWorkshopActivity) data.getSerializableExtra("activity");
                 mWorkshopSections.get(activityIndex).getActivities().add(mWorkshopActivity);
                 sectionAdapter.notifyItemChanged(activityIndex);
@@ -537,6 +539,8 @@ public class WSHomeFragment extends BaseFragment implements View.OnClickListener
                 }
             } else if (activity.getType() != null && activity.getType().equals("lcec")) {
                 openLcec(response, activity);
+            } else if (activity.getType() != null && activity.getType().equals("discuss_class")) { //评课议课
+                openDiscuss_class(response, activity);
             } else {
                 toast("系统暂不支持浏览，请到网站完成。");
             }
@@ -722,6 +726,26 @@ public class WSHomeFragment extends BaseFragment implements View.OnClickListener
             intent.setClass(context, AppTestHomeActivity.class);
         }
         startActivity(intent);
+    }
+
+    private void openDiscuss_class(AppActivityViewResult response, CourseSectionActivity activity) {
+        if (response.getResponseData() != null && response.getResponseData().getmVideoDC() != null) {
+            Intent intent = new Intent(context, WSClassDiscussInfoActivity.class);
+            if (activity.getmTimePeriod() != null && activity.getmTimePeriod().getState() != null && activity.getmTimePeriod().getState().equals("进行中"))
+                intent.putExtra("running", true);
+            else if (activity.getmTimePeriod() != null && activity.getmTimePeriod().getMinutes() > 0)
+                intent.putExtra("running", true);
+            else
+                intent.putExtra("running", false);
+            intent.putExtra("timePeriod", activity.getmTimePeriod());
+            intent.putExtra("workshopId", workshopId);
+            intent.putExtra("activityId", activity.getId());
+            intent.putExtra("activityTitle", activity.getTitle());
+            intent.putExtra("discussClass", response.getResponseData().getmVideoDC());
+            startActivity(intent);
+        } else {
+            toast("系统暂不支持浏览，请到网站完成。");
+        }
     }
 
     @Override

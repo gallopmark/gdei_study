@@ -206,9 +206,6 @@
             android:name="com.haoyu.app.activity.WSTeachingDiscussActivity"
             android:windowSoftInputMode="adjustResize|stateHidden" />
         <!--教学观摩-->
-        <activity
-            android:name="com.haoyu.app.activity.WSTeachingEmulateActivity"
-            android:windowSoftInputMode="adjustPan|stateHidden" />
         <!--听课评课-->
         <activity android:name="com.haoyu.app.activity.WSTeachingStudyEditActivity" />
         <!--听课评课上传录像-->
