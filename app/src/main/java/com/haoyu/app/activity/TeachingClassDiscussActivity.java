@@ -64,7 +64,7 @@ public class TeachingClassDiscussActivity extends BaseActivity {
         videoFragment = new VideoPlayerFragment();
         Bundle bundle = new Bundle();
         bundle.putString("videoUrl", videoUrl);
-        bundle.putString("videoTitle",);
+        bundle.putString("videoTitle", title);
         videoFragment.setArguments(bundle);
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.fl_video, videoFragment).commit();

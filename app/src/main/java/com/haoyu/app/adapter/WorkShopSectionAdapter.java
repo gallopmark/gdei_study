@@ -181,7 +181,7 @@ public class WorkShopSectionAdapter extends BaseArrayRecyclerAdapter<MWorkshopSe
             ll_content.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    if(onSectionLongClickListener!=null)
+                    if (onSectionLongClickListener != null)
                         onSectionLongClickListener.onLongClickListener(entity.getId(), position, entity);
                     return true;
                 }
@@ -315,6 +315,12 @@ public class WorkShopSectionAdapter extends BaseArrayRecyclerAdapter<MWorkshopSe
                     ic_type.setImageResource(R.drawable.progress_test_default);
                 tv_typeName.setText("在线测验");
             } else if (entity.getType().equals("video")) {
+                if (mainPosition == mainIndex && childPosition == position) {
+                    ic_type.setImageResource(R.drawable.progress_video_press);
+                } else
+                    ic_type.setImageResource(R.drawable.progress_video_default);
+                tv_typeName.setText("教学观摩");
+            } else if (entity.getType() != null && entity.getType().equals("discuss_class")) {
                 if (mainPosition == mainIndex && childPosition == position) {
                     ic_type.setImageResource(R.drawable.progress_video_press);
                 } else

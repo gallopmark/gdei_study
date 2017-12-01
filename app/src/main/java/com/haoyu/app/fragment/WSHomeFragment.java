@@ -512,6 +512,39 @@ public class WSHomeFragment extends BaseFragment implements View.OnClickListener
         }, map));
     }
 
+    private void setAdapter(WorkShopTaskAdapter adapter) {
+        adapter.setOnActivityClickCallBack(new WorkShopTaskAdapter.OnActivityClickCallBack() {
+            @Override
+            public void onActivityClick(final MWorkshopActivity activity) {
+                 /*进入活动*/
+                enterActivity(activity.getId());
+            }
+        });
+    }
+
+    private void enterActivity(final String activityId) {
+        String url = Constants.OUTRT_NET + "/student_" + workshopId + "/m/activity/wsts/" + activityId + "/view";
+        addSubscription(OkHttpClientManager.getAsyn(context, url, new OkHttpClientManager.ResultCallback<AppActivityViewResult>() {
+            @Override
+            public void onBefore(Request request) {
+                showTipDialog();
+            }
+
+            @Override
+            public void onError(Request request, Exception e) {
+                e.printStackTrace();
+                hideTipDialog();
+                onNetWorkError();
+            }
+
+            @Override
+            public void onResponse(AppActivityViewResult response) {
+                hideTipDialog();
+                EnterActivity(response);
+            }
+        }));
+    }
+
     private void EnterActivity(AppActivityViewResult response) {
         if (response != null && response.getResponseData() != null
                 && response.getResponseData().getmActivityResult() != null
@@ -537,7 +570,7 @@ public class WSHomeFragment extends BaseFragment implements View.OnClickListener
                 } else {
                     toast("当前网络不稳定，请检查网络设置！");
                 }
-            } else if (activity.getType() != null && activity.getType().equals("lcec")) {
+            } else if (activity.getType() != null && activity.getType().equals("lcec")) {  //听课评课
                 openLcec(response, activity);
             } else if (activity.getType() != null && activity.getType().equals("discuss_class")) { //评课议课
                 openDiscuss_class(response, activity);
@@ -545,38 +578,6 @@ public class WSHomeFragment extends BaseFragment implements View.OnClickListener
                 toast("系统暂不支持浏览，请到网站完成。");
             }
         }
-    }
-
-    private void setAdapter(WorkShopTaskAdapter adapter) {
-        adapter.setOnActivityClickCallBack(new WorkShopTaskAdapter.OnActivityClickCallBack() {
-            @Override
-            public void onActivityClick(final MWorkshopActivity activity) {
-                 /*进入活动*/
-                enterActivity(activity.getId());
-            }
-        });
-    }
-
-    private void enterActivity(final String activityId) {
-        String url = Constants.OUTRT_NET + "/student_" + workshopId + "/m/activity/wsts/" + activityId + "/view";
-        addSubscription(OkHttpClientManager.getAsyn(context, url, new OkHttpClientManager.ResultCallback<AppActivityViewResult>() {
-            @Override
-            public void onBefore(Request request) {
-                showTipDialog();
-            }
-
-            @Override
-            public void onError(Request request, Exception e) {
-                hideTipDialog();
-                onNetWorkError();
-            }
-
-            @Override
-            public void onResponse(AppActivityViewResult response) {
-                hideTipDialog();
-                EnterActivity(response);
-            }
-        }));
     }
 
     private void showNetDialog(final AppActivityViewResult response, final CourseSectionActivity activity) {
