@@ -27,9 +27,13 @@
     <uses-permission android:name="android.permission.READ_LOGS" />
     <!---->
 
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.GET_TASKS" />
+    <supports-screens
+        android:anyDensity="true"
+        android:largeScreens="true"
+        android:normalScreens="true"
+        android:resizeable="true"
+        android:smallScreens="true"
+        android:xlargeScreens="true" />
 
     <application
         android:name="com.haoyu.app.base.GdeiApplication"
@@ -317,6 +321,7 @@
         <activity
             android:name="com.haoyu.app.activity.VideoPlayerLibActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="sensorLandscape"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
 
         <service android:name="com.haoyu.app.service.VersionUpdateService" />

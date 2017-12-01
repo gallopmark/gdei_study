@@ -33,6 +33,7 @@ dependencies {
     /*android support*/
     /*libs*/
     compile files('libs/pldroid-player-2.0.4.jar')
+    compile 'com.qiniu:happy-dns:0.2.+'
     compile files('libs/nineoldandroids-2.4.0.jar')
     compile files('libs/PersistentCookieJar-v1.0.0.jar')
     /*okHttp3*/
