@@ -1,7 +1,7 @@
 package com.haoyu.app.activity;
 
 import android.content.Intent;
-import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -11,7 +11,7 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.haoyu.app.adapter.DiscussFileAdapter;
+import com.haoyu.app.adapter.MFileInfoAdapter;
 import com.haoyu.app.base.BaseActivity;
 import com.haoyu.app.base.BaseResponseResult;
 import com.haoyu.app.basehelper.BaseRecyclerAdapter;
@@ -57,7 +57,6 @@ public class TestAssignmentActivity extends BaseActivity implements OnClickListe
     TextView owntotal_percent;// 已互评所占百分比
     @BindView(R.id.myhomeworkScore)
     TextView myhomeworkScore;// 我的作业得分
-
     @BindView(R.id.timelimt)
     TextView mTimeLimt;//限时完成该
     @BindView(R.id.assignment_commit)
@@ -74,34 +73,32 @@ public class TestAssignmentActivity extends BaseActivity implements OnClickListe
     ScrollView mScrollView;
     @BindView(R.id.own_score)
     RelativeLayout mOwnScore;//我的得分
-    private int allMarkNum;
     @BindView(R.id.reBack)
     TextView mReBack;//申请退回作业
     @BindView(R.id.own_progress)
     RoundRectProgressBar progressBar1;//作业所占百分比
     @BindView(R.id.own_progress2)
     RoundRectProgressBar progressBar2;//互评所占百分比
-    private DetailMap detailMap;
     @BindView(R.id.rl_top)
     RelativeLayout rl_top;
     @BindView(R.id.xRecyclerView)
     RecyclerView xRecyclerView;
     @BindView(R.id.ll_content)
     LinearLayout ll_content;
-    private String mAcid;//活动id
-    private String userId;//用户id
-    private String state;//作业的状态
-    private GridLayoutManager fileManager;
-    private DiscussFileAdapter discussFileAdapter;
-    private List<MFileInfo> mFileInfoList = new ArrayList<>();
-    private String aresponseScore;//
-    private String aallScore;
-    private String amarkScore;
     @BindView(R.id.loadingView)
     LoadingView loadingView;
     @BindView(R.id.loadFailView)
     LoadFailView loadFailView;
-
+    private int allMarkNum;
+    private DetailMap detailMap;
+    private String mAcid;//活动id
+    private String userId;//用户id
+    private String state;//作业的状态
+    private MFileInfoAdapter mFileInfoAdapter;
+    private List<MFileInfo> mFileInfoList = new ArrayList<>();
+    private String aresponseScore;//
+    private String aallScore;
+    private String amarkScore;
     private boolean running;
     private TimePeriod timePeriod;
 
@@ -127,7 +124,6 @@ public class TestAssignmentActivity extends BaseActivity implements OnClickListe
         mOwnScore.setOnClickListener(context);
         mAssignmentCommit.setOnClickListener(context);
         mHuPing.setOnClickListener(context);
-
         AssignDesc.setOnClickListener(context);
         mReBack.setOnClickListener(context);
         rl_top.setOnClickListener(context);
@@ -143,7 +139,7 @@ public class TestAssignmentActivity extends BaseActivity implements OnClickListe
                 getDescData();
             }
         });
-        discussFileAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
+        mFileInfoAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseRecyclerAdapter adapter, BaseRecyclerAdapter.RecyclerHolder holder, View view, int position) {
                 MFileInfo mFileInfo = mFileInfoList.get(position);
@@ -163,10 +159,9 @@ public class TestAssignmentActivity extends BaseActivity implements OnClickListe
         running = getIntent().getBooleanExtra("running", false);
         timePeriod = (TimePeriod) getIntent().getSerializableExtra("timePeriod");
         userId = context.getUserId();
-        discussFileAdapter = new DiscussFileAdapter(context, mFileInfoList);
-        fileManager = new GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false);
-        xRecyclerView.setLayoutManager(fileManager);
-        xRecyclerView.setAdapter(discussFileAdapter);
+        mFileInfoAdapter = new MFileInfoAdapter(mFileInfoList);
+        xRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+        xRecyclerView.setAdapter(mFileInfoAdapter);
         getDescData();
         registRxBus();
     }
@@ -226,7 +221,7 @@ public class TestAssignmentActivity extends BaseActivity implements OnClickListe
             if (response.getResponseData().getmAssignmentUser().getmAssignmentEntity() != null) {
                 MAssignmentEntity mAssignmentEntity = response.getResponseData().getmAssignmentUser().getmAssignmentEntity();
                 mFileInfoList.addAll(response.getResponseData().getmAssignmentUser().getmAssignmentEntity().getMFileInfos());
-                discussFileAdapter.notifyDataSetChanged();
+                mFileInfoAdapter.notifyDataSetChanged();
                 String type = response.getResponseData().getmAssignmentUser().getmAssignmentEntity().getMarkType();
                 //已经提交的作业个数
                 int percenta = 100 - (int) mAssignmentEntity.getMarkScorePct();
