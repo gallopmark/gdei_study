@@ -59,14 +59,13 @@ public class PageResourcesAdapter extends BaseArrayRecyclerAdapter<ResourcesEnti
 
         @Override
         public void onBindHoder(RecyclerHolder holder, final MFileInfo entity, final int position) {
-            View content = holder.obtainView(R.id.content);
             ImageView iv_type = holder.obtainView(R.id.iv_fileType);
             TextView tv_name = holder.obtainView(R.id.tv_mFileName);
             TextView tv_size = holder.obtainView(R.id.tv_mFileSize);
-            Common.setFileType(entity.getUrl(),iv_type);
+            Common.setFileType(entity.getUrl(), iv_type);
             tv_name.setText(resourcesName);
             tv_size.setText(Common.FormetFileSize(entity.getFileSize()));
-            content.setOnClickListener(new View.OnClickListener() {
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (callBack != null) {

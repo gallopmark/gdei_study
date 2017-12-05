@@ -207,11 +207,7 @@
             android:windowSoftInputMode="adjustResize|stateHidden" />
         <!--教学观摩-->
         <!--听课评课-->
-        <activity android:name="com.haoyu.app.activity.WSTeachingStudyEditActivity" />
         <!--听课评课上传录像-->
-        <activity
-            android:name="com.haoyu.app.activity.WSTeachingStudySubmitActivity"
-            android:windowSoftInputMode="adjustResize|stateHidden" />
         <!--选择授课人-->
         <activity android:name="com.haoyu.app.activity.TeachingStudyLeacturerActivity" />
         <!--教材版本-->
@@ -285,6 +281,10 @@
             android:name="vn.tungdx.mediapicker.activities.MediaPickerActivity"
             android:screenOrientation="portrait"
             android:theme="@style/MediaPickerTheme" />-->
+        <!--添加听课评课-->
+        <activity
+            android:name="com.haoyu.app.activity.WSTeachingStudyEditActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
         <!--听课评课详情-->
         <activity
             android:name="com.haoyu.app.activity.TeachingStudyActivity"
