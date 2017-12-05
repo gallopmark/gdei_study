@@ -28,8 +28,8 @@ import okhttp3.Request;
  * 作者:xiaoma
  */
 
-public class WSTeachingStudyEditActivity extends BaseActivity {
-    private WSTeachingStudyEditActivity context = this;
+public class WSTSEditActivity extends BaseActivity {
+    private WSTSEditActivity context = this;
     @BindView(R.id.toolBar)
     AppToolBar toolBar;
     private String workshopId, workSectionId;

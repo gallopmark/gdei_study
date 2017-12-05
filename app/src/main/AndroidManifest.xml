@@ -203,7 +203,7 @@
             android:windowSoftInputMode="stateHidden|adjustPan" />
         <!--添加研讨-->
         <activity
-            android:name="com.haoyu.app.activity.WSTeachingDiscussActivity"
+            android:name="com.haoyu.app.activity.WSTDEditActivity"
             android:windowSoftInputMode="adjustResize|stateHidden" />
         <!--教学观摩-->
         <!--听课评课-->
@@ -283,15 +283,15 @@
             android:theme="@style/MediaPickerTheme" />-->
         <!--添加听课评课-->
         <activity
-            android:name="com.haoyu.app.activity.WSTeachingStudyEditActivity"
+            android:name="com.haoyu.app.activity.WSTSEditActivity"
             android:windowSoftInputMode="stateHidden|adjustResize" />
         <!--听课评课详情-->
         <activity
-            android:name="com.haoyu.app.activity.TeachingStudyActivity"
+            android:name="com.haoyu.app.activity.WSTSInfoActivity"
             android:configChanges="screenSize|orientation|keyboardHidden" />
         <!--评课议课-->
         <activity
-            android:name="com.haoyu.app.activity.WSClassDiscussInfoActivity"
+            android:name="com.haoyu.app.activity.WSCDInfoActivity"
             android:configChanges="screenSize|orientation|keyboardHidden" />
         <!--听课评课的结果-->
         <activity android:name="com.haoyu.app.activity.TeachingStudyResultDetailActiivty" />

@@ -11,12 +11,14 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -41,7 +43,6 @@ import com.haoyu.app.gdei.student.R;
 import com.haoyu.app.rxBus.MessageEvent;
 import com.haoyu.app.utils.Action;
 import com.haoyu.app.utils.Constants;
-import com.haoyu.app.utils.HtmlTagHandler;
 import com.haoyu.app.utils.OkHttpClientManager;
 import com.haoyu.app.utils.ScreenUtils;
 import com.haoyu.app.utils.TimeUtil;
@@ -66,12 +67,12 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.Request;
 
 /**
- * 创建日期：2017/11/2.
- * 描述:评课议课
- * 作者:Administrator
+ * 创建日期：2017/8/30 on 10:29
+ * 描述:听课评课
+ * 作者:马飞奔 Administrator
  */
-public class WSClassDiscussInfoActivity extends BaseActivity implements View.OnClickListener {
-    private WSClassDiscussInfoActivity context = this;
+public class WSTSInfoActivity extends BaseActivity implements View.OnClickListener {
+    private WSTSInfoActivity context = this;
     @BindView(R.id.toolBar)
     AppToolBar toolBar;
     @BindView(R.id.scrollView)
@@ -80,19 +81,26 @@ public class WSClassDiscussInfoActivity extends BaseActivity implements View.OnC
     LinearLayout ll_outSideTop;
     @BindView(R.id.tv_time)
     TextView tv_time;
-    @BindView(R.id.tv_title)
-    TextView tv_title;
-    @BindView(R.id.tv_stage)
-    TextView tv_stage;
-    @BindView(R.id.tv_textBook)
-    TextView tv_textBook;
+    @BindView(R.id.tv_study_title)
+    TextView tv_study_title; //听课评课标题
+    @BindView(R.id.tv_activity_type)
+    TextView tv_activity_type;  //活动类型
+    @BindView(R.id.tv_subject)
+    TextView tv_subject; //年级学科
+    @BindView(R.id.tv_lecture)
+    TextView tv_lecture; //授课人
+    @BindView(R.id.tv_bookversion)
+    TextView tv_bookversion; //选用教材
 
-    /*videoplayer layout*/
     @BindView(R.id.fl_video)
-    FrameLayout fl_video;
+    FrameLayout fl_video;  //视频文件
+    private int smallHeight;
+    private VideoPlayerFragment videoFragment;
 
     @BindView(R.id.ll_videoOutSide)
     LinearLayout ll_videoOutSide;
+    @BindView(R.id.tv_evaluation)
+    TextView tv_evaluation;
     @BindView(R.id.tv_content)
     TextView tv_content;
     @BindView(R.id.rv_file)
@@ -100,23 +108,31 @@ public class WSClassDiscussInfoActivity extends BaseActivity implements View.OnC
     @BindView(R.id.ll_discussion)
     LinearLayout ll_discussion;
     @BindView(R.id.tv_discussCount)
-    TextView tv_discussCount;
+    TextView tv_discussCount;   //评论总数
     @BindView(R.id.loadFailView)
     LoadFailView loadFailView;
-    @BindView(R.id.tv_emptyComment)
-    TextView tv_emptyComment;
     @BindView(R.id.recyclerView)
     RecyclerView recyclerView;
+    @BindView(R.id.tv_emptyComment)
+    TextView tv_emptyComment;
     @BindView(R.id.tv_more_reply)
-    TextView tv_more_reply;
-    @BindView(R.id.tv_bottomView)
-    TextView tv_bottomView;
-    private boolean running;
-    private String activityId, activityTitle;
+    TextView tv_more_reply;   //更多回复内容
+
+    @BindView(R.id.ll_outSideBottom)
+    LinearLayout ll_outSideBottom;
+    @BindView(R.id.ll_left)
+    LinearLayout ll_left;
+    @BindView(R.id.ll_right)
+    LinearLayout ll_right;
+    @BindView(R.id.iv_bottomRight)
+    ImageView iv_bottomRight;
+    @BindView(R.id.tv_bottomRight)
+    TextView tv_bottomRight;
+    private boolean running;   //是否在培训时间内、活动是否进行中
     private TimePeriod timePeriod;
-    private AppActivityViewEntity.ClassDiscussEntity mVideoDC;
-    private int smallHeight;
-    private VideoPlayerFragment videoFragment;
+    private String workshopId, activityId;
+    private AppActivityViewEntity.MLcecMobileEntity lcecEntity;
+    private boolean hasSubmitEvaluate;
     private int discussNum;//总回复数
     private AppCommentAdapter adapter;
     private List<CommentEntity> mComments = new ArrayList<>();
@@ -124,17 +140,17 @@ public class WSClassDiscussInfoActivity extends BaseActivity implements View.OnC
 
     @Override
     public int setLayoutResID() {
-        return R.layout.activity_wsts_classdiscuss;
+        return R.layout.activity_teaching_study;
     }
 
     @Override
     public void initView() {
         running = getIntent().getBooleanExtra("running", false);
         timePeriod = (TimePeriod) getIntent().getSerializableExtra("timePeriod");
+        workshopId = getIntent().getStringExtra("workshopId");
         activityId = getIntent().getStringExtra("activityId");
-        activityTitle = getIntent().getStringExtra("activityTitle");
-        mVideoDC = (AppActivityViewEntity.ClassDiscussEntity) getIntent().getSerializableExtra("discussClass");
-        setToolBar();
+        lcecEntity = (AppActivityViewEntity.MLcecMobileEntity) getIntent().getSerializableExtra("mlcec");
+        setSupportToolbar();
         showData();
         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -144,8 +160,8 @@ public class WSClassDiscussInfoActivity extends BaseActivity implements View.OnC
         registRxBus();
     }
 
-    private void setToolBar() {
-        toolBar.setTitle_text("教学观摩");
+    private void setSupportToolbar() {
+        toolBar.setTitle_text("听课评课");
         toolBar.setOnLeftClickListener(new AppToolBar.OnLeftClickListener() {
             @Override
             public void onLeftClick(View view) {
@@ -155,10 +171,12 @@ public class WSClassDiscussInfoActivity extends BaseActivity implements View.OnC
     }
 
     private void showData() {
-        setOutSideTop();
-        setVideo_info(mVideoDC.getVideoFiles());
-        setContext_text(mVideoDC.getSummary());
-        setFile_info(mVideoDC.getAttchFiles());
+        setTime_text();
+        setTop_text();
+        setmVideo_layout(lcecEntity.getmVideo());
+        setContext_text(lcecEntity.getContent());
+        setmFileInfos(lcecEntity.getmFileInfos());
+        setBottom_layout(lcecEntity.isHasSubmitEvaluate());
     }
 
     private void setTime_text() {
@@ -178,34 +196,49 @@ public class WSClassDiscussInfoActivity extends BaseActivity implements View.OnC
         }
     }
 
-    private void setOutSideTop() {
-        setTime_text();
-        tv_title.setText(activityTitle);
-        String stage_text = "学段/学科：";
-        if (mVideoDC.getStage() != null) {
-            stage_text += mVideoDC.getStage();
+    private void setTop_text() {
+        if (lcecEntity.getTitle() != null) {
+            tv_study_title.setText(Html.fromHtml(lcecEntity.getTitle()));
         }
-        if (mVideoDC.getSubject() != null) {
-            stage_text += ("/" + mVideoDC.getSubject());
+        String activityType = "活动类型：";
+        if (lcecEntity.getType() != null && lcecEntity.getType().equals("offLine")) {
+            activityType += "现场评课";
+        } else if (lcecEntity.getType() != null && lcecEntity.getType().equals("onLine")) {
+            activityType += "实录评课";
         }
-        tv_stage.setText(stage_text);
-        String textBook = "选用教材：";
-        if (mVideoDC.getTextbook() != null) {
-            textBook += mVideoDC.getTextbook();
+        tv_activity_type.setText(activityType);
+        String bookversion = "选用教材：";
+        if (lcecEntity.getTextbook() != null) {
+            bookversion += lcecEntity.getTextbook();
         }
-        tv_textBook.setText(textBook);
+        tv_bookversion.setText(bookversion);
+        String lecture = "授课人：";
+        if (lcecEntity.getTeacher() != null && lcecEntity.getTeacher().getRealName() != null) {
+            lecture += lcecEntity.getTeacher().getRealName();
+        }
+        tv_lecture.setText(lecture);
+        String ssubject = "年级学科：";
+        if (lcecEntity.getStage() != null && lcecEntity.getSubject() != null) {
+            ssubject += lcecEntity.getStage() + "\u3000" + lcecEntity.getSubject();
+        } else if (lcecEntity.getStage() != null) {
+            ssubject += lcecEntity.getStage();
+        } else if (lcecEntity.getSubject() != null) {
+            ssubject += lcecEntity.getSubject();
+        }
+        tv_subject.setText(ssubject);
     }
 
-    private void setVideo_info(List<MFileInfo> videoFiles) {
-        if (videoFiles.size() > 0) {
-            MFileInfo fileInfo = videoFiles.get(0);
+    private void setmVideo_layout(MFileInfo video) {
+        if (video != null && !TextUtils.isEmpty(video.getUrl())) {
+            fl_video.setVisibility(View.VISIBLE);
             smallHeight = ScreenUtils.getScreenHeight(context) / 5 * 2;
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, smallHeight);
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) fl_video.getLayoutParams();
+            params.height = smallHeight;
             fl_video.setLayoutParams(params);
             videoFragment = new VideoPlayerFragment();
             Bundle bundle = new Bundle();
-            bundle.putString("videoUrl", fileInfo.getUrl());
-            bundle.putString("videoTitle", activityTitle);
+            bundle.putString("videoUrl", video.getUrl());
+            bundle.putString("videoTitle", lcecEntity.getTitle());
             videoFragment.setArguments(bundle);
             FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction().replace(R.id.fl_video, videoFragment).commit();
@@ -215,23 +248,15 @@ public class WSClassDiscussInfoActivity extends BaseActivity implements View.OnC
                     setRequestedOrientation(orientation);
                 }
             });
+        } else {
+            fl_video.setVisibility(View.GONE);
         }
     }
 
     private void setContext_text(String content) {
         if (content != null && content.trim().length() > 0) {
             Html.ImageGetter imageGetter = new HtmlHttpImageGetter(tv_content, Constants.REFERER, true);
-            HtmlTagHandler tagHandler = new HtmlTagHandler(new HtmlTagHandler.OnImageClickListener() {
-                @Override
-                public void onImageClick(View view, String url) {
-                    ArrayList<String> imgList = new ArrayList<>();
-                    imgList.add(Constants.REFERER + url);
-                    Intent intent = new Intent(context, AppMultiImageShowActivity.class);
-                    intent.putStringArrayListExtra("photos", imgList);
-                    startActivity(intent);
-                }
-            });
-            Spanned spanned = Html.fromHtml(content, imageGetter, tagHandler);
+            Spanned spanned = Html.fromHtml(content, imageGetter, null);
             tv_content.setMovementMethod(LinkMovementMethod.getInstance());
             tv_content.setText(spanned);
             tv_content.setVisibility(View.VISIBLE);
@@ -240,18 +265,18 @@ public class WSClassDiscussInfoActivity extends BaseActivity implements View.OnC
         }
     }
 
-    private void setFile_info(final List<MFileInfo> attchFiles) {
-        if (attchFiles.size() > 0) {
+    private void setmFileInfos(final List<MFileInfo> mFileInfos) {
+        if (mFileInfos != null && mFileInfos.size() > 0) {
             rv_file.setVisibility(View.VISIBLE);
             FullyLinearLayoutManager layoutManager = new FullyLinearLayoutManager(context);
             layoutManager.setOrientation(FullyLinearLayoutManager.VERTICAL);
             rv_file.setLayoutManager(layoutManager);
-            MFileInfoAdapter adapter = new MFileInfoAdapter(attchFiles);
+            MFileInfoAdapter adapter = new MFileInfoAdapter(mFileInfos, true);
             rv_file.setAdapter(adapter);
             adapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
                 @Override
                 public void onItemClick(BaseRecyclerAdapter adapter, BaseRecyclerAdapter.RecyclerHolder holder, View view, int position) {
-                    MFileInfo fileInfo = attchFiles.get(position);
+                    MFileInfo fileInfo = mFileInfos.get(position);
                     Intent intent = new Intent(context, MFileInfoActivity.class);
                     intent.putExtra("fileInfo", fileInfo);
                     startActivity(intent);
@@ -259,6 +284,19 @@ public class WSClassDiscussInfoActivity extends BaseActivity implements View.OnC
             });
         } else {
             rv_file.setVisibility(View.GONE);
+        }
+    }
+
+    private void setBottom_layout(boolean hasSubmitEvaluate) {
+        this.hasSubmitEvaluate = hasSubmitEvaluate;
+        if (hasSubmitEvaluate) {
+            ll_right.setBackgroundColor(ContextCompat.getColor(context, R.color.node_select));
+            iv_bottomRight.setImageResource(R.drawable.teach_study_detail);
+            tv_bottomRight.setText("查看评课结果");
+        } else {
+            ll_right.setBackgroundColor(ContextCompat.getColor(context, R.color.orange));
+            iv_bottomRight.setImageResource(R.drawable.teach_study_insert);
+            tv_bottomRight.setText("填写评课表");
         }
     }
 
@@ -275,7 +313,8 @@ public class WSClassDiscussInfoActivity extends BaseActivity implements View.OnC
                 videoFragment.setFullScreen(false);
             }
             showOutSize();
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, smallHeight);
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) fl_video.getLayoutParams();
+            params.height = smallHeight;
             fl_video.setLayoutParams(params);
         } else { //横屏
             if (videoFragment != null) {
@@ -286,23 +325,28 @@ public class WSClassDiscussInfoActivity extends BaseActivity implements View.OnC
             int screenHeight = ScreenUtils.getScreenHeight(context);
             int statusHeight = ScreenUtils.getStatusHeight(context);
             int realHeight = screenHeight - statusHeight;
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(screeWidth, realHeight);
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) fl_video.getLayoutParams();
+            params.weight = screeWidth;
+            params.height = realHeight;
+            params.setMargins(0, 0, 0, 0);
             fl_video.setLayoutParams(params);
         }
     }
 
     private void showOutSize() {
+        tv_time.setVisibility(View.VISIBLE);
         toolBar.setVisibility(View.VISIBLE);
         ll_outSideTop.setVisibility(View.VISIBLE);
         ll_videoOutSide.setVisibility(View.VISIBLE);
-        tv_bottomView.setVisibility(View.VISIBLE);
+        ll_outSideBottom.setVisibility(View.VISIBLE);
     }
 
     private void hideOutSize() {
         toolBar.setVisibility(View.GONE);
+        tv_time.setVisibility(View.GONE);
         ll_outSideTop.setVisibility(View.GONE);
         ll_videoOutSide.setVisibility(View.GONE);
-        tv_bottomView.setVisibility(View.GONE);
+        ll_outSideBottom.setVisibility(View.GONE);
     }
 
     @Override
@@ -318,7 +362,7 @@ public class WSClassDiscussInfoActivity extends BaseActivity implements View.OnC
     public void initData() {
         tv_more_reply.setVisibility(View.GONE);
         showTipDialog();
-        String url = Constants.OUTRT_NET + "/m/comment?relation.id=" + activityId + "&relation.type=discuss_class&orders=CREATE_TIME.ASC&limit=5";
+        String url = Constants.OUTRT_NET + "/m/comment?relation.id=" + activityId + "&relation.type=lcec&orders=CREATE_TIME.ASC&limit=5";
         addSubscription(Flowable.just(url).map(new Function<String, CommentListResult>() {
             @Override
             public CommentListResult apply(String url) throws Exception {
@@ -349,7 +393,7 @@ public class WSClassDiscussInfoActivity extends BaseActivity implements View.OnC
                 && commentListResult.getResponseData().getmComments().size() > 0) {
             for (int i = 0; i < commentListResult.getResponseData().getmComments().size(); i++) {
                 String mainPostId = commentListResult.getResponseData().getmComments().get(i).getId();
-                url = Constants.OUTRT_NET + "/m/comment?relation.id=" + activityId + "&relation.type=discuss_class"
+                url = Constants.OUTRT_NET + "/m/comment?relation.id=" + activityId + "&relation.type=lcec"
                         + "&mainId=" + mainPostId + "&orders=CREATE_TIME.ASC";
                 try {
                     String Jsonarr = OkHttpClientManager.getAsString(context, url);
@@ -417,8 +461,15 @@ public class WSClassDiscussInfoActivity extends BaseActivity implements View.OnC
 
     @Override
     public void setListener() {
+        ll_right.setOnClickListener(context);
+        ll_left.setOnClickListener(context);
+        loadFailView.setOnRetryListener(new LoadFailView.OnRetryListener() {
+            @Override
+            public void onRetry(View v) {
+                initData();
+            }
+        });
         tv_more_reply.setOnClickListener(context);
-        tv_bottomView.setOnClickListener(context);
         adapter.setCommentCallBack(new AppCommentAdapter.CommentCallBack() {
             @Override
             public void comment(int position, CommentEntity entity) {
@@ -443,7 +494,7 @@ public class WSClassDiscussInfoActivity extends BaseActivity implements View.OnC
                 replyPosition = position;
                 Intent intent = new Intent(context, AppMoreReplyActivity.class);
                 intent.putExtra("entity", entity);
-                intent.putExtra("relationType", "discuss_class");
+                intent.putExtra("relationType", "lcec");
                 intent.putExtra("relationId", activityId);
                 startActivity(intent);
             }
@@ -462,18 +513,38 @@ public class WSClassDiscussInfoActivity extends BaseActivity implements View.OnC
 
     @Override
     public void onClick(View view) {
+        Intent intent = new Intent();
         switch (view.getId()) {
             case R.id.tv_more_reply:
-                Intent intent = new Intent(context, AppMoreCommentActivity.class);
+                intent.setClass(context, AppMoreCommentActivity.class);
                 intent.putExtra("relationId", activityId);
-                intent.putExtra("relationType", "discuss_class");
+                intent.putExtra("relationType", "lcec");
                 startActivity(intent);
                 return;
-            case R.id.tv_bottomView:
+            case R.id.ll_left:
                 if (running) {
                     showCommentDialog(false);
                 } else {
                     showMaterialDialog("提示", "活动已结束,无法参与听课评课");
+                }
+                return;
+            case R.id.ll_right:
+                if (hasSubmitEvaluate) {
+                    //查看听课评课明细
+                    intent.setClass(context, TeachingStudyResultDetailActiivty.class);
+                    intent.putExtra("workshopId", workshopId);
+                    intent.putExtra("leceId", lcecEntity.getId());
+                    startActivity(intent);
+                } else {
+                    //填写评课表
+                    if (running) {
+                        intent.setClass(context, TeachingStudyFillActivity.class);
+                        intent.putExtra("workshopId", workshopId);
+                        intent.putExtra("leceId", lcecEntity.getId());
+                        startActivityForResult(intent, 1);
+                    } else {
+                        showMaterialDialog("提示", "活动已结束,无法参与听课评课");
+                    }
                 }
                 return;
         }
@@ -499,7 +570,7 @@ public class WSClassDiscussInfoActivity extends BaseActivity implements View.OnC
         String url = Constants.OUTRT_NET + "/m/comment";
         Map<String, String> map = new HashMap<>();
         map.put("relation.id", activityId);
-        map.put("relation.type", "discuss_class");
+        map.put("relation.type", "lcec");
         map.put("content", content);
         addSubscription(OkHttpClientManager.postAsyn(context, url, new OkHttpClientManager.ResultCallback<BaseResponseResult<CommentEntity>>() {
             @Override
@@ -556,7 +627,7 @@ public class WSClassDiscussInfoActivity extends BaseActivity implements View.OnC
         String url = Constants.OUTRT_NET + "/m/comment";
         Map<String, String> map = new HashMap<>();
         map.put("relation.id", activityId);
-        map.put("relation.type", "discuss_class");
+        map.put("relation.type", "lcec");
         map.put("content", content);
         map.put("mainId", mComments.get(childPosition).getId());
         addSubscription(OkHttpClientManager.postAsyn(context, url, new OkHttpClientManager.ResultCallback<BaseResponseResult<CommentEntity>>() {
@@ -664,6 +735,15 @@ public class WSClassDiscussInfoActivity extends BaseActivity implements View.OnC
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            hasSubmitEvaluate = true;
+            setBottom_layout(hasSubmitEvaluate);
+        }
+    }
+
+    @Override
     public void obBusEvent(MessageEvent event) {
         if (event.action.equals(Action.CREATE_CHILD_COMMENT)) {
             if (event.getBundle() != null && event.getBundle().getSerializable("mainComment") != null
@@ -706,5 +786,4 @@ public class WSClassDiscussInfoActivity extends BaseActivity implements View.OnC
             }
         }
     }
-
 }

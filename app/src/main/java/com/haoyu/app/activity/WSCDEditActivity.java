@@ -9,8 +9,8 @@ import android.view.View;
 import com.haoyu.app.base.BaseActivity;
 import com.haoyu.app.base.BaseResponseResult;
 import com.haoyu.app.entity.MWorkshopActivity;
-import com.haoyu.app.fragment.WSClassDiscussFragment;
-import com.haoyu.app.fragment.WSClassDiscussSubmitFragment;
+import com.haoyu.app.fragment.WSCDEditFragment;
+import com.haoyu.app.fragment.WSCDSubmitFragment;
 import com.haoyu.app.gdei.student.R;
 import com.haoyu.app.utils.Constants;
 import com.haoyu.app.utils.OkHttpClientManager;
@@ -28,8 +28,8 @@ import okhttp3.Request;
  * 作者:xiaoma
  */
 
-public class WSClassDiscussEditActivity extends BaseActivity {
-    private WSClassDiscussEditActivity context = this;
+public class WSCDEditActivity extends BaseActivity {
+    private WSCDEditActivity context = this;
     @BindView(R.id.toolBar)
     AppToolBar toolBar;
     private String workshopId, workSectionId;
@@ -55,13 +55,13 @@ public class WSClassDiscussEditActivity extends BaseActivity {
     private void showF1() {
         toolBar.setShow_right_button(false);
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        WSClassDiscussFragment f1 = new WSClassDiscussFragment();
+        WSCDEditFragment f1 = new WSCDEditFragment();
         Bundle bundle = new Bundle();
         bundle.putString("workshopId", workshopId);
         bundle.putString("workSectionId", workSectionId);
         f1.setArguments(bundle);
         transaction.replace(R.id.container, f1);
-        f1.setOnNextListener(new WSClassDiscussFragment.OnNextListener() {
+        f1.setOnNextListener(new WSCDEditFragment.OnNextListener() {
             @Override
             public void onNext(MWorkshopActivity activity) {
                 context.activity = activity;
@@ -77,7 +77,7 @@ public class WSClassDiscussEditActivity extends BaseActivity {
     private void showF2() {
         toolBar.setShow_right_button(true);
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        final WSClassDiscussSubmitFragment f2 = new WSClassDiscussSubmitFragment();
+        final WSCDSubmitFragment f2 = new WSCDSubmitFragment();
         transaction.add(R.id.container, f2);
         transaction.commitAllowingStateLoss();
         toolBar.setOnRightClickListener(new AppToolBar.OnRightClickListener() {
