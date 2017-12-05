@@ -32,7 +32,7 @@ public class WSCDSubmitFragment extends BaseFragment implements View.OnClickList
 
     @Override
     public int createView() {
-        return R.layout.fragment_ws_classdiscuss_submit;
+        return R.layout.fragment_wscdsubmit;
     }
 
     @Override
