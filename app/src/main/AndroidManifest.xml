@@ -205,12 +205,32 @@
         <activity
             android:name="com.haoyu.app.activity.WSTDEditActivity"
             android:windowSoftInputMode="adjustResize|stateHidden" />
-        <!--评课议课-->
+        <!--创建评课议课-->
         <activity
             android:name="com.haoyu.app.activity.WSCDEditActivity"
             android:windowSoftInputMode="adjustResize|stateHidden" />
-        <!--听课评课-->
-        <activity android:name="com.haoyu.app.activity.WSTSEditActivity" />
+        <!--评课议课详情-->
+        <activity
+            android:name="com.haoyu.app.activity.WSCDInfoActivity"
+            android:configChanges="screenSize|orientation|keyboardHidden" />
+        <!--创建听课评课-->
+        <activity
+            android:name="com.haoyu.app.activity.WSTSEditActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
+        <!--听课评课详情-->
+        <activity
+            android:name="com.haoyu.app.activity.WSTSInfoActivity"
+            android:configChanges="screenSize|orientation|keyboardHidden" />
+        <!--听课评课的结果-->
+        <activity android:name="com.haoyu.app.activity.WSTSInfoResultActivity" />
+        <!--听课评课的得分明细-->
+        <activity android:name="com.haoyu.app.activity.WSTSInfoScoreActivity" />
+        <!--填写听课评课-->
+        <activity
+            android:name="com.haoyu.app.activity.WSTSInfoFillActivity"
+            android:configChanges="screenSize|orientation|keyboardHidden" />
+        <!--评价总结及建议列表-->
+        <activity android:name="com.haoyu.app.activity.WSTSSuggestActivity" />
         <!--选择授课人-->
         <activity android:name="com.haoyu.app.activity.TeachingStudyLeacturerActivity" />
         <!--教材版本-->
@@ -280,34 +300,6 @@
         <activity android:name="com.haoyu.app.activity.AppMultiImageShowActivity" />
 
         <activity android:name="com.haoyu.app.activity.BriefingDetailActivity" />
-        <!--<activity
-            android:name="vn.tungdx.mediapicker.activities.MediaPickerActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/MediaPickerTheme" />-->
-        <!--添加听课评课-->
-        <activity
-            android:name="com.haoyu.app.activity.WSTSEditActivity"
-            android:windowSoftInputMode="stateHidden|adjustResize" />
-        <!--听课评课详情-->
-        <activity
-            android:name="com.haoyu.app.activity.WSTSInfoActivity"
-            android:configChanges="screenSize|orientation|keyboardHidden" />
-        <!--评课议课-->
-        <activity
-            android:name="com.haoyu.app.activity.WSCDInfoActivity"
-            android:configChanges="screenSize|orientation|keyboardHidden" />
-        <!--听课评课的结果-->
-        <activity android:name="com.haoyu.app.activity.TeachingStudyResultDetailActiivty" />
-        <!--听课评课的得分明细-->
-        <activity android:name="com.haoyu.app.activity.TeachingStudyDetailScoreActivity" />
-        <!--听课评课发表评论-->
-        <!--填写听课评课-->
-        <activity
-            android:name="com.haoyu.app.activity.TeachingStudyFillActivity"
-            android:windowSoftInputMode="stateHidden|adjustResize" />
-
-        <!--评价总结及建议列表-->
-        <activity android:name="com.haoyu.app.activity.EValuationSummaryActivity" />
         <!--调查问卷问答更多详情-->
         <activity android:name="com.haoyu.app.activity.AppSurveyAnswerActivity" />
 
