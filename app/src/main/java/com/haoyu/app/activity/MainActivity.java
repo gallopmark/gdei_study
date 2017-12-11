@@ -147,7 +147,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private TextView tv_userName;   //侧滑菜单用户名
     private TextView tv_deptName;   //侧滑菜单用户部门名称
     private ArrayMap<String, MobileUserTrainInfoResult> mInfoMap = new ArrayMap<>();  //将已经加载的数据添加到map集合，避免重复加载
-    private final static int SCANNIN_GREQUEST_CODE = 1;
+    private final static int SCANNIN_GREQUEST_CODE = 1, CREATE_WS = 2;
     private boolean hasTopic;   //课程是否有主题
     private boolean isSelf, isNoLimit, showCommuity;  //课程是否是自主选课，是否限制学时
     private boolean canCreateWS;    //培训是否是创建工作坊考核
@@ -600,13 +600,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 startActivity(intent);
                 break;
             case R.id.tv_createWs:
-                intent.setClass(context, WorkshopCreateActivity.class);
+                intent.setClass(context, WorkshopEditActivity.class);
                 startActivity(intent);
                 break;
             case R.id.bt_createWs:   //创建个人工作坊页面
-                intent.setClass(context, WorkshopCreateActivity.class);
+                intent.setClass(context, WorkshopEditActivity.class);
                 intent.putExtra("trainId", trainId);
-                startActivity(intent);
+                startActivityForResult(intent, CREATE_WS);
                 break;
             case R.id.commuity_learn:
                 startActivity(new Intent(context, CmtsMainActivity.class));
@@ -732,6 +732,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     parseCaptureResult(result);
                 }
                 break;
+            case CREATE_WS:
+                mInfoMap.remove(trainId);
+                getUserTrainInfo(trainId);
+                break;
         }
     }
 
@@ -821,9 +825,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             String deptName = (String) event.obj;
             tv_deptName.setText(deptName);
         } else if (event.action.equals(Action.SUBMIT_CHOOSE_COURSE)) {
-            mInfoMap.remove(trainId);
-            getUserTrainInfo(trainId);
-        } else if (event.action.equals(Action.CREATE_WORKSHOP)) {
             mInfoMap.remove(trainId);
             getUserTrainInfo(trainId);
         }

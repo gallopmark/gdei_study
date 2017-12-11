@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/spaceColor"
+    android:orientation="vertical">
+
+    <com.haoyu.app.view.AppToolBar
+        android:id="@+id/toolBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:right_button_text="提交"
+        app:show_right_button="true"
+        app:title_text="创建工作坊" />
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:overScrollMode="never"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:id="@+id/fl_imageLayout"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:background="@color/spaceColor">
+
+                <LinearLayout
+                    android:id="@+id/ll_addImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:drawablePadding="@dimen/margin_size_8"
+                        android:drawableTop="@drawable/teaching_research_add"
+                        android:gravity="center"
+                        android:text="添加封面"
+                        android:textColor="@color/faq_type"
+                        android:textSize="@dimen/font_size_14" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/fl_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:id="@+id/iv_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop" />
+
+                    <LinearLayout
+                        android:id="@+id/ll_imageProgress"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:background="@color/videoplayer_control"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:paddingLeft="@dimen/margin_size_16"
+                        android:paddingRight="@dimen/margin_size_16"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:id="@+id/tv_imageName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:ellipsize="middle"
+                            android:gravity="center"
+                            android:singleLine="true"
+                            android:textColor="@color/defaultColor"
+                            android:textSize="@dimen/font_size_16"
+                            android:textStyle="bold" />
+
+                        <com.haoyu.app.view.RoundRectProgressBar
+                            android:id="@+id/imageProgressBar"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/margin_size_4"
+                            android:layout_marginLeft="@dimen/margin_size_30"
+                            android:layout_marginRight="@dimen/margin_size_30"
+                            android:layout_marginTop="@dimen/margin_size_12"
+                            app:progress_background_color="@color/faq_type"
+                            app:progress_color="@color/defaultColor" />
+
+                        <TextView
+                            android:id="@+id/tv_imageProgress"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginTop="@dimen/margin_size_12"
+                            android:gravity="center"
+                            android:textColor="@color/defaultColor"
+                            android:textSize="@dimen/font_size_16"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tv_imageError"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@color/videoplayer_control"
+                        android:gravity="center"
+                        android:text="上传失败，点击重试！"
+                        android:textColor="@color/defaultColor"
+                        android:textSize="@dimen/font_size_16"
+                        android:visibility="gone" />
+
+                    <ImageView
+                        android:id="@+id/iv_deleteImage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="top|right"
+                        android:padding="@dimen/margin_size_6"
+                        android:src="@drawable/download_cancel" />
+                </FrameLayout>
+            </FrameLayout>
+
+            <EditText
+                android:id="@+id/et_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                android:hint="工作坊名称"
+                android:maxLines="1"
+                android:padding="@dimen/margin_size_14"
+                android:textSize="@dimen/font_size_16" />
+
+            <com.haoyu.app.view.ScrollEditText
+                android:id="@+id/et_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_size_8"
+                android:background="@color/white"
+                android:gravity="top|left"
+                android:hint="工作坊简介，描述研修方向"
+                android:maxLines="7"
+                android:minLines="7"
+                android:padding="@dimen/margin_size_14"
+                android:textSize="@dimen/font_size_16" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_size_8"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tv_stage"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@color/white"
+                    android:drawableRight="@drawable/course_dictionary_xiala"
+                    android:hint="请选择学段"
+                    android:padding="@dimen/margin_size_14"
+                    android:textSize="@dimen/font_size_16" />
+
+                <TextView
+                    android:id="@+id/tv_subject"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/margin_size_1"
+                    android:layout_weight="1"
+                    android:background="@color/white"
+                    android:drawableRight="@drawable/course_dictionary_xiala"
+                    android:hint="请选择学科"
+                    android:padding="@dimen/margin_size_14"
+                    android:textSize="@dimen/font_size_16" />
+            </LinearLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="160dp"
+                android:layout_marginLeft="@dimen/margin_size_50"
+                android:layout_marginRight="@dimen/margin_size_50"
+                android:layout_marginTop="@dimen/margin_size_8"
+                android:background="@color/white"
+                android:nestedScrollingEnabled="false">
+
+                <LinearLayout
+                    android:id="@+id/ll_addFile"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/add_scheme" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/margin_size_16"
+                        android:text="上传研修方案"
+                        android:textColor="@color/faq_type"
+                        android:textSize="@dimen/font_size_16" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/fl_file"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:id="@+id/ll_fileProgress"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@color/videoplayer_control"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:paddingBottom="@dimen/margin_size_26"
+                        android:paddingLeft="@dimen/margin_size_16"
+                        android:paddingRight="@dimen/margin_size_16"
+                        android:paddingTop="@dimen/margin_size_26"
+                        android:visibility="gone">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:id="@+id/iv_fileType"
+                                android:layout_width="@dimen/margin_size_30"
+                                android:layout_height="@dimen/margin_size_30"
+                                android:layout_gravity="center" />
+
+                            <TextView
+                                android:id="@+id/tv_fileName"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginLeft="@dimen/margin_size_12"
+                                android:ellipsize="middle"
+                                android:singleLine="true"
+                                android:textColor="@color/defaultColor"
+                                android:textSize="@dimen/font_size_16" />
+                        </LinearLayout>
+
+                        <com.haoyu.app.view.RoundRectProgressBar
+                            android:id="@+id/fileProgressBar"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/margin_size_4"
+                            android:layout_marginLeft="@dimen/margin_size_30"
+                            android:layout_marginRight="@dimen/margin_size_30"
+                            android:layout_marginTop="@dimen/margin_size_12"
+                            app:progress_background_color="@color/faq_type"
+                            app:progress_color="@color/defaultColor" />
+
+                        <TextView
+                            android:id="@+id/tv_fileProgress"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginTop="@dimen/margin_size_12"
+                            android:gravity="center"
+                            android:textColor="@color/defaultColor"
+                            android:textSize="@dimen/font_size_16"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tv_fileError"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@color/videoplayer_control"
+                        android:gravity="center"
+                        android:text="附件上传失败，点击重试！"
+                        android:textColor="@color/defaultColor"
+                        android:textSize="@dimen/font_size_16"
+                        android:visibility="gone" />
+
+                    <ImageView
+                        android:id="@+id/iv_deleteFile"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="top|right"
+                        android:padding="@dimen/margin_size_6"
+                        android:src="@drawable/download_cancel" />
+                </FrameLayout>
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/margin_size_12"
+                android:text="注：研修方案是工作坊是否通过审核的重要资料。"
+                android:textColor="@color/gray"
+                android:textSize="@dimen/font_size_16" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
