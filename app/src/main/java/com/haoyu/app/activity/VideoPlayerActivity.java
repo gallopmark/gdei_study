@@ -762,7 +762,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
 
             showMessage(MyUtils.generateTime(newPosition) + "/"
                     + MyUtils.generateTime(mVideoView.getDuration()));
-
             if (isLocal || !NONE.equals(netType)) {
                 showCenterBox();
                 videoHandler.removeMessages(VIDEO_FORWARD);
@@ -798,6 +797,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         } else if (lpa.screenBrightness < 0.01f) {
             lpa.screenBrightness = 0.01f;
         }
+
         if (isLocal || !NONE.equals(netType)) {
             getWindow().setAttributes(lpa);
             showMessage((int) (lpa.screenBrightness * 100) + "%");
@@ -806,7 +806,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
             videoHandler.removeMessages(VIDEO_HIDECENTERBOX);
             videoHandler.sendEmptyMessageDelayed(VIDEO_HIDECENTERBOX, defaultTime);
         }
-
     }
 
     private void videoViewStart() {
