@@ -127,7 +127,7 @@ public class CmtsLsonInfoFragment extends BaseFragment implements View.OnClickLi
 
     @Override
     public int createView() {
-        return R.layout.fragment_cmts_lesson;
+        return R.layout.fragment_cmtslsoninfo;
     }
 
     @Override
