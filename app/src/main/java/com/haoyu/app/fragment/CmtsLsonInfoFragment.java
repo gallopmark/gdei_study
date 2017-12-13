@@ -71,7 +71,7 @@ import okhttp3.Request;
  * 作者:xiaoma
  */
 
-public class CmtsLessonFragment extends BaseFragment implements View.OnClickListener {
+public class CmtsLsonInfoFragment extends BaseFragment implements View.OnClickListener {
     @BindView(R.id.mRrogressBar)
     RoundRectProgressBar mRrogressBar; //创课进度
     @BindView(R.id.tv_day)

@@ -22,7 +22,7 @@ import com.haoyu.app.entity.FileUploadResult;
 import com.haoyu.app.entity.TeachingLessonData;
 import com.haoyu.app.entity.TeachingLessonEntity;
 import com.haoyu.app.filePicker.LFilePicker;
-import com.haoyu.app.fragment.CmtsLessonFragment;
+import com.haoyu.app.fragment.CmtsLsonInfoFragment;
 import com.haoyu.app.gdei.student.R;
 import com.haoyu.app.rxBus.MessageEvent;
 import com.haoyu.app.utils.Action;
@@ -64,7 +64,7 @@ public class CmtsLessonActivity extends BaseActivity {
     TextView tv_empty;
     private TeachingLessonEntity lessonEntity;
     private String lessonId;
-    private CmtsLessonFragment fragment;
+    private CmtsLsonInfoFragment fragment;
 
     @Override
     public int setLayoutResID() {
@@ -356,7 +356,7 @@ public class CmtsLessonActivity extends BaseActivity {
     }
 
     private void setSupportFragment(TeachingLessonEntity entity) {
-        fragment = new CmtsLessonFragment();
+        fragment = new CmtsLsonInfoFragment();
         Bundle bundle = new Bundle();
         bundle.putSerializable("entity", entity);
         fragment.setArguments(bundle);
