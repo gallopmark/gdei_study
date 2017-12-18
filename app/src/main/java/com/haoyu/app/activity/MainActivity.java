@@ -6,7 +6,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.ArrayMap;
-import android.support.v4.widget.NestedScrollView;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.KeyEvent;
@@ -18,13 +18,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.haoyu.app.adapter.MyTrainAdapter;
-import com.haoyu.app.adapter.MyTrainCommunityAdapter;
-import com.haoyu.app.adapter.MyTrainCourseListAdapter;
-import com.haoyu.app.adapter.MyTrainWorkShopListAdapter;
+import com.haoyu.app.adapter.MyTrainCourseAdapter;
+import com.haoyu.app.adapter.MyTrainWSAdapter;
 import com.haoyu.app.base.BaseActivity;
 import com.haoyu.app.base.BaseResponseResult;
 import com.haoyu.app.base.GdeiApplication;
@@ -51,6 +51,8 @@ import com.haoyu.app.utils.Action;
 import com.haoyu.app.utils.Common;
 import com.haoyu.app.utils.Constants;
 import com.haoyu.app.utils.OkHttpClientManager;
+import com.haoyu.app.utils.ScreenUtils;
+import com.haoyu.app.utils.TimeUtil;
 import com.haoyu.app.view.FullyLinearLayoutManager;
 import com.haoyu.app.view.LoadFailView;
 import com.haoyu.app.view.LoadingView;
@@ -74,74 +76,78 @@ import okhttp3.Request;
  * 作者:马飞奔 Administrator
  */
 public class MainActivity extends BaseActivity implements View.OnClickListener {
-    private MainActivity context = this;
+    private MainActivity context;
     @BindView(R.id.toggle)
     ImageView toggle;
     @BindView(R.id.iv_scan)
     View iv_scan;  //扫一扫
     @BindView(R.id.iv_msg)
     ImageView iv_msg;
-    @BindView(R.id.empty_train)
-    View empty_train;
-    @BindView(R.id.commuity_learn)
-    View commuity_learn;   //空培训  进入社区交流教学经验
+    @BindView(R.id.ll_emptyTrain)
+    LinearLayout ll_emptyTrain;
     @BindView(R.id.tv_createWs)
-    View tv_createWs;   //空培训  创建工作坊组织共同研修
-    @BindView(R.id.rl_myTrain)
-    View rl_myTrain;
-    @BindView(R.id.tv_myTrain)
-    TextView tv_myTrain;
+    TextView tv_createWs;   //空培训  创建工作坊组织共同研修
+    @BindView(R.id.tv_cmtsLearn)
+    TextView tv_cmtsLearn;   //空培训  进入社区交流教学经验
     @BindView(R.id.loadingView)
     LoadingView loadingView;
     @BindView(R.id.loadFailView)
     LoadFailView loadFailView;
     @BindView(R.id.svPersonalInfo)
-    NestedScrollView svPersonalInfo;
-    @BindView(R.id.info_content)
-    LinearLayout info_content;
-    @BindView(R.id.tv_courseResult)
-    TextView tv_courseResult;
-    @BindView(R.id.tv_workShopResult)
-    TextView tv_workShopResult;
-    @BindView(R.id.tv_communityResult)
-    TextView tv_communityResult;
+    ScrollView svPersonalInfo;
+    @BindView(R.id.tv_myTrain)
+    TextView tv_myTrain;
+    @BindView(R.id.ll_content)
+    LinearLayout ll_content;
     @BindView(R.id.ll_course)
     LinearLayout ll_course;
+    @BindView(R.id.tv_courseResult)
+    TextView tv_courseResult;
     @BindView(R.id.ll_workshop)
     LinearLayout ll_workshop;
+    @BindView(R.id.tv_workShopResult)
+    TextView tv_workShopResult;
     @BindView(R.id.ll_community)
     LinearLayout ll_community;
-    @BindView(R.id.mCourseLayout)
-    LinearLayout mCourseLayout;
-    @BindView(R.id.mWorkShopLayout)
-    TextView mWorkShopLayout;
+    @BindView(R.id.tv_communityResult)
+    TextView tv_communityResult;
+    @BindView(R.id.ll_courseLayout)
+    LinearLayout ll_courseLayout;
+    @BindView(R.id.tv_workshop)
+    TextView tv_workshop;
     @BindView(R.id.ll_selectCourse)
-    View ll_selectCourse;      //当选课限制学时，所选课程未达目标学时，则显示选课按钮
-    @BindView(R.id.empty_course)
-    View empty_course;      //未选课
+    LinearLayout ll_selectCourse;      //当选课限制学时，所选课程未达目标学时，则显示选课按钮
     @BindView(R.id.bt_selectCourse)
     Button bt_selectCourse;   //空课程列表以及培训需要课程考核，则显示选课按钮
-    @BindView(R.id.myCourseListView)
-    RecyclerView myCourseListView;   //我的课程列表
-    @BindView(R.id.empty_workshop)
-    View empty_workshop;
+    @BindView(R.id.rv_course)
+    RecyclerView rv_course;   //我的课程列表
+    @BindView(R.id.ll_emptyCourse)
+    LinearLayout ll_emptyCourse;
+    @BindView(R.id.ll_emptyWS)
+    LinearLayout ll_emptyWS;
     @BindView(R.id.tv_wsConfig)
     TextView tv_wsConfig;
     @BindView(R.id.bt_createWs)
     Button bt_createWs;
-    @BindView(R.id.ll_CommunityLayout)
-    LinearLayout ll_CommunityLayout;
-    @BindView(R.id.mWorkShopLV)
-    RecyclerView mWorkShopLV;        //我的工作坊列表
-    @BindView(R.id.mCommuityLV)
-    RecyclerView mCommuityLV;        //研修社区列表
+    @BindView(R.id.rv_workshop)
+    RecyclerView rv_workshop;        //我的工作坊列表
+    @BindView(R.id.ll_cmtsLayout)
+    LinearLayout ll_cmtsLayout;
+    @BindView(R.id.ll_cmts)
+    LinearLayout ll_cmts;
+    @BindView(R.id.iv_cmts)
+    ImageView iv_cmts;
+    @BindView(R.id.tv_cmtsPeriod)
+    TextView tv_cmtsPeriod;
+    @BindView(R.id.tv_cmtsStudyHour)
+    TextView tv_cmtsStudyHour;
+    @BindView(R.id.tv_cmtsScore)
+    TextView tv_cmtsScore;
     private List<MyTrainMobileEntity> myTrains = new ArrayList<>();
     private List<MyTrainCourseResult> courses = new ArrayList<>();
-    private MyTrainCourseListAdapter courseAdapter;
+    private MyTrainCourseAdapter courseAdapter;
     private List<MyTrainWorkShopResult> workShops = new ArrayList<>();
-    private MyTrainWorkShopListAdapter workShopAdapter;
-    private List<MyTrainCommunityResult> communitys = new ArrayList<>();
-    private MyTrainCommunityAdapter communityAdapter;
+    private MyTrainWSAdapter workShopAdapter;
     private SlidingMenu menu;
     private ImageView iv_userIco;   //侧滑菜单用户头像
     private TextView tv_userName;   //侧滑菜单用户名
@@ -162,49 +168,43 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     @Override
     public void initView() {
-        menu = new SlidingMenu(this);
+        context = this;
+        initMenu();
+        LinearLayoutManager courseLayoutManager = new LinearLayoutManager(context);
+        courseLayoutManager.setOrientation(FullyLinearLayoutManager.VERTICAL);
+        rv_course.setLayoutManager(courseLayoutManager);
+        LinearLayoutManager wsLayoutManager = new LinearLayoutManager(context);
+        wsLayoutManager.setOrientation(FullyLinearLayoutManager.VERTICAL);
+        rv_workshop.setLayoutManager(wsLayoutManager);
+        courseAdapter = new MyTrainCourseAdapter(context, courses);
+        rv_course.setAdapter(courseAdapter);
+        workShopAdapter = new MyTrainWSAdapter(context, workShops);
+        rv_workshop.setAdapter(workShopAdapter);
+        registRxBus();  //订阅事件
+        getVersion();
+    }
+
+    private void initMenu() {
+        menu = new SlidingMenu(context);
         menu.setMode(SlidingMenu.LEFT);
         // 设置触摸屏幕的模式
         menu.setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
-
         menu.setShadowWidthRes(R.dimen.shadow_width);
         // 设置滑动菜单视图的宽度
         menu.setBehindOffsetRes(R.dimen.slidingmenu_offset);
         // 设置渐入渐出效果的值
         menu.setFadeDegree(0.35f);
-
-        menu.attachToActivity(this, SlidingMenu.SLIDING_CONTENT);
+        menu.attachToActivity(context, SlidingMenu.SLIDING_CONTENT);
         View menuView = LayoutInflater.from(context).inflate(R.layout.app_homepage_menu, null);
         initMenuView(menuView);
         menu.setMenu(menuView);
-        myCourseListView.setNestedScrollingEnabled(false);
-        mWorkShopLV.setNestedScrollingEnabled(false);
-        mCommuityLV.setNestedScrollingEnabled(false);
-        FullyLinearLayoutManager courseLayoutManager = new FullyLinearLayoutManager(context);
-        courseLayoutManager.setOrientation(FullyLinearLayoutManager.VERTICAL);
-        myCourseListView.setLayoutManager(courseLayoutManager);
-        myCourseListView.setNestedScrollingEnabled(false);
-        FullyLinearLayoutManager workShopLayoutManager = new FullyLinearLayoutManager(context);
-        workShopLayoutManager.setOrientation(FullyLinearLayoutManager.VERTICAL);
-        mWorkShopLV.setLayoutManager(workShopLayoutManager);
-        FullyLinearLayoutManager communityLayoutManager = new FullyLinearLayoutManager(context);
-        communityLayoutManager.setOrientation(FullyLinearLayoutManager.VERTICAL);
-        mCommuityLV.setLayoutManager(communityLayoutManager);
-        courseAdapter = new MyTrainCourseListAdapter(context, courses);
-        myCourseListView.setAdapter(courseAdapter);
-        workShopAdapter = new MyTrainWorkShopListAdapter(context, workShops);
-        mWorkShopLV.setAdapter(workShopAdapter);
-        communityAdapter = new MyTrainCommunityAdapter(context, communitys);
-        mCommuityLV.setAdapter(communityAdapter);
-        registRxBus();  //订阅事件
-        getVersion();
     }
 
     private void initMenuView(View menuView) {
         View ll_userInfo = getView(menuView, R.id.ll_userInfo);
         ll_userInfo.setOnClickListener(context);
         iv_userIco = getView(menuView, R.id.iv_userIco);
-        GlideImgManager.loadCircleImage(context, getAvatar(), R.drawable.user_default,
+        GlideImgManager.loadCircleImage(context.getApplicationContext(), getAvatar(), R.drawable.user_default,
                 R.drawable.user_default, iv_userIco);
         tv_userName = getView(menuView, R.id.tv_userName);
         tv_deptName = getView(menuView, R.id.tv_deptName);
@@ -292,7 +292,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     trainingTime = response.getResponseData().get(0).getmTrainingTime();
                     getUserTrainInfo(trainId);
                 } else {
-                    empty_train.setVisibility(View.VISIBLE);
+                    ll_emptyTrain.setVisibility(View.VISIBLE);
                 }
             }
         }));
@@ -314,7 +314,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 public void onBefore(Request request) {
                     loadingView.setVisibility(View.VISIBLE);
                     loadFailView.setVisibility(View.GONE);
-                    info_content.setVisibility(View.GONE);
+                    ll_content.setVisibility(View.GONE);
                 }
 
                 @Override
@@ -338,7 +338,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     private void updateUI(MobileUserTrainInfoResult response) {
-        info_content.setVisibility(View.VISIBLE);
+        ll_content.setVisibility(View.VISIBLE);
         if (response != null && response.getResponseData() != null && response.getResponseData().getTrainResult() != null) {
             updateTrainInfoUI(response.getResponseData().getTrainResult());
         }
@@ -404,17 +404,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
         if (courses.size() > 0) {
             courseAdapter.notifyDataSetChanged();
-            myCourseListView.setVisibility(View.VISIBLE);
-            myCourseListView.setFocusable(false);
-            empty_course.setVisibility(View.GONE);
+            rv_course.setVisibility(View.VISIBLE);
+            ll_emptyCourse.setVisibility(View.GONE);
             if (isNoLimit) {
                 ll_selectCourse.setVisibility(View.VISIBLE);
             } else {
                 ll_selectCourse.setVisibility(View.GONE);
             }
         } else {
-            myCourseListView.setVisibility(View.GONE);
-            empty_course.setVisibility(View.VISIBLE);
+            rv_course.setVisibility(View.GONE);
+            ll_emptyCourse.setVisibility(View.VISIBLE);
             if (isSelf) {
                 bt_selectCourse.setVisibility(View.VISIBLE);
             } else {
@@ -429,12 +428,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             workShops.clear();
             workShops.addAll(myTrainWorkShopResults);
             workShopAdapter.notifyDataSetChanged();
-            mWorkShopLV.setVisibility(View.VISIBLE);
-            mWorkShopLV.setFocusable(false);
-            empty_workshop.setVisibility(View.GONE);
+            rv_workshop.setVisibility(View.VISIBLE);
+            ll_emptyWS.setVisibility(View.GONE);
         } else {
-            mWorkShopLV.setVisibility(View.GONE);
-            empty_workshop.setVisibility(View.VISIBLE);
+            rv_workshop.setVisibility(View.GONE);
+            ll_emptyWS.setVisibility(View.VISIBLE);
             if (canCreateWS) {
                 tv_wsConfig.setText("暂未创建个人工作坊");
                 bt_createWs.setVisibility(View.VISIBLE);
@@ -445,15 +443,34 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
     }
 
-    private void updateCommunityListUI(MyTrainCommunityResult myTrainCommunityResult) {
+    private void updateCommunityListUI(MyTrainCommunityResult cmts) {
         if (showCommuity) {
-            ll_CommunityLayout.setVisibility(View.VISIBLE);
-            communitys.clear();
-            communitys.add(myTrainCommunityResult);
-            mCommuityLV.setFocusable(false);
-            communityAdapter.notifyDataSetChanged();
+            ll_cmtsLayout.setVisibility(View.VISIBLE);
+            setCmtsLayout(cmts);
         } else {
-            ll_CommunityLayout.setVisibility(View.GONE);
+            ll_cmtsLayout.setVisibility(View.GONE);
+        }
+    }
+
+    private void setCmtsLayout(MyTrainCommunityResult cmts) {
+        int width = ScreenUtils.getScreenWidth(context) / 3 - 20;
+        int height = width / 3 * 2;
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                width, height);
+        iv_cmts.setLayoutParams(params);
+        iv_cmts.setImageResource(R.drawable.app_default);
+        if (cmts.getmCommunityRelation() != null && cmts.getmCommunityRelation().getTimePeriod() != null) {
+            tv_cmtsPeriod.setText(TimeUtil.getSlashDate(cmts.getmCommunityRelation().getTimePeriod().getStartTime())
+                    + "至" + TimeUtil.getSlashDate(cmts.getmCommunityRelation().getTimePeriod().getEndTime()));
+        } else {
+            tv_cmtsPeriod.setText("时间未定");
+        }
+        if (cmts.getmCommunityRelation() != null) {
+            tv_cmtsStudyHour.setText(cmts.getmCommunityRelation().getStudyHours() + "学时");
+            tv_cmtsScore.setText("获得" + cmts.getScore() + " / " + cmts.getmCommunityRelation().getScore() + "积分");
+        } else {
+            tv_cmtsStudyHour.setText("0学时");
+            tv_cmtsScore.setText("获得" + cmts.getScore() + " / " + 0 + "积分");
         }
     }
 
@@ -462,15 +479,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         iv_msg.setOnClickListener(context);
         toggle.setOnClickListener(context);
         tv_createWs.setOnClickListener(context);
-        commuity_learn.setOnClickListener(context);
+        tv_cmtsLearn.setOnClickListener(context);
         iv_scan.setOnClickListener(context);
-        rl_myTrain.setOnClickListener(context);
+        tv_myTrain.setOnClickListener(context);
         ll_course.setOnClickListener(context);
         ll_workshop.setOnClickListener(context);
         ll_community.setOnClickListener(context);
         ll_selectCourse.setOnClickListener(context);
         bt_selectCourse.setOnClickListener(context);
         bt_createWs.setOnClickListener(context);
+        ll_cmts.setOnClickListener(context);
         loadFailView.setOnRetryListener(new LoadFailView.OnRetryListener() {
             @Override
             public void onRetry(View v) {
@@ -530,16 +548,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 }
             }
         });
-        communityAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(BaseRecyclerAdapter adapter, BaseRecyclerAdapter.RecyclerHolder holder, View view, int position) {
-                startActivity(new Intent(context, CmtsMainActivity.class));
-            }
-        });
     }
 
     private void showDialog(String state) {
-        MaterialDialog tipDialog = new MaterialDialog(context);
+        MaterialDialog dialog = new MaterialDialog(context);
         String message;
         if (state != null && state.equals("未开始"))
             message = "课程尚未开放";
@@ -549,11 +561,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             message = "您的选课审核不通过";
         else
             message = "课程尚未开放";
-        tipDialog.setTitle("温馨提示");
-        tipDialog.setMessage(message);
-        tipDialog.setPositiveTextColor(ContextCompat.getColor(context, R.color.defaultColor));
-        tipDialog.setPositiveButton("我知道了", null);
-        tipDialog.show();
+        dialog.setTitle("温馨提示");
+        dialog.setMessage(message);
+        dialog.setPositiveTextColor(ContextCompat.getColor(context, R.color.defaultColor));
+        dialog.setPositiveButton("我知道了", null);
+        dialog.show();
     }
 
     private long mExitTime = 0;
@@ -608,7 +620,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 intent.putExtra("trainId", trainId);
                 startActivityForResult(intent, CREATE_WS);
                 break;
-            case R.id.commuity_learn:
+            case R.id.tv_cmtsLearn:
                 startActivity(new Intent(context, CmtsMainActivity.class));
                 break;
             case R.id.ll_selectCourse:
@@ -625,17 +637,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 intent.putExtra("isNoLimit", isNoLimit);
                 startActivity(intent);
                 break;
-            case R.id.rl_myTrain:
+            case R.id.tv_myTrain:
                 setPopupView(tv_myTrain, myTrains);
                 break;
             case R.id.ll_course:
-                scrollToPosition(mCourseLayout);
+                scrollToPosition(ll_courseLayout);
                 break;
             case R.id.ll_workshop:
-                scrollToPosition(mWorkShopLayout);
+                scrollToPosition(tv_workshop);
                 break;
             case R.id.ll_community:
-                scrollToPosition(ll_CommunityLayout);
+                scrollToPosition(ll_cmtsLayout);
+                break;
+            case R.id.ll_cmts:
+                startActivity(new Intent(context, CmtsMainActivity.class));
                 break;
             case R.id.ll_userInfo:  //侧滑菜单个人信息
                 startActivity(new Intent(context, AppUserInfoActivity.class));
@@ -817,7 +832,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     public void obBusEvent(MessageEvent event) {
         if (event.action.equals(Action.CHANGE_USER_ICO) && event.obj != null && event.obj instanceof String) {
             String avatar = (String) event.obj;
-            GlideImgManager.loadCircleImage(context, avatar, R.drawable.user_default, R.drawable.user_default, iv_userIco);
+            GlideImgManager.loadCircleImage(context.getApplicationContext(), avatar, R.drawable.user_default, R.drawable.user_default, iv_userIco);
         } else if (event.action.equals(Action.CHANGE_USER_NAME) && event.obj != null && event.obj instanceof String) {
             String realName = (String) event.obj;
             tv_userName.setText(realName);
@@ -891,7 +906,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         stopService(new Intent(context, VersionUpdateService.class));
+        super.onDestroy();
     }
 }
