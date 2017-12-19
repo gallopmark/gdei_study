@@ -56,10 +56,14 @@ public class MCourseRegister {
 
     @Override
     public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
         if (this == obj)
             return true;
-        if (obj.getClass() == MCourseRegister.class)
-            return ((MCourseRegister) obj).id.equals(this.id);
+        if (obj instanceof MCourseRegister) {
+            MCourseRegister entity = (MCourseRegister) obj;
+            return entity.id.equals(this.id);
+        }
         return false;
     }
 }

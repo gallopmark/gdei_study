@@ -1,10 +1,9 @@
 package com.haoyu.app.adapter;
 
 import android.content.Context;
-import android.support.v4.util.ArrayMap;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -13,10 +12,10 @@ import com.haoyu.app.basehelper.BaseArrayRecyclerAdapter;
 import com.haoyu.app.entity.CourseMobileEntity;
 import com.haoyu.app.entity.MCourseRegister;
 import com.haoyu.app.gdei.student.R;
-import com.haoyu.app.swipe.SwipeMenuLayout;
 import com.haoyu.app.imageloader.GlideImgManager;
 import com.haoyu.app.utils.ScreenUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,68 +28,31 @@ public class CourseRegistStateAdapter extends BaseArrayRecyclerAdapter<MCourseRe
     private Context context;
     private int imageWidth;
     private int imageHeight;
-    private boolean visiable;
-    private boolean swipeEnable = true;
-    private ArrayMap<Integer, Boolean> isSelected = new ArrayMap<>();
-    private CancelCallBack callBack;
+    private boolean isEdit;
+    private List<MCourseRegister> mSelects = new ArrayList<>();
+    private OnItemSelectListener onItemSelectListener;
 
     public CourseRegistStateAdapter(Context context, List<MCourseRegister> mDatas) {
         super(mDatas);
         this.context = context;
         imageWidth = ScreenUtils.getScreenWidth(context) / 5 * 2 - 20;
         imageHeight = imageWidth / 3 * 2;
-        init();
     }
 
-    private void init() {
-        for (int i = 0; i < mDatas.size(); i++) {
-            isSelected.put(i, false);
-        }
-    }
-
-    public void addAll(List<MCourseRegister> mDatas) {
-        this.mDatas.addAll(mDatas);
-        notifyDataSetChanged();
-        init();
-    }
-
-    public void selectAll() {
-        for (Integer i : isSelected.keySet()) {
-            isSelected.put(i, true);
-        }
+    public void setEdit(boolean edit) {
+        isEdit = edit;
         notifyDataSetChanged();
     }
 
-    public void clear() {
-        for (Integer i : isSelected.keySet()) {
-            isSelected.put(i, false);
-        }
-        swipeEnable = true;
-        visiable = true;
+    public void selecetAll() {
+        mSelects.clear();
+        mSelects.addAll(mDatas);
         notifyDataSetChanged();
     }
 
-    public void cancel(){
-        for (Integer i : isSelected.keySet()) {
-            isSelected.put(i, false);
-        }
-        swipeEnable = true;
-        visiable = false;
+    public void cancelAll() {
+        mSelects.clear();
         notifyDataSetChanged();
-    }
-
-    public void setCancelCallBack(CancelCallBack callBack) {
-        this.callBack = callBack;
-    }
-
-    public void setEdit() {
-        visiable = true;
-        swipeEnable = false;
-        notifyDataSetChanged();
-    }
-
-    public ArrayMap<Integer, Boolean> getIsSelected() {
-        return isSelected;
     }
 
     @Override
@@ -99,101 +61,87 @@ public class CourseRegistStateAdapter extends BaseArrayRecyclerAdapter<MCourseRe
     }
 
     @Override
-    public void onBindHoder(RecyclerHolder holder, final MCourseRegister mCourseRegister, final int position) {
-        final SwipeMenuLayout swipeLayout = holder.obtainView(R.id.swipeLayout);
-        View contentView = holder.obtainView(R.id.contentView);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                imageWidth, imageHeight);
-        final CheckBox cb_select = holder.obtainView(R.id.cb_select);
-        ImageView course_img = holder.obtainView(R.id.course_img);
-        TextView course_title = holder.obtainView(R.id.course_title);
-        TextView course_type = holder.obtainView(R.id.course_type);
-        TextView course_period = holder.obtainView(R.id.course_period);
-        TextView course_enroll = holder.obtainView(R.id.course_enroll);
-        Button bt_cancel = holder.obtainView(R.id.bt_cancel);
-        course_img.setLayoutParams(params);
-        swipeLayout.setIos(true);
-        swipeLayout.setSwipeEnable(swipeEnable);
-        if (visiable) {
-            cb_select.setVisibility(View.VISIBLE);
+    public void onBindHoder(RecyclerHolder holder, final MCourseRegister entity, final int position) {
+        final CheckBox checkBox = holder.obtainView(R.id.checkBox);
+        ImageView iv_img = holder.obtainView(R.id.iv_img);
+        TextView tv_title = holder.obtainView(R.id.tv_title);
+        TextView tv_period = holder.obtainView(R.id.tv_period);
+        TextView tv_enroll = holder.obtainView(R.id.tv_enroll);
+        TextView tv_type = holder.obtainView(R.id.tv_type);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(imageWidth, imageHeight);
+        iv_img.setLayoutParams(params);
+        if (isEdit) {
+            checkBox.setVisibility(View.VISIBLE);
         } else {
-            cb_select.setVisibility(View.GONE);
+            checkBox.setVisibility(View.GONE);
         }
-        cb_select.setChecked(isSelected.get(position));
-        CourseMobileEntity entity = mCourseRegister.getmCourse();
-        if (entity != null && entity.getImage() != null && entity.getImage().length() > 0) {
-            GlideImgManager.loadImage(context, entity.getImage(), R.drawable.app_default, R.drawable.app_default, course_img);
+        CourseMobileEntity course = entity.getmCourse();
+        if (course != null && course.getImage() != null && course.getImage().length() > 0) {
+            GlideImgManager.loadImage(context, course.getImage(), R.drawable.app_default, R.drawable.app_default, iv_img);
         } else {
-            course_img.setImageResource(R.drawable.app_default);
+            iv_img.setImageResource(R.drawable.app_default);
         }
-        if (entity != null && entity.getTitle() != null) {
-            course_title.setText(entity.getTitle());
+        if (course != null && course.getTitle() != null) {
+            tv_title.setText(course.getTitle());
         } else {
-            course_title.setText("无标题");
+            tv_title.setText("");
         }
-        if (entity != null && entity.getType() != null) {
-            course_type.setText(entity.getType());
+        if (course != null && course.getType() != null) {
+            tv_type.setVisibility(View.VISIBLE);
+            tv_type.setText(course.getType());
         } else {
-            course_type.setText("未知类型");
+            tv_type.setVisibility(View.GONE);
         }
-        if (entity != null) {
-            course_period.setText(String.valueOf(entity.getStudyHours()) + "学时");
+        if (course != null) {
+            tv_period.setVisibility(View.VISIBLE);
+            tv_period.setText(String.valueOf(course.getStudyHours()) + "学时");
         } else {
-            course_period.setText("未知学时");
+            tv_period.setVisibility(View.GONE);
         }
-        if (entity != null) {
-            course_enroll.setText(entity.getRegisterNum() + "人报读");
+        if (course != null) {
+            tv_enroll.setText(course.getRegisterNum() + "人报读");
         } else {
-            course_enroll.setText("0人报读");
+            tv_enroll.setText("0人报读");
         }
-        View.OnClickListener listener = new View.OnClickListener() {
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                switch (view.getId()) {
-                    case R.id.contentView:
-                        swipeLayout.smoothClose();
-                        if (cb_select.isChecked())
-                            cb_select.setChecked(false);
-                        else
-                            cb_select.setChecked(true);
-                        setChecked(position, cb_select.isChecked());
-                        break;
-                    case R.id.cb_select:
-                        setChecked(position, cb_select.isChecked());
-                        break;
-                    case R.id.bt_cancel:
-                        swipeLayout.smoothClose();
-                        if (callBack != null) {
-                            callBack.cancel(mCourseRegister, position);
-                        }
-                        break;
+                if (isEdit) {
+                    if (checkBox.isChecked()) {
+                        checkBox.setChecked(false);
+                    } else {
+                        checkBox.setChecked(true);
+                    }
                 }
             }
-        };
-        contentView.setOnClickListener(listener);
-        cb_select.setOnClickListener(listener);
-        bt_cancel.setOnClickListener(listener);
+        });
+        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                if (isChecked) {
+                    if (!mSelects.contains(entity)) {
+                        mSelects.add(entity);
+                    }
+                } else {
+                    mSelects.remove(entity);
+                }
+                if (onItemSelectListener != null) {
+                    onItemSelectListener.onItemSelect(mSelects);
+                }
+            }
+        });
+        checkBox.setChecked(mSelects.contains(entity));
     }
 
-    private void setChecked(int position, boolean isChecked) {
-        isSelected.put(position, isChecked);
-        if (selectListener != null) {
-            selectListener.onSelect(isSelected);
-        }
-        notifyDataSetChanged();
+    public interface OnItemSelectListener {
+        void onItemSelect(List<MCourseRegister> mSelects);
     }
 
-    private OnSelectListener selectListener;
-
-    public void setOnSelectListener(OnSelectListener selectListener) {
-        this.selectListener = selectListener;
+    public void setOnItemSelectListener(OnItemSelectListener onItemSelectListener) {
+        this.onItemSelectListener = onItemSelectListener;
     }
 
-    public interface OnSelectListener {
-        void onSelect(ArrayMap<Integer, Boolean> isSelected);
-    }
-
-    public interface CancelCallBack {
-        void cancel(MCourseRegister mCourseRegister, int position);
+    public List<MCourseRegister> getmSelects() {
+        return mSelects;
     }
 }

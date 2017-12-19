@@ -839,7 +839,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         } else if (event.action.equals(Action.CHANGE_DEPT_NAME) && event.obj != null && event.obj instanceof String) {
             String deptName = (String) event.obj;
             tv_deptName.setText(deptName);
-        } else if (event.action.equals(Action.SUBMIT_CHOOSE_COURSE)) {
+        } else if (event.action.equals(Action.CHOOSE_COURSE_STATE)) {
             mInfoMap.remove(trainId);
             getUserTrainInfo(trainId);
         }

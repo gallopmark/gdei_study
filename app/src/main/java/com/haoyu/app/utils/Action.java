@@ -104,6 +104,6 @@ public class Action {
     public static String CHANGE_DEPT_NAME = "CHANGE_DEPT_NAME";
 
     /*选课中心*/
-    public static String SUBMIT_CHOOSE_COURSE = "SUBMIT_CHOOSE_COURSE";   //提交选课
+    public static String CHOOSE_COURSE_STATE = "CHOOSE_COURSE_STATE";   //提交选课、取消选课
     public static String CREATE_WORKSHOP = "CREATE_WORKSHOP";  //创建工作坊
 }

@@ -5,13 +5,54 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.haoyu.app.view.AppToolBar
-        android:id="@+id/toolBar"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:right_button_text="编辑"
-        app:show_right_button="false"
-        app:title_text="已选课程" />
+        android:layout_height="wrap_content">
+
+        <com.haoyu.app.view.AppToolBar
+            android:id="@+id/toolBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:right_button_text="编辑"
+            app:show_right_button="false"
+            app:title_text="已选课程" />
+
+        <RelativeLayout
+            android:id="@+id/rl_edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/transparent"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tv_select"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:paddingBottom="@dimen/title_padding"
+                android:paddingLeft="@dimen/margin_size_12"
+                android:paddingRight="@dimen/margin_size_12"
+                android:paddingTop="@dimen/title_padding"
+                android:text="全不选"
+                android:textColor="@color/white"
+                android:textSize="@dimen/font_size_17" />
+
+            <TextView
+                android:id="@+id/tv_cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:gravity="center"
+                android:paddingBottom="@dimen/title_padding"
+                android:paddingLeft="@dimen/margin_size_12"
+                android:paddingRight="@dimen/margin_size_12"
+                android:paddingTop="@dimen/title_padding"
+                android:text="取消"
+                android:textColor="@color/white"
+                android:textSize="@dimen/font_size_17" />
+        </RelativeLayout>
+    </FrameLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -35,12 +76,11 @@
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:paddingBottom="@dimen/margin_size_60"
+            android:layout_above="@+id/fl_bottom"
             android:visibility="gone" />
 
         <TextView
-            android:id="@+id/emptyData"
+            android:id="@+id/tv_empty"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
@@ -52,100 +92,75 @@
             android:textSize="@dimen/font_size_16"
             android:visibility="gone" />
 
-        <LinearLayout
-            android:id="@+id/layout_opreate"
+        <FrameLayout
+            android:id="@+id/fl_bottom"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/margin_size_60"
+            android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:descendantFocusability="blocksDescendants"
-            android:gravity="right"
-            android:orientation="horizontal"
-            android:visibility="visible">
-
-            <LinearLayout
-                android:id="@+id/ll_selectAll"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center|right"
-                android:layout_marginLeft="@dimen/margin_size_16"
-                android:layout_marginRight="@dimen/margin_size_16"
-                android:padding="@dimen/margin_size_10">
-
-                <com.haoyu.app.view.AppCheckBox
-                    android:id="@+id/cb_select"
-                    android:layout_width="@dimen/margin_size_20"
-                    android:layout_height="@dimen/margin_size_20"
-                    android:layout_gravity="center"
-                    app:color_checked="@color/defaultColor"
-                    app:color_tick="@color/white"
-                    app:color_unchecked="@color/white"
-                    app:duration="100"
-                    app:stroke_width="@dimen/margin_size_1" />
-
-                <TextView
-                    android:id="@+id/tv_select"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginLeft="@dimen/margin_size_6"
-                    android:text="全选"
-                    android:textColor="@color/defaultColor"
-                    android:textSize="@dimen/font_size_16" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/tv_cancel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginLeft="@dimen/margin_size_16"
-                android:layout_marginRight="@dimen/margin_size_16"
-                android:background="@drawable/app_button_selector"
-                android:paddingBottom="@dimen/margin_size_10"
-                android:paddingLeft="@dimen/margin_size_16"
-                android:paddingRight="@dimen/margin_size_16"
-                android:paddingTop="@dimen/margin_size_10"
-                android:text="取消选课"
-                android:textColor="@color/white"
-                android:textSize="@dimen/font_size_14"
-                android:visibility="gone" />
-        </LinearLayout>
-
-        <RelativeLayout
-            android:id="@+id/bottomView"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/margin_size_60"
-            android:layout_alignParentBottom="true"
-            android:background="#E6D7D7D7"
-            android:paddingLeft="@dimen/margin_size_12"
-            android:paddingRight="@dimen/margin_size_12"
             android:visibility="gone">
 
-            <TextView
-                android:id="@+id/tv_selectTips"
+            <LinearLayout
+                android:id="@+id/ll_tips"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_toLeftOf="@+id/bt_submit"
-                android:text="要求52学时，已选2门共12学时"
-                android:textColor="@color/black"
-                android:textSize="@dimen/font_size_16" />
+                android:background="@color/spaceColor"
+                android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/bt_submit"
-                android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/tv_tips"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="@dimen/margin_size_12"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/font_size_16" />
+
+                <Button
+                    android:id="@+id/bt_submit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:background="@color/defaultColor"
+                    android:gravity="center"
+                    android:paddingLeft="@dimen/margin_size_16"
+                    android:paddingRight="@dimen/margin_size_16"
+                    android:textSize="@dimen/font_size_16"
+                    android:text="确认提交"
+                    android:textColor="@color/white"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_opreate"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:background="@drawable/app_button_selector"
-                android:gravity="center"
-                android:paddingBottom="@dimen/margin_size_10"
-                android:paddingLeft="@dimen/margin_size_12"
-                android:paddingRight="@dimen/margin_size_12"
-                android:paddingTop="@dimen/margin_size_10"
-                android:text="确认提交"
-                android:textColor="@color/white"
-                android:visibility="gone" />
-        </RelativeLayout>
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/tv_selected"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@color/spaceColor"
+                    android:ellipsize="end"
+                    android:gravity="center|left"
+                    android:padding="@dimen/margin_size_12"
+                    android:singleLine="true"
+                    android:text="已选(0)"
+                    android:textSize="@dimen/font_size_16" />
+
+                <TextView
+                    android:id="@+id/tv_unregister"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:background="@color/defaultColor"
+                    android:gravity="center"
+                    android:paddingLeft="@dimen/margin_size_20"
+                    android:paddingRight="@dimen/margin_size_20"
+                    android:text="取消选课"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/font_size_16" />
+            </LinearLayout>
+        </FrameLayout>
     </RelativeLayout>
 </LinearLayout>

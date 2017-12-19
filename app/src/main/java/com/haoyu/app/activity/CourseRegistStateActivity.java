@@ -2,18 +2,22 @@ package com.haoyu.app.activity;
 
 import android.app.AlertDialog;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.util.ArrayMap;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.haoyu.app.adapter.CourseRegistStateAdapter;
 import com.haoyu.app.base.BaseActivity;
 import com.haoyu.app.base.BaseResponseResult;
+import com.haoyu.app.basehelper.BaseRecyclerAdapter;
 import com.haoyu.app.dialog.MaterialDialog;
 import com.haoyu.app.entity.CourseRegistStateResultBase;
 import com.haoyu.app.entity.MCourseRegister;
@@ -24,7 +28,6 @@ import com.haoyu.app.rxBus.RxBus;
 import com.haoyu.app.utils.Action;
 import com.haoyu.app.utils.Constants;
 import com.haoyu.app.utils.OkHttpClientManager;
-import com.haoyu.app.view.AppCheckBox;
 import com.haoyu.app.view.AppToolBar;
 import com.haoyu.app.view.LoadFailView;
 import com.haoyu.app.view.LoadingView;
@@ -35,6 +38,11 @@ import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
+import io.reactivex.Flowable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.Request;
 
 /**
@@ -43,40 +51,44 @@ import okhttp3.Request;
  * 作者:马飞奔 Administrator
  */
 public class CourseRegistStateActivity extends BaseActivity implements View.OnClickListener {
-    private CourseRegistStateActivity context = this;
+    private CourseRegistStateActivity context;
     @BindView(R.id.toolBar)
     AppToolBar toolBar;
+    @BindView(R.id.rl_edit)
+    RelativeLayout rl_edit;
+    @BindView(R.id.tv_select)
+    TextView tv_select;
+    @BindView(R.id.tv_cancel)
+    TextView tv_cancel;
     @BindView(R.id.loadingView)
     LoadingView loadingView;
     @BindView(R.id.loadFailView)
     LoadFailView loadFailView;
-    @BindView(R.id.bottomView)
-    RelativeLayout bottomView;
     @BindView(R.id.recyclerView)
     RecyclerView recyclerView;
-    @BindView(R.id.emptyData)
-    TextView emptyData;
-    @BindView(R.id.tv_selectTips)
-    TextView tv_selectTips;
+    @BindView(R.id.tv_empty)
+    TextView tv_empty;
+    @BindView(R.id.fl_bottom)
+    FrameLayout fl_bottom;
+    @BindView(R.id.ll_tips)
+    LinearLayout ll_tips;
+    @BindView(R.id.tv_tips)
+    TextView tv_tips;
     @BindView(R.id.bt_submit)
     Button bt_submit;
     @BindView(R.id.layout_opreate)
     LinearLayout layout_opreate;
-    @BindView(R.id.ll_selectAll)
-    LinearLayout ll_selectAll;
-    @BindView(R.id.cb_select)
-    AppCheckBox cb_select;
-    @BindView(R.id.tv_select)
-    TextView tv_select;
-    @BindView(R.id.tv_cancel)
-    TextView tv_cancel;  //取消选课
+    @BindView(R.id.tv_selected)
+    TextView tv_selected;
+    @BindView(R.id.tv_unregister)
+    TextView tv_unregister;  //取消选课
     private String trainId;
     private boolean isNoLimit;
     private CourseRegistStateAdapter adapter;
     private List<MCourseRegister> mDatas = new ArrayList<>();
-    private int totalHours, registHours, registedCourseNum;
     private String trainRegisterId;   //培训报名id
-    private String selectAll = "全选", cancelAll = "反选", edit = "编辑", cancel = "取消";
+    private String text_edit = "编辑", text_selectAll = "全选", text_cancelAll = "全不选", text_selected = "已选", text_cancel = "取消";
+    private int selectType = 1;
 
     @Override
     public int setLayoutResID() {
@@ -85,6 +97,11 @@ public class CourseRegistStateActivity extends BaseActivity implements View.OnCl
 
     @Override
     public void initView() {
+        context = this;
+        setToolBar();
+        tv_select.setText(text_selectAll);
+        tv_cancel.setText(text_cancel);
+        tv_selected.setText(text_selected);
         trainId = getIntent().getStringExtra("trainId");
         isNoLimit = getIntent().getBooleanExtra("isNoLimit", false);
         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
@@ -94,11 +111,35 @@ public class CourseRegistStateActivity extends BaseActivity implements View.OnCl
         recyclerView.setAdapter(adapter);
     }
 
+    private void setToolBar() {
+        toolBar.setTitle_text("已选课程");
+        toolBar.setRight_button_text(text_edit);
+        toolBar.setShow_right_button(false);
+        toolBar.setOnTitleClickListener(new AppToolBar.TitleOnClickListener() {
+            @Override
+            public void onLeftClick(View view) {
+                finish();
+            }
+
+            @Override
+            public void onRightClick(View view) {
+                setEdit();
+            }
+        });
+    }
+
+    private void setEdit() {
+        toolBar.setShow_left_button(false);
+        toolBar.setShow_right_button(false);
+        adapter.setEdit(true);
+        rl_edit.setVisibility(View.VISIBLE);
+        ll_tips.setVisibility(View.GONE);
+        layout_opreate.setVisibility(View.VISIBLE);
+    }
+
     @Override
     public void initData() {
-        getRegistState();
         getCourseList();
-        getTrainState();
     }
 
     /*获取选课情况*/
@@ -108,12 +149,13 @@ public class CourseRegistStateActivity extends BaseActivity implements View.OnCl
 
             @Override
             public void onError(Request request, Exception e) {
+                onNetWorkError(context);
             }
 
             @Override
             public void onResponse(CourseRegistStateResultBase response) {
                 if (response != null && response.getResponseData() != null) {
-                    bottomView.setVisibility(View.VISIBLE);
+                    fl_bottom.setVisibility(View.VISIBLE);
                     updateUI(response.getResponseData());
                 }
             }
@@ -138,9 +180,14 @@ public class CourseRegistStateActivity extends BaseActivity implements View.OnCl
             @Override
             public void onResponse(BaseResponseResult<List<MCourseRegister>> response) {
                 loadingView.setVisibility(View.GONE);
-                if (response != null && response.getResponseData() != null) {
+                if (response != null && response.getResponseData() != null && response.getResponseData().size() > 0) {
                     updateUI(response.getResponseData());
+                } else {
+                    recyclerView.setVisibility(View.GONE);
+                    tv_empty.setVisibility(View.VISIBLE);
                 }
+                getRegistState();
+                getTrainState();
             }
         }));
     }
@@ -151,7 +198,7 @@ public class CourseRegistStateActivity extends BaseActivity implements View.OnCl
         addSubscription(OkHttpClientManager.getAsyn(context, url, new OkHttpClientManager.ResultCallback<BaseResponseResult<MTrainRegister>>() {
             @Override
             public void onError(Request request, Exception e) {
-
+                onNetWorkError(context);
             }
 
             @Override
@@ -163,72 +210,79 @@ public class CourseRegistStateActivity extends BaseActivity implements View.OnCl
         }));
     }
 
-    private void updateUI(CourseRegistStateResultBase.CourseRegistStateData responseData) {
-        registedCourseNum = responseData.getRegistedCourseNum();
-        totalHours = responseData.getRequireStudyHours();
-        registHours = responseData.getRegistedStudyHours();
-        tv_selectTips.setText("要求" + totalHours + "学时"
-                + "，已选" + registedCourseNum + "门课共" + registHours + "学时");
+    private void updateUI(CourseRegistStateResultBase.CourseRegistStateData mData) {
+        if (mDatas.size() > 0) {
+            int registedCourseNum = mData.getRegistedCourseNum();
+            int totalHours = mData.getRequireStudyHours();
+            int registHours = mData.getRegistedStudyHours();
+            String text;
+            SpannableString ss;
+            if (isNoLimit) {
+                text = "已选" + registedCourseNum + "门课共" + registHours + "学时";
+                ss = new SpannableString(text);
+                int start = text.indexOf("选") + 1;
+                int end = text.indexOf("门");
+                int color = ContextCompat.getColor(context, R.color.darkorange);
+                ss.setSpan(new ForegroundColorSpan(color), start, end, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE);
+                start = text.indexOf("共") + 1;
+                end = text.lastIndexOf("学");
+                ss.setSpan(new ForegroundColorSpan(color), start, end, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE);
+            } else {
+                text = "要求" + totalHours + "学时" + "，已选" + registedCourseNum + "门课共" + registHours + "学时";
+                ss = new SpannableString(text);
+                int start = text.indexOf("求") + 1;
+                int end = text.indexOf("，") - 2;
+                int color = ContextCompat.getColor(context, R.color.darkorange);
+                ss.setSpan(new ForegroundColorSpan(color), start, end, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE);
+                start = text.indexOf("选") + 1;
+                end = text.indexOf("门");
+                ss.setSpan(new ForegroundColorSpan(color), start, end, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE);
+                start = text.indexOf("共") + 1;
+                end = text.lastIndexOf("学");
+                ss.setSpan(new ForegroundColorSpan(color), start, end, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+            tv_tips.setText(ss);
+        } else {
+            tv_tips.setText("暂时没有选课，请前往选课中心选课！");
+            bt_submit.setVisibility(View.GONE);
+        }
     }
 
-    private void updateUI(List<MCourseRegister> mDatas) {
-        if (mDatas.size() > 0) {
-            toolBar.setShow_right_button(true);
-            recyclerView.setVisibility(View.VISIBLE);
-            adapter.addAll(mDatas);
-        } else {
-            emptyData.setVisibility(View.VISIBLE);
-        }
+    private void updateUI(List<MCourseRegister> list) {
+        toolBar.setShow_right_button(true);
+        recyclerView.setVisibility(View.VISIBLE);
+        mDatas.addAll(list);
+        adapter.notifyDataSetChanged();
     }
 
     private void updateUI(MTrainRegister mTrainRegister) {
         trainRegisterId = mTrainRegister.getId();
-        bt_submit.setVisibility(View.VISIBLE);
+        if (mDatas.size() > 0) {
+            bt_submit.setVisibility(View.VISIBLE);
+        }
         if (mTrainRegister.getChooseCourseState() != null && mTrainRegister.getChooseCourseState().equals("submited")) {
             if (isNoLimit) {
                 bt_submit.setText("提交选课");
+                bt_submit.setBackgroundColor(ContextCompat.getColor(context, R.color.defaultColor));
                 bt_submit.setEnabled(true);
             } else {
                 bt_submit.setText("选课已提交");
                 bt_submit.setEnabled(false);
+                bt_submit.setBackgroundColor(ContextCompat.getColor(context, R.color.gray));
             }
         } else {
             bt_submit.setText("提交选课");
+            bt_submit.setEnabled(true);
+            bt_submit.setBackgroundColor(ContextCompat.getColor(context, R.color.defaultColor));
             bt_submit.setEnabled(true);
         }
     }
 
     @Override
     public void setListener() {
-        toolBar.setOnTitleClickListener(new AppToolBar.TitleOnClickListener() {
-            @Override
-            public void onLeftClick(View view) {
-                finish();
-            }
-
-            @Override
-            public void onRightClick(View view) {
-                if (isEdit) {
-                    toolBar.setRight_button_text(cancel);
-                    adapter.setEdit();
-                    isEdit = false;
-                    bottomView.setVisibility(View.GONE);
-                    layout_opreate.setVisibility(View.VISIBLE);
-                } else {
-                    toolBar.setRight_button_text(edit);
-                    adapter.cancel();
-                    isEdit = true;
-                    cb_select.setChecked(false);
-                    tv_select.setText(selectAll);
-                    tv_cancel.setVisibility(View.GONE);
-                    bottomView.setVisibility(View.VISIBLE);
-                    layout_opreate.setVisibility(View.GONE);
-                }
-            }
-        });
-        ll_selectAll.setOnClickListener(context);
-        cb_select.setOnClickListener(context);
+        tv_select.setOnClickListener(context);
         tv_cancel.setOnClickListener(context);
+        tv_unregister.setOnClickListener(context);
         bt_submit.setOnClickListener(context);
         loadFailView.setOnRetryListener(new LoadFailView.OnRetryListener() {
             @Override
@@ -236,164 +290,153 @@ public class CourseRegistStateActivity extends BaseActivity implements View.OnCl
                 getCourseList();
             }
         });
-        adapter.setCancelCallBack(new CourseRegistStateAdapter.CancelCallBack() {
+        adapter.setOnItemLongClickListener(new BaseRecyclerAdapter.OnItemLongClickListener() {
             @Override
-            public void cancel(MCourseRegister mCourseRegister, int position) {
-                unRegistCourse(mCourseRegister, position, false);
+            public void onItemLongClick(BaseRecyclerAdapter adapter, BaseRecyclerAdapter.RecyclerHolder holder, View view, int position) {
+                setEdit();
             }
         });
-        adapter.setOnSelectListener(new CourseRegistStateAdapter.OnSelectListener() {
+        adapter.setOnItemSelectListener(new CourseRegistStateAdapter.OnItemSelectListener() {
             @Override
-            public void onSelect(ArrayMap<Integer, Boolean> isSelected) {
-                boolean selected = false;
-                int select = 0;
-                for (Boolean isCheck : isSelected.values()) {
-                    if (isCheck) {
-                        select++;
-                        selected = true;
-                    }
-                }
-                if (!selected) {
-                    cb_select.setChecked(false);
-                    tv_select.setText(selectAll);
-                    tv_cancel.setVisibility(View.GONE);
+            public void onItemSelect(List<MCourseRegister> mSelects) {
+                if (mSelects.size() == mDatas.size()) {
+                    tv_select.setText(text_cancelAll);
+                    selectType = 2;
                 } else {
-                    tv_cancel.setVisibility(View.VISIBLE);
-                    if (select == isSelected.size()) {
-                        cb_select.setChecked(true);
-                        tv_select.setText(cancelAll);
-                    } else {
-                        cb_select.setChecked(false);
-                        tv_select.setText(selectAll);
-                    }
+                    tv_select.setText(text_selectAll);
+                    selectType = 1;
+                }
+                if (mSelects.size() > 0) {
+                    tv_selected.setText(text_selected + "(" + mSelects.size() + ")");
+                } else {
+                    tv_selected.setText(text_selected);
                 }
             }
         });
     }
-
-    private boolean isEdit = true;
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.ll_selectAll:
-                setCheckOpreate();
-                break;
-            case R.id.cb_select:
-                setCheckOpreate();
+            case R.id.tv_select:
+                if (selectType == 1) {
+                    adapter.selecetAll();
+                    tv_select.setText(text_cancelAll);
+                    selectType = 2;
+                } else {
+                    adapter.cancelAll();
+                    tv_select.setText(text_selectAll);
+                    selectType = 1;
+                }
                 break;
             case R.id.tv_cancel:
-                bottomView.setVisibility(View.VISIBLE);
-                layout_opreate.setVisibility(View.GONE);
-                ArrayMap<Integer, Boolean> isSelected = adapter.getIsSelected();
-                for (Integer position : isSelected.keySet()) {
-                    if (isSelected.get(position) && position < mDatas.size()) {
-                        unRegistCourse(mDatas.get(position), position, true);
-                    }
+                cancelEdit();
+                break;
+            case R.id.tv_unregister:
+                if (adapter.getmSelects().size() > 0) {
+                    MaterialDialog dialog = new MaterialDialog(context);
+                    dialog.setTitle("提示");
+                    dialog.setMessage("您确定取消选课吗？");
+                    dialog.setNegativeButton("确定", new MaterialDialog.ButtonClickListener() {
+                        @Override
+                        public void onClick(View v, AlertDialog dialog) {
+                            List<MCourseRegister> mSelects = adapter.getmSelects();
+                            unRegistCourses(mSelects);
+                        }
+                    });
+                    dialog.setNegativeButton("取消", null);
+                    dialog.show();
+                } else {
+                    showMaterialDialog("提示", "请先勾选课程");
                 }
                 break;
             case R.id.bt_submit:
-                String message;
-                boolean submit;
-                if (isNoLimit) {
-                    message = "提交选课信息后，不允许改课程或取消选课";
-                    submit = true;
-                } else if (registHours < totalHours) {
-                    message = "提交失败，选课学时未达标，请查看选课要求";
-                    submit = false;
-                } else {
-                    message = "提交选课信息后，不允许再次选课或取消选课";
-                    submit = true;
-                }
-                showSubmitDialog(message, submit);
+                showSubmitDialog();
                 break;
         }
     }
 
-    private void setCheckOpreate() {
-        if (cb_select.isChecked()) {
-            cb_select.setChecked(false);
-            tv_select.setText(selectAll);
-            adapter.clear();
-            tv_cancel.setVisibility(View.GONE);
+    private void cancelEdit() {
+        toolBar.setShow_left_button(true);
+        if (mDatas.size() == 0) {
+            toolBar.setShow_right_button(false);
         } else {
-            cb_select.setChecked(true);
-            tv_select.setText(cancelAll);
-            adapter.selectAll();
-            tv_cancel.setVisibility(View.VISIBLE);
+            toolBar.setShow_right_button(true);
         }
+        adapter.cancelAll();
+        adapter.setEdit(false);
+        rl_edit.setVisibility(View.GONE);
+        ll_tips.setVisibility(View.VISIBLE);
+        layout_opreate.setVisibility(View.GONE);
+    }
+
+    private void unRegistCourses(List<MCourseRegister> mSelects) {
+        showTipDialog();
+        addSubscription(Flowable.just(mSelects).map(new Function<List<MCourseRegister>, List<MCourseRegister>>() {
+            @Override
+            public List<MCourseRegister> apply(List<MCourseRegister> mSelects) {
+                return unRegistCourse(mSelects);
+            }
+        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Consumer<List<MCourseRegister>>() {
+            @Override
+            public void accept(List<MCourseRegister> list) throws Exception {
+                hideTipDialog();
+                MessageEvent ev = new MessageEvent();
+                ev.action = Action.CHOOSE_COURSE_STATE;
+                RxBus.getDefault().post(ev);
+                mDatas.removeAll(list);
+                adapter.notifyDataSetChanged();
+                if (mDatas.size() == 0) {
+                    cancelEdit();
+                    recyclerView.setVisibility(View.GONE);
+                    tv_empty.setVisibility(View.VISIBLE);
+                }
+                getRegistState();
+            }
+        }, new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) throws Exception {
+                hideTipDialog();
+                onNetWorkError(context);
+            }
+        }));
     }
 
     /*取消选课*/
-    private void unRegistCourse(final MCourseRegister mCourseRegister, final int position, final boolean isAll) {
-        String url = Constants.OUTRT_NET + "/unique_uid_" + getUserId() + "/m/course_register/delete/" + mCourseRegister.getId();
+    private List<MCourseRegister> unRegistCourse(List<MCourseRegister> mSelects) {
+        List<MCourseRegister> list = new ArrayList<>();
         Map<String, String> map = new HashMap<>();
         map.put("_method", "delete");
-        addSubscription(OkHttpClientManager.postAsyn(context, url, new OkHttpClientManager.ResultCallback<BaseResponseResult>() {
-            @Override
-            public void onBefore(Request request) {
-                if (!isAll) {
-                    showTipDialog();
+        for (int i = 0; i < mSelects.size(); i++) {
+            try {
+                MCourseRegister register = mSelects.get(i);
+                String registerId = register.getId();
+                String url = Constants.OUTRT_NET + "/unique_uid_" + getUserId() + "/m/course_register/delete/" + registerId;
+                String json = OkHttpClientManager.postAsString(context, url, map);
+                BaseResponseResult result = new Gson().fromJson(json, BaseResponseResult.class);
+                if (result != null && result.getResponseCode() != null && result.getResponseCode().equals("00")) {
+                    list.add(register);
                 }
+            } catch (Exception e) {
+                continue;
             }
-
-            @Override
-            public void onError(Request request, Exception e) {
-                hideTipDialog();
-            }
-
-            @Override
-            public void onResponse(BaseResponseResult response) {
-                hideTipDialog();
-                if (response != null && response.getResponseCode() != null && response.getResponseCode().equals("00")) {
-                    adapter.getIsSelected().put(position, false);
-                    mDatas.remove(mCourseRegister);
-                    adapter.notifyDataSetChanged();
-                    if (mCourseRegister.getmCourse() != null) {
-                        registHours -= mCourseRegister.getmCourse().getStudyHours();
-                    }
-                    registedCourseNum--;
-                    if (registedCourseNum < 0) {
-                        registedCourseNum = 0;
-                    }
-                    tv_selectTips.setText("要求" + totalHours + "学时"
-                            + "，已选" + registedCourseNum + "门课共" + registHours + "学时");
-                    if (mDatas.size() <= 0) {
-                        emptyData.setVisibility(View.VISIBLE);
-                        recyclerView.setVisibility(View.GONE);
-                        toolBar.setShow_right_button(false);
-                    }
-                }
-            }
-        }, map));
+        }
+        return list;
     }
 
-    private void showSubmitDialog(String message, boolean submit) {
+    private void showSubmitDialog() {
         MaterialDialog dialog = new MaterialDialog(context);
-        if (submit) {
-            dialog.setTitle("请慎重提交");
-        } else {
-            dialog.setTitle("提示");
-        }
-        dialog.setMessage(message);
+        dialog.setTitle("温馨提示");
+        dialog.setMessage("提交选课信息后，不允许改选课程或取消选课，请情重提交！");
         dialog.setPositiveTextColor(ContextCompat.getColor(context, R.color.defaultColor));
         dialog.setNegativeTextColor(ContextCompat.getColor(context, R.color.gray));
-        if (submit) {
-            dialog.setPositiveButton("确定提交", new MaterialDialog.ButtonClickListener() {
-                @Override
-                public void onClick(View v, AlertDialog dialog) {
-                    submitCourse();
-                }
-            });
-            dialog.setNegativeButton("取消", null);
-        } else {
-            dialog.setPositiveButton("我知道了", new MaterialDialog.ButtonClickListener() {
-                @Override
-                public void onClick(View v, AlertDialog dialog) {
-                    dialog.dismiss();
-                }
-            });
-        }
+        dialog.setPositiveButton("确定提交", new MaterialDialog.ButtonClickListener() {
+            @Override
+            public void onClick(View v, AlertDialog dialog) {
+                submitCourse();
+            }
+        });
+        dialog.setNegativeButton("取消", null);
         dialog.show();
     }
 
@@ -406,27 +449,27 @@ public class CourseRegistStateActivity extends BaseActivity implements View.OnCl
         addSubscription(OkHttpClientManager.postAsyn(context, url, new OkHttpClientManager.ResultCallback<BaseResponseResult>() {
             @Override
             public void onBefore(Request request) {
-                showLoadingDialog("正在提交");
+                showTipDialog();
             }
 
             @Override
             public void onError(Request request, Exception e) {
-                hideLoadingDialog();
+                hideTipDialog();
                 onNetWorkError(context);
             }
 
             @Override
             public void onResponse(BaseResponseResult response) {
-                hideLoadingDialog();
+                hideTipDialog();
                 if (response != null && response.getResponseCode() != null && response.getResponseCode().equals("00")) {
-                    if (!isNoLimit) {
-                        MessageEvent ev = new MessageEvent();
-                        ev.action = Action.SUBMIT_CHOOSE_COURSE;
-                        RxBus.getDefault().post(ev);
-                    }
+                    MessageEvent ev = new MessageEvent();
+                    ev.action = Action.CHOOSE_COURSE_STATE;
+                    RxBus.getDefault().post(ev);
                     finish();
                 } else if (response != null && response.getResponseCode() != null && response.getResponseCode().equals("03")) {
-                    showDialog();
+                    showMaterialDialog("温馨提示", "提交失败，选课学时未达标，请查看选课要求！");
+                } else if (response != null && response.getResponseCode() != null && response.getResponseCode().equals("01")) {
+                    showMaterialDialog("温馨提示", "您的选课已提交，请不要重复提交！");
                 } else {
                     toast(context, "提交失败，请稍后再试");
                 }
@@ -434,11 +477,4 @@ public class CourseRegistStateActivity extends BaseActivity implements View.OnCl
         }, map));
     }
 
-    private void showDialog() {
-        MaterialDialog dialog = new MaterialDialog(context);
-        dialog.setTitle("提示");
-        dialog.setMessage("提交失败，选课学时未达标，请查看选课要求");
-        dialog.setPositiveButton("我知道了", null);
-        dialog.show();
-    }
 }

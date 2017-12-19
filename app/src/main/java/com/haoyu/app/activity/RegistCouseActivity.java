@@ -26,8 +26,6 @@ import com.haoyu.app.entity.DictEntryResult;
 import com.haoyu.app.entity.Paginator;
 import com.haoyu.app.entity.RegistCourseListResult;
 import com.haoyu.app.gdei.student.R;
-import com.haoyu.app.rxBus.MessageEvent;
-import com.haoyu.app.utils.Action;
 import com.haoyu.app.utils.Constants;
 import com.haoyu.app.utils.OkHttpClientManager;
 import com.haoyu.app.view.AppToolBar;
@@ -97,7 +95,6 @@ public class RegistCouseActivity extends BaseActivity implements View.OnClickLis
         mAdapter = new RegistCourseAdapter(context, coursesList);
         xRecyclerView.setAdapter(mAdapter);
         xRecyclerView.setLoadingListener(context);
-        registRxBus();
     }
 
     public void initData() {
@@ -191,7 +188,7 @@ public class RegistCouseActivity extends BaseActivity implements View.OnClickLis
                 Intent intent = new Intent(context, CourseRegistStateActivity.class);
                 intent.putExtra("trainId", trainId);
                 intent.putExtra("isNoLimit", isNoLimit);
-                startActivity(intent);
+                startActivityForResult(intent, 1);
             }
         });
         tv_subject.setOnClickListener(context);
@@ -496,9 +493,13 @@ public class RegistCouseActivity extends BaseActivity implements View.OnClickLis
     }
 
     @Override
-    public void obBusEvent(MessageEvent event) {
-        if (event.action.equals(Action.SUBMIT_CHOOSE_COURSE)) {
-            finish();
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 && resultCode == RESULT_OK && data != null) {
+            setResult(RESULT_OK);
+            if (data.getStringExtra("state").equals("submit")) {
+                finish();
+            }
         }
     }
 }
