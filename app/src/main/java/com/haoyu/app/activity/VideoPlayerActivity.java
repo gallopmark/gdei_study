@@ -104,7 +104,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     private boolean isLocal = false;//判断播放的事本地视频还是网络视频
     private boolean isReCheck = false;
     private boolean isWarn = false;
-    private boolean okWifi = false;
+
     private boolean isOpen = false;
     // 处理点击事件
     private boolean isNet;//判断是否非wifi下播放
@@ -186,7 +186,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                         if (videoPosition > 0) {
                             hideWarnControll();
                             videoViewStart();
-                            mVideoView.seekTo(videoPosition);
                         }
                     }
                     break;
@@ -216,7 +215,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
             mFileInfoList.addAll(entity.getAttchFiles());
         }
         initContent();
-        mVideoView.setBufferingIndicator(loadingView);
         linear_centercontroll.getBackground().setAlpha(80);
         screenWidthPixels = MyUtils.screenWidthPixels(context);
         topControll.getBackground().setAlpha(80);
@@ -265,7 +263,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                     mVideoView.pause();
                     if (!isWarn) {
                         isWarn = true;
-                        okWifi = false;
                         isNet = false;
                         showWarnControll();
                         hideVideoCenterPause();
@@ -276,7 +273,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                 } else if (WIFI.equals(obj)) {
                     isOpen = true;
                     hideWarnControll();
-                    okWifi = true;
                     if (mVideoView.getDuration() != -1) {
                         if (!mVideoView.isPlaying()) {
                             mVideoView.start();
@@ -286,7 +282,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                         videoViewStart();
                     }
                 } else {
-                    okWifi = false;
+
                     if (!isNet && isOpen) {
                         mVideoView.pause();
                         hideVideoCenterPause();
@@ -402,7 +398,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         });
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         if (NetStatusUtil.isWifi(context)) {
-            setVideoPath();
+            videoViewStart();
         } else {
             iv_play.setVisibility(View.VISIBLE);
             iv_play.setOnClickListener(new View.OnClickListener() {
@@ -417,9 +413,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         }
     }
 
-    private void setVideoPath() {
-        mVideoView.setVideoPath(mVideoPath);
-    }
 
     private void hideIV() {
         iv_play.setVisibility(View.GONE);
@@ -460,8 +453,11 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         if (window == null) {
             window = new PopupWindow(view, MyUtils.getWidth(context) * 3 / 5, MyUtils.getHeight(context));
         }
-        window.setOutsideTouchable(true);
+        window.setTouchable(true);
         window.setBackgroundDrawable(new BitmapDrawable());
+        window.setOutsideTouchable(true);
+        window.setFocusable(true);
+
         popClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -487,7 +483,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
             String message;
             switch (errorCode) {
                 case PLMediaPlayer.MEDIA_ERROR_UNKNOWN:
-                    message = "该视频暂时无法播放";
+                    message = "该视频暂时无法播放,请稍后重试";
                     showToastTips(message);
                     videoHandler.sendEmptyMessageDelayed(VIDEO_WARN_MESSAGE, 2000);
                     break;
@@ -531,18 +527,16 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     private PLMediaPlayer.OnPreparedListener mOnPreparedListener = new PLMediaPlayer.OnPreparedListener() {
         @Override
         public void onPrepared(PLMediaPlayer plMediaPlayer, int preparedTime) {
-            if (mVideoView.getDuration() != -1) {
-                setVideoProgress();
-                isReCheck = false;
-                length = mVideoView.getDuration();
-                mVideoView.setDisplayAspectRatio(0);
-                mVideoView.start();
-                videoSeekBar.setMax((int) mVideoView.getDuration());
-                if (seekTime > 0) {
-                    mVideoView.seekTo(seekTime);
-                }
+            setVideoProgress();
+            mVideoView.start();
+            isReCheck = false;
+            length = mVideoView.getDuration();
+            videoSeekBar.setMax((int) mVideoView.getDuration());
+            if (videoPosition > 0) {
+                mVideoView.seekTo(videoPosition);
+            } else if (seekTime > 0) {
+                mVideoView.seekTo(seekTime);
             }
-
 
         }
     };
@@ -551,7 +545,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress,
                                       boolean fromUser) {
-
         }
 
         @Override
@@ -811,7 +804,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     private void videoViewStart() {
         mVideoView.setVideoPath(mVideoPath);
         mVideoView.setBufferingIndicator(loadingView);
-        mVideoView.seekTo(videoPosition);
     }
 
     private void videoForward() {
@@ -891,8 +883,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                 hideVideoCenterPause();
                 videoPlay.setImageResource(R.drawable.zanting);
                 break;
-
-
             case R.id.pop_close:
                 //课前指导
                 if (window != null && window.isShowing())
@@ -953,7 +943,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         isShowing = false;
     }
 
-
     private long length;
 
     // 设置进度条进度
@@ -967,16 +956,13 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         if (mVideoView.getCurrentPosition() / 1000 > 0 && mVideoView.getCurrentPosition() / 1000 % interval == 0 && mVideoView.isPlaying()) {
             updateVideoTime(mVideoView.getCurrentPosition());
         }
-
         currentTime.setText(MyUtils.generateTime(mVideoView.getCurrentPosition()) + "/" + MyUtils.generateTime(length));
-
         Message msg = new Message();
         msg.what = UPDATE_SEEKBAR;
         if (videoHandler != null)
             videoHandler.sendMessageDelayed(msg, 1000);
         return time;
     }
-
 
     //更新当前播放视频缓存
     private void updateVideoCatch() {
@@ -1001,7 +987,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                 }));
             }
         }
-
 
     }
 
@@ -1044,7 +1029,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                 } else if (type.equals("workshop")) {
                     url = Constants.OUTRT_NET + "/student_" + workshopId + "/m/video/user/{id}/removeVideoStatus";
                 }
-
                 addSubscription(OkHttpClientManager.getAsyn(context, url, new OkHttpClientManager.ResultCallback<String>() {
                     @Override
                     public void onError(Request request, Exception e) {
