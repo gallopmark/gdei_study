@@ -599,7 +599,7 @@ public class WorkshopEditActivity extends BaseActivity implements View.OnClickLi
             public void onResponse(BaseResponseResult<WorkShopMobileEntity> response) {
                 hideLoadingDialog();
                 if (response != null && response.getResponseData() != null) {
-                    Intent intent = new Intent(context, WorkshopHomeActivity.class);
+                    Intent intent = new Intent(context, WSHomePageActivity.class);
                     intent.putExtra("workshopId", response.getResponseData().getId());
                     intent.putExtra("workshopTitle", response.getResponseData().getTitle());
                     startActivity(intent);
