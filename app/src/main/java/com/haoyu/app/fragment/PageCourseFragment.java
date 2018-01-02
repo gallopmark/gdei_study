@@ -17,9 +17,9 @@ import com.haoyu.app.activity.AppSurveyHomeActivity;
 import com.haoyu.app.activity.AppTestHomeActivity;
 import com.haoyu.app.activity.AppTestResultActivity;
 import com.haoyu.app.activity.CoursewareViewerActivity;
+import com.haoyu.app.activity.IJKPlayerActivity;
 import com.haoyu.app.activity.TeachingDiscussionActivity;
 import com.haoyu.app.activity.TestAssignmentActivity;
-import com.haoyu.app.activity.VideoPlayerActivity;
 import com.haoyu.app.adapter.CourseActivityAdapter;
 import com.haoyu.app.adapter.CourseStudyAdapter;
 import com.haoyu.app.base.BaseFragment;
@@ -366,7 +366,7 @@ public class PageCourseFragment extends BaseFragment {
         if (response.getResponseData() != null && response.getResponseData().getmVideoUser() != null) {  //教学视频
             AppActivityViewEntity.VideoUserMobileEntity videoEntity = response.getResponseData().getmVideoUser();
             VideoMobileEntity video = videoEntity.getmVideo();
-            Intent intent = new Intent(context, VideoPlayerActivity.class);
+            Intent intent = new Intent(context, IJKPlayerActivity.class);
             if (training && activity.getmTimePeriod() != null && activity.getmTimePeriod().getState() != null && activity.getmTimePeriod().getState().equals("进行中"))
                 intent.putExtra("running", true);
             else if (training && activity.getmTimePeriod() != null && activity.getmTimePeriod().getMinutes() > 0)
