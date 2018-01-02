@@ -43,10 +43,6 @@ import com.haoyu.app.utils.Constants;
 import com.haoyu.app.utils.MyUtils;
 import com.haoyu.app.utils.NetStatusUtil;
 import com.haoyu.app.utils.OkHttpClientManager;
-import com.pili.pldroid.player.AVOptions;
-import com.pili.pldroid.player.PLMediaPlayer;
-import com.pili.pldroid.player.widget.PLVideoTextureView;
-import com.pili.pldroid.player.widget.PLVideoView;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -56,11 +52,13 @@ import java.util.Map;
 
 import butterknife.BindView;
 import okhttp3.Request;
+import tv.danmaku.ijk.media.player.IMediaPlayer;
+import tv.danmaku.ijk.media.player.widget.IjkVideoView;
 
 public class VideoPlayerActivity extends BaseActivity implements View.OnClickListener {
     private VideoPlayerActivity context = this;
     @BindView(R.id.videoView)
-    PLVideoTextureView mVideoView;
+    IjkVideoView mVideoView;
     @BindView(R.id.video_layout)
     RelativeLayout videoLayout;
     @BindView(R.id.linear_centercontroll)
@@ -102,14 +100,14 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     private boolean isShowing;  //控制栏是否是显示
     private boolean mPause = false; //判断当前是否暂停了
     private boolean isLocal = false;//判断播放的事本地视频还是网络视频
-    private boolean isReCheck = false;
+
     private boolean isWarn = false;
 
     private boolean isOpen = false;
     // 处理点击事件
     private boolean isNet;//判断是否非wifi下播放
-    private long newPosition = -1; /*滑动屏幕快进到的新位置*/
-    private long videoPosition;
+    private int newPosition = -1; /*滑动屏幕快进到的新位置*/
+    private int videoPosition;
     private long mPauseStartTime = 0;
     private long mPausedTime = 0;
     // 开始拖动时的位置
@@ -145,7 +143,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     private ImageView popClose;//关闭课前指导弹出页
     private List<MFileInfo> mFileInfoList = new ArrayList<>();
     private MyHandler videoHandler = new MyHandler(context);
-
 
     private class MyHandler extends Handler {
         private WeakReference<Context> reference;
@@ -202,6 +199,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
 
     @Override
     public void initView() {
+        System.out.println("-------------comes!!");
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         videoId = getIntent().getStringExtra("videoId");
@@ -351,7 +349,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         videoHandler.removeCallbacksAndMessages(null);
     }
 
-    private long seekTime;
+    private int seekTime;
     private double interval;//更新时间间隔
     private String activityTitle;
 
@@ -365,18 +363,16 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         if (summary == null && mFileInfoList.size() == 0) {
             mRead.setVisibility(View.GONE);
         }
-        AVOptions options = new AVOptions();
-        // 设置链接超时时间
-        options.setInteger(AVOptions.KEY_PREPARE_TIMEOUT, 20 * 1000);
-        mVideoView.setScreenOnWhilePlaying(true);
-        mVideoView.setAVOptions(options);
+
         mVideoView.setOnInfoListener(mOnInfoListener);
-        mVideoView.setOnBufferingUpdateListener(mOnBufferingUpdateListener);
         mVideoView.setOnCompletionListener(mOnCompletionListener);
-        mVideoView.setOnSeekCompleteListener(mOnSeekCompleteListener);
+        mVideoView.setOnBufferingUpdateListener(mOnBufferingUpdateListener);
+
+        mVideoView.setKeepScreenOn(true);
+        mVideoView.setOnCompletionListener(mOnCompletionListener);
         mVideoView.setOnErrorListener(mOnErrorListener);
         mVideoView.setOnPreparedListener(mOnPreparedListener);
-        mVideoView.setDisplayAspectRatio(PLVideoView.ASPECT_RATIO_PAVED_PARENT);
+        //   mVideoView.setDisplayAspectRatio(PLVideoView.ASPECT_RATIO_PAVED_PARENT);
         // 手势监听
         gestureDetector = new GestureDetector(context, new PlayerGestureListener());
         framelayout.setClickable(true);
@@ -476,16 +472,26 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     }
 
     //视频错误内容
-    private PLMediaPlayer.OnErrorListener mOnErrorListener = new PLMediaPlayer.OnErrorListener() {
+    IMediaPlayer.OnErrorListener mOnErrorListener = new IMediaPlayer.OnErrorListener() {
         @Override
-        public boolean onError(PLMediaPlayer mp, int errorCode) {
+        public boolean onError(IMediaPlayer iMediaPlayer, int errorCode, int i1) {
             mVideoView.pause();
             String message;
             switch (errorCode) {
-                case PLMediaPlayer.MEDIA_ERROR_UNKNOWN:
+                case IMediaPlayer.MEDIA_ERROR_IO:
                     message = "该视频暂时无法播放,请稍后重试";
                     showToastTips(message);
                     videoHandler.sendEmptyMessageDelayed(VIDEO_WARN_MESSAGE, 2000);
+                    break;
+                case IMediaPlayer.MEDIA_ERROR_TIMED_OUT:
+                    message = "连接超时,请稍后重试";
+                    showToastTips(message);
+                    videoHandler.sendEmptyMessageDelayed(VIDEO_WARN_MESSAGE, 2000);
+                    break;
+                case IMediaPlayer.MEDIA_ERROR_UNSUPPORTED:
+                    message = "不支持该格式视频";
+                    showToastTips(message);
+                    //videoHandler.sendEmptyMessageDelayed(VIDEO_WARN_MESSAGE, 2000);
                     break;
                 default:
                     message = "该视频暂时无法播放,请稍后重试";
@@ -493,15 +499,13 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                     videoHandler.sendEmptyMessageDelayed(VIDEO_WARN_MESSAGE, 2000);
                     break;
             }
-            showControllBar();
-            hideVideoCenterPause();
-            return true;
+            return false;
         }
     };
 
-    private PLMediaPlayer.OnCompletionListener mOnCompletionListener = new PLMediaPlayer.OnCompletionListener() {
+    IMediaPlayer.OnCompletionListener mOnCompletionListener = new IMediaPlayer.OnCompletionListener() {
         @Override
-        public void onCompletion(PLMediaPlayer plMediaPlayer) {
+        public void onCompletion(IMediaPlayer iMediaPlayer) {
             showToastTips("视频播放完成");
             showVideoCenterPause();
             updateVideoTime(mVideoView.getDuration());
@@ -509,35 +513,27 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
             clearVideoCatch();
         }
     };
+
     //缓冲监听
-    private PLMediaPlayer.OnBufferingUpdateListener mOnBufferingUpdateListener = new PLMediaPlayer.OnBufferingUpdateListener() {
+    IMediaPlayer.OnBufferingUpdateListener mOnBufferingUpdateListener = new IMediaPlayer.OnBufferingUpdateListener() {
         @Override
-        public void onBufferingUpdate(PLMediaPlayer plMediaPlayer, int precent) {
-            videoSeekBar.setSecondaryProgress((int) (precent * mVideoView.getCurrentPosition()));
-
-        }
-    };
-    private PLMediaPlayer.OnSeekCompleteListener mOnSeekCompleteListener = new PLMediaPlayer.OnSeekCompleteListener() {
-        @Override
-        public void onSeekComplete(PLMediaPlayer plMediaPlayer) {
-
+        public void onBufferingUpdate(IMediaPlayer iMediaPlayer, int precent) {
+            videoSeekBar.setSecondaryProgress(precent * mVideoView.getCurrentPosition());
         }
     };
 
-    private PLMediaPlayer.OnPreparedListener mOnPreparedListener = new PLMediaPlayer.OnPreparedListener() {
+    IMediaPlayer.OnPreparedListener mOnPreparedListener = new IMediaPlayer.OnPreparedListener() {
         @Override
-        public void onPrepared(PLMediaPlayer plMediaPlayer, int preparedTime) {
+        public void onPrepared(IMediaPlayer iMediaPlayer) {
             setVideoProgress();
             mVideoView.start();
-            isReCheck = false;
             length = mVideoView.getDuration();
-            videoSeekBar.setMax((int) mVideoView.getDuration());
+            videoSeekBar.setMax(mVideoView.getDuration());
             if (videoPosition > 0) {
                 mVideoView.seekTo(videoPosition);
             } else if (seekTime > 0) {
                 mVideoView.seekTo(seekTime);
             }
-
         }
     };
 
@@ -581,28 +577,22 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
 
         }
     };
-    /**
-     * 视频的方向
-     */
 
-    private PLMediaPlayer.OnInfoListener mOnInfoListener = new PLMediaPlayer.OnInfoListener() {
+    IMediaPlayer.OnInfoListener mOnInfoListener = new IMediaPlayer.OnInfoListener() {
         @Override
-        public boolean onInfo(PLMediaPlayer plMediaPlayer, int what, int extra) {
+        public boolean onInfo(IMediaPlayer iMediaPlayer, int what, int i1) {
             switch (what) {
-                case PLMediaPlayer.MEDIA_INFO_BUFFERING_START:
+                case IMediaPlayer.MEDIA_INFO_BUFFERING_START:
                     hideCenterBox();
                     videoCenterPause.setVisibility(View.GONE);
-                    // 开始缓存，暂停播放
                     break;
-                case PLMediaPlayer.MEDIA_INFO_BUFFERING_END:
+                case IMediaPlayer.MEDIA_INFO_BUFFERING_END:
                     if (mVideoView.isPlaying()) {
                         hideVideoCenterPause();
                     } else {
                         showVideoCenterPause();
                     }
-                    break;
-                case PLMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START:
-                    // 缓存完成，继续播放
+                case IMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START:
                     mVideoView.start();
                     break;
 
@@ -610,7 +600,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
             return false;
         }
     };
-
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -623,7 +612,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         params.height = height;
         videoLayout.setLayoutParams(params);
     }
-
 
     class PlayerGestureListener extends
             GestureDetector.SimpleOnGestureListener {
@@ -734,10 +722,10 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     //滑动屏幕快进
     private void onProgressSlide(float percent) {
         hideVideoCenterPause();
-        long position = mVideoView.getCurrentPosition();
-        long duration = mVideoView.getDuration();
-        long deltaMax = Math.min(100 * 1000, duration - position);
-        long delta = (long) (deltaMax * percent);
+        int position = mVideoView.getCurrentPosition();
+        int duration = mVideoView.getDuration();
+        int deltaMax = Math.min(100 * 1000, duration - position);
+        int delta = (int) (deltaMax * percent);
 
         newPosition = delta + position;
         if (newPosition > duration) {
@@ -746,7 +734,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
             newPosition = 0;
             delta = -position;
         }
-        int showDelta = (int) delta / 1000;
+        int showDelta = delta / 1000;
         if (showDelta != 0) {
             if (showDelta > 0)
                 showImg(R.drawable.video_btn_fast_forword);
@@ -835,7 +823,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
             mVideoView.seekTo(newPosition);
         }
     }
-
 
     @Override
     public void onClick(View v) {
@@ -947,7 +934,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
 
     // 设置进度条进度
     public int setVideoProgress() {
-        int time = (int) mVideoView.getCurrentPosition();
+        int time =  mVideoView.getCurrentPosition();
         videoSeekBar.setProgress(time);
         if (time > 0) {
             videoPosition = time;
@@ -982,12 +969,10 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                     @Override
                     public void onResponse(String response) {
 
-
                     }
                 }));
             }
         }
-
     }
 
     //更新视频的观看时间
@@ -1110,7 +1095,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                 case TelephonyManager.NETWORK_TYPE_LTE:
                     /** 4G网络 */
                     return 4;
-
             }
         }
         /** 未知网络 */

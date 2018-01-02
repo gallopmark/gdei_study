@@ -88,6 +88,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     private int mCurrentBufferPercentage;
     private IMediaPlayer.OnErrorListener mOnErrorListener;
     private IMediaPlayer.OnInfoListener mOnInfoListener;
+    private IjkMediaPlayer.OnBufferingUpdateListener mOnBufferingUpdateListener;
     private long mSeekWhenPrepared;  // recording the seek position while preparing
     private boolean mCanPause = true;
     private boolean isDebug = true;
@@ -558,6 +559,9 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             new IMediaPlayer.OnBufferingUpdateListener() {
                 public void onBufferingUpdate(IMediaPlayer mp, int percent) {
                     mCurrentBufferPercentage = percent;
+                    if (mOnBufferingUpdateListener != null) {
+                        mOnBufferingUpdateListener.onBufferingUpdate(mp, percent);
+                    }
                 }
             };
 
@@ -601,6 +605,10 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
      */
     public void setOnInfoListener(IMediaPlayer.OnInfoListener l) {
         mOnInfoListener = l;
+    }
+
+    public void setOnBufferingUpdateListener(IjkMediaPlayer.OnBufferingUpdateListener l) {
+        mOnBufferingUpdateListener = l;
     }
 
     // REMOVED: mSHCallback
