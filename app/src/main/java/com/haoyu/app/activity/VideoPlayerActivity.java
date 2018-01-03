@@ -15,6 +15,7 @@ import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.telephony.TelephonyManager;
@@ -76,7 +77,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     @BindView(R.id.iv_back)
     ImageView iv_back;
     @BindView(R.id.video_play)
-    ImageView videoPlay;
+    AppCompatImageView videoPlay;
     @BindView(R.id.video_centerpause)
     ImageView videoCenterPause;
     @BindView(R.id.video_seekbar)
@@ -244,7 +245,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         iv_back.setOnClickListener(context);
         videoCenterPause.setOnClickListener(context);
         videoPlay.setOnClickListener(mStartBtnListener);
-        videoPlay.setImageResource(R.drawable.zanting);
+        videoPlay.setImageResource(R.drawable.ic_pause_24dp);
         videoSeekBar.setOnSeekBarChangeListener(mSeekBarListener);
     }
 
@@ -305,7 +306,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         if (!NONE.equals(netType) || isLocal) {
             mVideoView.start();
             hideVideoCenterPause();
-            videoPlay.setImageResource(R.drawable.zanting);
+            videoPlay.setImageResource(R.drawable.ic_pause_24dp);
         }
         if (!isLocal && netType != null && NONE.equals(netType)) {
             mVideoView.pause();
@@ -509,7 +510,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
             showToastTips("视频播放完成");
             showVideoCenterPause();
             updateVideoTime(mVideoView.getDuration());
-            videoPlay.setImageResource(R.drawable.ic_play);
+            videoPlay.setImageResource(R.drawable.ic_play_arrow_24dp);
             clearVideoCatch();
         }
     };
@@ -563,12 +564,12 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         public void onClick(View v) {
             mPause = !mPause;
             if (mPause) {
-                videoPlay.setImageResource(R.drawable.ic_play);
+                videoPlay.setImageResource(R.drawable.ic_play_arrow_24dp);
                 mVideoView.pause();
                 mPauseStartTime = System.currentTimeMillis();
                 showVideoCenterPause();
             } else {
-                videoPlay.setImageResource(R.drawable.zanting);
+                videoPlay.setImageResource(R.drawable.ic_pause_24dp);
                 mVideoView.start();
                 mPausedTime += System.currentTimeMillis() - mPauseStartTime;
                 mPauseStartTime = 0;
@@ -782,7 +783,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         if (isLocal || !NONE.equals(netType)) {
             getWindow().setAttributes(lpa);
             showMessage((int) (lpa.screenBrightness * 100) + "%");
-            showImg(R.drawable.ic_brightness_6_white_36dp);
+            showImg(R.drawable.ic_brightness);
             showCenterBox();
             videoHandler.removeMessages(VIDEO_HIDECENTERBOX);
             videoHandler.sendEmptyMessageDelayed(VIDEO_HIDECENTERBOX, defaultTime);
@@ -868,7 +869,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                     }
                 }
                 hideVideoCenterPause();
-                videoPlay.setImageResource(R.drawable.zanting);
+                videoPlay.setImageResource(R.drawable.ic_pause_24dp);
                 break;
             case R.id.pop_close:
                 //课前指导

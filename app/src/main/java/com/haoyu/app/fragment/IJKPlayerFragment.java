@@ -15,7 +15,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.AppCompatImageView;
 import android.text.Html;
 import android.text.Spanned;
 import android.view.GestureDetector;
@@ -34,7 +34,6 @@ import com.haoyu.app.dialog.MaterialDialog;
 import com.haoyu.app.gdei.student.R;
 import com.haoyu.app.utils.NetStatusUtil;
 import com.haoyu.app.utils.PixelFormat;
-import com.haoyu.app.view.LoadingView;
 import com.haoyu.app.view.RoundRectProgressBar;
 
 import tv.danmaku.ijk.media.player.IMediaPlayer;
@@ -53,8 +52,9 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
     private IjkVideoView videoView;
 
     private TextView tv_loading;   //提示即将播放
-    private LoadingView indicator;  //加载提示框
+    private View indicator;  //加载提示框
 
+    private ImageView iv_isLocked;
     private FrameLayout fl_controller;
     private TextView tv_videoTitle;
     private LinearLayout ll_attribute;
@@ -63,18 +63,18 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
     private LinearLayout ll_progress;
     private ImageView iv_direction;
     private TextView tv_duration;
-    private ImageView iv_playState;
+    private AppCompatImageView iv_playState;
     private SeekBar seekbar;
     private TextView tv_current;
     private TextView tv_videoSize;
-    private ImageView iv_expand;
+    private AppCompatImageView iv_expand;
 
     private String videoUrl, videoTitle;
     private boolean isFullScreen;
-    private int dp_120, dp_160, dp_20, dp_30;
+    private int dp_120, dp_160, dp_20, dp_30, dp_40;
     private AudioManager mAudioManager;
-    private boolean progress_turn, attrbute_turn;
-    private long currentDuration = -1, duration, lastDuration = -1;  //当前播放位置
+    private boolean progress_turn, attrbute_turn, isLocked;  //isLocked是否锁住屏幕
+    private long currentDuration = -1, lastDuration = -1;  //当前播放位置
     /*** 视频窗口的宽和高*/
     private int playerWidth, playerHeight;
     private int maxVolume, currentVolume = -1;
@@ -98,6 +98,7 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
         dp_160 = PixelFormat.dp2px(activity, 160);
         dp_20 = PixelFormat.dp2px(activity, 20);
         dp_30 = PixelFormat.dp2px(activity, 30);
+        dp_40 = PixelFormat.dp2px(activity, 40);
     }
 
     @Override
@@ -117,13 +118,12 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
             Spanned spanned = Html.fromHtml(videoTitle);
             tv_videoTitle.setText(spanned);
         }
-        setAttributeLayout();
+        setVideoAttrsParma();
         setVideoController();
+        videoView.setBufferingIndicator(indicator);
         mAudioManager = (AudioManager) activity.getSystemService(Context.AUDIO_SERVICE);
         maxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC); // 获取系统最大音量
         activity.setVolumeControlStream(AudioManager.STREAM_MUSIC);
-        setVideoView();
-        seekbar.setMax(1000);
         receiver = new NetWorkReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -136,6 +136,7 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
         videoView = view.findViewById(R.id.videoView);
         tv_loading = view.findViewById(R.id.tv_loading);
         indicator = view.findViewById(R.id.indicator);
+        iv_isLocked = view.findViewById(R.id.iv_isLocked);
         fl_controller = view.findViewById(R.id.fl_controller);
         tv_videoTitle = view.findViewById(R.id.tv_videoTitle);
         ll_attribute = view.findViewById(R.id.ll_attribute);
@@ -151,18 +152,19 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
         iv_expand = view.findViewById(R.id.iv_expand);
     }
 
-    private void setAttributeLayout() {
+    private void setVideoAttrsParma() {
+        FrameLayout.LayoutParams indiParams = (FrameLayout.LayoutParams) indicator.getLayoutParams();
         FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) ll_attribute.getLayoutParams();
         LinearLayout.LayoutParams ivParams = (LinearLayout.LayoutParams) iv_attribute.getLayoutParams();
         if (isFullScreen) {     //全屏
             params.width = dp_160;
-            ivParams.width = dp_30;
-            ivParams.height = dp_30;
+            ivParams.width = ivParams.height = dp_30;
+            indiParams.width = indiParams.height = dp_40;
             tv_videoTitle.setVisibility(View.VISIBLE);
         } else {
             params.width = dp_120;
-            ivParams.width = dp_20;
-            ivParams.height = dp_20;
+            ivParams.width = ivParams.height = dp_20;
+            indiParams.width = indiParams.height = dp_30;
             tv_videoTitle.setVisibility(View.GONE);
         }
         ll_attribute.setLayoutParams(params);
@@ -193,7 +195,16 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
             @Override
             public boolean onDown(MotionEvent e) {
                 firstTouch = true;
-                fl_controller.setVisibility(View.VISIBLE);
+                if (isFullScreen) {
+                    iv_isLocked.setVisibility(View.VISIBLE);
+                } else {
+                    iv_isLocked.setVisibility(View.GONE);
+                }
+                if (isLocked) {
+                    fl_controller.setVisibility(View.GONE);
+                } else {
+                    fl_controller.setVisibility(View.VISIBLE);
+                }
                 handler.sendEmptyMessage(CODE_PROGRESS);
                 return false;
             }
@@ -240,8 +251,14 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
             public boolean onTouch(View view, MotionEvent event) {
                 // 手势里除了singleTapUp，没有其他检测up的方法
                 if (!isPrepared) return true;
+                if (fl_video.getParent() != null) {
+                    fl_video.getParent().requestDisallowInterceptTouchEvent(true);
+                }
                 if (event.getAction() == MotionEvent.ACTION_UP) {
                     endGesture();
+                    if (fl_video.getParent() != null) {
+                        fl_video.getParent().requestDisallowInterceptTouchEvent(false);
+                    }
                 }
                 return gestureDetector.onTouchEvent(event);
             }
@@ -353,25 +370,18 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
         handler.sendEmptyMessageDelayed(CODE_ENDGESTURE, 5000);
     }
 
-    private void setVideoView() {
-        initIndicator();
-        videoView.setBufferingIndicator(indicator);
-    }
-
-    private void initIndicator() {
-        indicator.setLoadingText("正在加载");
-        indicator.setLoadingTextSize(16);
-        indicator.setLoadingTextColor(ContextCompat.getColor(context, R.color.white));
-    }
-
     @Override
     public void setListener() {
         iv_play.setOnClickListener(this);
         iv_playState.setOnClickListener(this);
         iv_expand.setOnClickListener(this);
+        iv_isLocked.setOnClickListener(this);
         seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && !videoView.isPlaying()) {
+                    start();
+                }
             }
 
             @Override
@@ -381,7 +391,7 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                videoView.seekTo((int) ((duration * seekBar.getProgress()) / 1000));
+                videoView.seekTo(seekBar.getProgress());
             }
         });
     }
@@ -423,6 +433,18 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
                     }
                 }
                 break;
+            case R.id.iv_isLocked:
+                if (isLocked) {
+                    iv_isLocked.setImageResource(R.drawable.playerunlocked);
+                    fl_controller.setVisibility(View.VISIBLE);
+                    handler.sendEmptyMessageDelayed(CODE_ENDGESTURE, 5000);
+                    isLocked = false;
+                } else {
+                    iv_isLocked.setImageResource(R.drawable.playerlocked);
+                    fl_controller.setVisibility(View.GONE);
+                    isLocked = true;
+                }
+                break;
         }
     }
 
@@ -458,11 +480,20 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
             public void onPrepared(IMediaPlayer iMediaPlayer) {
                 prepared();
                 if (lastDuration > 0) {
-                    videoView.seekTo((int) (lastDuration / 1000));
+                    videoView.seekTo((int) lastDuration);
                 }
                 start();
-                duration = iMediaPlayer.getDuration();
+                long duration = iMediaPlayer.getDuration();
+                seekbar.setMax((int) duration);
                 tv_videoSize.setText(generateTime(duration));
+            }
+        });
+        videoView.setOnBufferingUpdateListener(new IMediaPlayer.OnBufferingUpdateListener() {
+            @Override
+            public void onBufferingUpdate(IMediaPlayer iMediaPlayer, int precent) {
+                long duration = iMediaPlayer.getDuration();
+                long secondary = precent * duration / 100;
+                seekbar.setSecondaryProgress((int) secondary);
             }
         });
         videoView.setOnErrorListener(new IMediaPlayer.OnErrorListener() {
@@ -491,27 +522,23 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
     private void prepared() {
         isPrepared = true;
         tv_loading.setVisibility(View.GONE);
-        if (tv_loading.getVisibility() != View.GONE) {
-            tv_loading.setVisibility(View.GONE);
-        }
     }
 
     private void start() {
         iv_play.setVisibility(View.GONE);
         tv_loading.setVisibility(View.GONE);
         videoView.start();
-        iv_playState.setImageResource(R.drawable.ic_pause);
+        iv_playState.setImageResource(R.drawable.ic_pause_24dp);
     }
 
     private void pause() {
         tv_loading.setVisibility(View.GONE);
         iv_play.setVisibility(View.VISIBLE);
         videoView.pause();
-        iv_playState.setImageResource(R.drawable.ic_play);
+        iv_playState.setImageResource(R.drawable.ic_play_arrow_24dp);
     }
 
     private void completed() {
-        tv_loading.setVisibility(View.GONE);
         lastDuration = 0;
         iv_play.setVisibility(View.VISIBLE);
         tv_loading.setText("播放完毕");
@@ -560,14 +587,8 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
 
     private void setProgress() {
         long position = videoView.getCurrentPosition();
-        long duration = videoView.getDuration();
-        long pos = 1000 * position / duration;
-        seekbar.setProgress((int) pos);
-        int percent = videoView.getBufferPercentage();
-        seekbar.setSecondaryProgress(percent * 10);
+        seekbar.setProgress((int) position);
         tv_current.setText(generateTime(position));
-        tv_duration.setText(generateTime(duration));
-        this.duration = duration;
     }
 
     private class NetWorkReceiver extends BroadcastReceiver {
@@ -602,11 +623,14 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
     public void setFullScreen(boolean isFullScreen) {
         this.isFullScreen = isFullScreen;
         if (!isFullScreen) {
-            iv_expand.setImageResource(R.drawable.quanping);
+            iv_expand.setImageResource(R.drawable.ic_fullscreen_24dp);
+            iv_isLocked.setVisibility(View.GONE);
+            isLocked = false;
         } else {
-            iv_expand.setImageResource(R.drawable.xiaoping);
+            iv_expand.setImageResource(R.drawable.ic_fullscreen_exit_24dp);
+            iv_isLocked.setVisibility(View.VISIBLE);
         }
-        setAttributeLayout();
+        setVideoAttrsParma();
     }
 
     @Override

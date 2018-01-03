@@ -13,7 +13,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.AppCompatImageView;
 import android.text.TextUtils;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -31,7 +31,6 @@ import com.haoyu.app.dialog.MaterialDialog;
 import com.haoyu.app.gdei.student.R;
 import com.haoyu.app.utils.Common;
 import com.haoyu.app.utils.NetStatusUtil;
-import com.haoyu.app.view.LoadingView;
 import com.haoyu.app.view.RoundRectProgressBar;
 
 import butterknife.BindView;
@@ -56,8 +55,10 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
     @BindView(R.id.tv_loading)
     TextView tv_loading;   //提示即将播放
     @BindView(R.id.indicator)
-    LoadingView indicator;  //加载进度条
+    View indicator;  //加载进度条
 
+    @BindView(R.id.iv_isLocked)
+    ImageView iv_isLocked;
     @BindView(R.id.fl_controller)
     FrameLayout fl_controller;
     @BindView(R.id.iv_back)
@@ -77,7 +78,7 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
     @BindView(R.id.tv_duration)
     TextView tv_duration;
     @BindView(R.id.iv_playState)
-    ImageView iv_playState;
+    AppCompatImageView iv_playState;
     @BindView(R.id.seekbar)
     SeekBar seekbar;
     @BindView(R.id.tv_current)
@@ -86,8 +87,8 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
     TextView tv_videoSize;
     private String videoUrl;
     private AudioManager mAudioManager;
-    private boolean progress_turn, attrbute_turn;
-    private long currentDuration = -1, duration, lastDuration = -1;  //当前播放位置
+    private boolean progress_turn, attrbute_turn, isLocked;  //isLocked是否锁住屏幕
+    private long currentDuration = -1, lastDuration = -1;  //当前播放位置
     /*** 视频窗口的宽和高*/
     private int playerWidth, playerHeight;
     private int maxVolume, currentVolume = -1;
@@ -129,11 +130,10 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
         }
         tv_videoName.setText(videoTitle);
         setVideoController();
+        videoView.setBufferingIndicator(indicator);
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         maxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC); // 获取系统最大音量
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
-        setVideoView();
-        seekbar.setMax(1000);
         if (isHttp) {
             receiver = new NetWorkReceiver();
             IntentFilter filter = new IntentFilter();
@@ -166,7 +166,12 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
             @Override
             public boolean onDown(MotionEvent e) {
                 firstTouch = true;
-                fl_controller.setVisibility(View.VISIBLE);
+                iv_isLocked.setVisibility(View.VISIBLE);
+                if (isLocked) {
+                    fl_controller.setVisibility(View.GONE);
+                } else {
+                    fl_controller.setVisibility(View.VISIBLE);
+                }
                 handler.sendEmptyMessage(CODE_PROGRESS);
                 return false;
             }
@@ -326,17 +331,6 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
         handler.sendEmptyMessageDelayed(CODE_ENDGESTURE, 5000);
     }
 
-    private void setVideoView() {
-        initIndicator();
-        videoView.setBufferingIndicator(indicator);
-    }
-
-    private void initIndicator() {
-        indicator.setLoadingText("正在加载");
-        indicator.setLoadingTextSize(16);
-        indicator.setLoadingTextColor(ContextCompat.getColor(context, R.color.white));
-    }
-
     @Override
     public void initData() {
         if (NetStatusUtil.isWifi(context)) {   //如果是wifi网络环境直接播放视频
@@ -350,10 +344,13 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
         iv_play.setOnClickListener(context);
         iv_back.setOnClickListener(context);
         iv_playState.setOnClickListener(context);
+        iv_isLocked.setOnClickListener(context);
         seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
+                if (fromUser && !videoView.isPlaying()) {
+                    start();
+                }
             }
 
             @Override
@@ -363,7 +360,7 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                videoView.seekTo((int) ((duration * seekBar.getProgress()) / 1000));
+                videoView.seekTo(seekBar.getProgress());
             }
         });
     }
@@ -395,6 +392,18 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
                     } else {
                         start();
                     }
+                }
+                break;
+            case R.id.iv_isLocked:
+                if (isLocked) {
+                    iv_isLocked.setImageResource(R.drawable.playerunlocked);
+                    fl_controller.setVisibility(View.VISIBLE);
+                    handler.sendEmptyMessageDelayed(CODE_ENDGESTURE, 5000);
+                    isLocked = false;
+                } else {
+                    iv_isLocked.setImageResource(R.drawable.playerlocked);
+                    fl_controller.setVisibility(View.GONE);
+                    isLocked = true;
                 }
                 break;
         }
@@ -432,11 +441,20 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
             public void onPrepared(IMediaPlayer iMediaPlayer) {
                 prepared();
                 if (lastDuration > 0) {
-                    videoView.seekTo((int) (lastDuration / 1000));
+                    videoView.seekTo((int) lastDuration);
                 }
                 start();
-                duration = iMediaPlayer.getDuration();
+                long duration = iMediaPlayer.getDuration();
+                seekbar.setMax((int) duration);
                 tv_videoSize.setText(generateTime(duration));
+            }
+        });
+        videoView.setOnBufferingUpdateListener(new IMediaPlayer.OnBufferingUpdateListener() {
+            @Override
+            public void onBufferingUpdate(IMediaPlayer iMediaPlayer, int precent) {
+                long duration = iMediaPlayer.getDuration();
+                long secondary = precent * duration / 100;
+                seekbar.setSecondaryProgress((int) secondary);
             }
         });
         videoView.setOnErrorListener(new IMediaPlayer.OnErrorListener() {
@@ -465,27 +483,23 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
     private void prepared() {
         isPrepared = true;
         tv_loading.setVisibility(View.GONE);
-        if (tv_loading.getVisibility() != View.GONE) {
-            tv_loading.setVisibility(View.GONE);
-        }
     }
 
     private void start() {
         iv_play.setVisibility(View.GONE);
         tv_loading.setVisibility(View.GONE);
         videoView.start();
-        iv_playState.setImageResource(R.drawable.ic_pause);
+        iv_playState.setImageResource(R.drawable.ic_pause_24dp);
     }
 
     private void pause() {
         tv_loading.setVisibility(View.GONE);
         iv_play.setVisibility(View.VISIBLE);
         videoView.pause();
-        iv_playState.setImageResource(R.drawable.ic_play);
+        iv_playState.setImageResource(R.drawable.ic_play_arrow_24dp);
     }
 
     private void completed() {
-        tv_loading.setVisibility(View.GONE);
         lastDuration = 0;
         iv_play.setVisibility(View.VISIBLE);
         tv_loading.setText("播放完毕");
@@ -525,6 +539,7 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
                     sendEmptyMessageDelayed(CODE_PROGRESS, 1000);
                     break;
                 case CODE_ENDGESTURE:
+                    iv_isLocked.setVisibility(View.GONE);
                     fl_controller.setVisibility(View.GONE);
                     removeMessages(CODE_PROGRESS);
                     break;
@@ -534,14 +549,8 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
 
     private void setProgress() {
         long position = videoView.getCurrentPosition();
-        long duration = videoView.getDuration();
-        long pos = 1000 * position / duration;
-        seekbar.setProgress((int) pos);
-        int percent = videoView.getBufferPercentage();
-        seekbar.setSecondaryProgress(percent * 10);
+        seekbar.setProgress((int) position);
         tv_current.setText(generateTime(position));
-        tv_duration.setText(generateTime(duration));
-        this.duration = duration;
     }
 
     private class NetWorkReceiver extends BroadcastReceiver {

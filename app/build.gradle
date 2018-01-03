@@ -11,9 +11,9 @@ android {
         versionCode 8
         versionName "2.3.0"
         vectorDrawables.useSupportLibrary = true
-//        ndk {
-//            abiFilters "armeabi", "armeabi-v7a", "x86"
-//        }
+        ndk {
+            abiFilters "armeabi", "armeabi-v7a", "x86"
+        }
     }
     buildTypes {
         release {
