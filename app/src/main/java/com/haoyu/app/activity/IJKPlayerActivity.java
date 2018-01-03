@@ -29,18 +29,14 @@ import android.widget.TextView;
 import com.haoyu.app.base.BaseActivity;
 import com.haoyu.app.dialog.MaterialDialog;
 import com.haoyu.app.gdei.student.R;
-import tv.danmaku.ijk.media.player.widget.IjkVideoView;
 import com.haoyu.app.utils.Common;
 import com.haoyu.app.utils.NetStatusUtil;
 import com.haoyu.app.view.LoadingView;
 import com.haoyu.app.view.RoundRectProgressBar;
-import com.pili.pldroid.player.AVOptions;
-import com.pili.pldroid.player.PLMediaPlayer;
-
-import java.util.Locale;
 
 import butterknife.BindView;
 import tv.danmaku.ijk.media.player.IMediaPlayer;
+import tv.danmaku.ijk.media.player.widget.IjkVideoView;
 
 /**
  * 创建日期：2018/1/2.
@@ -91,7 +87,7 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
     private String videoUrl;
     private AudioManager mAudioManager;
     private boolean progress_turn, attrbute_turn;
-    private long currentDuration = -1, lastDuration = -1;  //当前播放位置
+    private long currentDuration = -1, duration, lastDuration = -1;  //当前播放位置
     /*** 视频窗口的宽和高*/
     private int playerWidth, playerHeight;
     private int maxVolume, currentVolume = -1;
@@ -137,6 +133,7 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
         maxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC); // 获取系统最大音量
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         setVideoView();
+        seekbar.setMax(1000);
         if (isHttp) {
             receiver = new NetWorkReceiver();
             IntentFilter filter = new IntentFilter();
@@ -330,8 +327,6 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
     }
 
     private void setVideoView() {
-        AVOptions options = new AVOptions();
-        options.setInteger(AVOptions.KEY_PREPARE_TIMEOUT, 20 * 1000);
         initIndicator();
         videoView.setBufferingIndicator(indicator);
     }
@@ -368,7 +363,7 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                videoView.seekTo(seekBar.getProgress());
+                videoView.seekTo((int) ((duration * seekBar.getProgress()) / 1000));
             }
         });
     }
@@ -432,40 +427,33 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
 
     private void playVideo() {
         idle();
-        videoView.setOnPreparedListener(mPreparedListener);
-        videoView.setOnErrorListener(onErrorListener);
-        videoView.setOnCompletionListener(onCompletionListener);
-    }
-
-    private IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedListener() {
-        @Override
-        public void onPrepared(IMediaPlayer iMediaPlayer) {
-            prepared();
-            if (lastDuration > 0) {
-                videoView.seekTo((int) lastDuration);
+        videoView.setOnPreparedListener(new IMediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(IMediaPlayer iMediaPlayer) {
+                prepared();
+                if (lastDuration > 0) {
+                    videoView.seekTo((int) (lastDuration / 1000));
+                }
+                start();
+                duration = iMediaPlayer.getDuration();
+                tv_videoSize.setText(generateTime(duration));
             }
-            start();
-            long maxDuration = iMediaPlayer.getDuration();
-            seekbar.setMax((int) maxDuration);
-            tv_videoSize.setText(generateTime(maxDuration));
-        }
-    };
-
-    private IMediaPlayer.OnErrorListener onErrorListener = new IMediaPlayer.OnErrorListener() {
-        @Override
-        public boolean onError(IMediaPlayer iMediaPlayer, int errorCode, int i1) {
-            lastDuration = iMediaPlayer.getCurrentPosition();
-            error(errorCode);
-            return false;
-        }
-    };
-
-    private IMediaPlayer.OnCompletionListener onCompletionListener = new IMediaPlayer.OnCompletionListener() {
-        @Override
-        public void onCompletion(IMediaPlayer iMediaPlayer) {
-            completed();
-        }
-    };
+        });
+        videoView.setOnErrorListener(new IMediaPlayer.OnErrorListener() {
+            @Override
+            public boolean onError(IMediaPlayer iMediaPlayer, int errorCode, int i1) {
+                lastDuration = iMediaPlayer.getCurrentPosition();
+                error(errorCode);
+                return false;
+            }
+        });
+        videoView.setOnCompletionListener(new IMediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(IMediaPlayer iMediaPlayer) {
+                completed();
+            }
+        });
+    }
 
     private void idle() {
         iv_play.setVisibility(View.GONE);
@@ -505,7 +493,7 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
     }
 
     private void error(int errorCode) {
-        if (errorCode == PLMediaPlayer.ERROR_CODE_IO_ERROR) {
+        if (errorCode == IMediaPlayer.MEDIA_ERROR_IO) {
             toast(context, "当前网络不稳定，请检查您的网络设置");
         }
         if (!NetStatusUtil.isConnected(context)) {
@@ -522,11 +510,7 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
         int seconds = totalSeconds % 60;
         int minutes = (totalSeconds / 60) % 60;
         int hours = totalSeconds / 3600;
-        if (hours > 0) {
-            return String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, seconds).toString();
-        } else {
-            return String.format(Locale.US, "%02d:%02d", minutes, seconds).toString();
-        }
+        return hours > 0 ? String.format("%02d:%02d:%02d", hours, minutes, seconds) : String.format("%02d:%02d", minutes, seconds);
     }
 
     private Handler handler = new Handler(Looper.getMainLooper()) {
@@ -538,7 +522,7 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
                     break;
                 case CODE_PROGRESS:
                     setProgress();
-                    sendEmptyMessage(CODE_PROGRESS);
+                    sendEmptyMessageDelayed(CODE_PROGRESS, 1000);
                     break;
                 case CODE_ENDGESTURE:
                     fl_controller.setVisibility(View.GONE);
@@ -551,11 +535,13 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
     private void setProgress() {
         long position = videoView.getCurrentPosition();
         long duration = videoView.getDuration();
-        seekbar.setProgress((int) position);
+        long pos = 1000 * position / duration;
+        seekbar.setProgress((int) pos);
         int percent = videoView.getBufferPercentage();
         seekbar.setSecondaryProgress(percent * 10);
         tv_current.setText(generateTime(position));
         tv_duration.setText(generateTime(duration));
+        this.duration = duration;
     }
 
     private class NetWorkReceiver extends BroadcastReceiver {

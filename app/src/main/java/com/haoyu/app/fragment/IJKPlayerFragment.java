@@ -1,4 +1,4 @@
-package com.haoyu.app.activity;
+package com.haoyu.app.fragment;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -11,10 +11,13 @@ import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.support.v4.content.ContextCompat;
-import android.text.TextUtils;
+import android.text.Html;
+import android.text.Spanned;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -26,130 +29,144 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.haoyu.app.base.BaseActivity;
+import com.haoyu.app.base.BaseFragment;
 import com.haoyu.app.dialog.MaterialDialog;
 import com.haoyu.app.gdei.student.R;
-import com.haoyu.app.utils.Common;
 import com.haoyu.app.utils.NetStatusUtil;
+import com.haoyu.app.utils.PixelFormat;
 import com.haoyu.app.view.LoadingView;
 import com.haoyu.app.view.RoundRectProgressBar;
-import com.pili.pldroid.player.AVOptions;
-import com.pili.pldroid.player.PLMediaPlayer;
-import com.pili.pldroid.player.widget.PLVideoTextureView;
 
-import java.lang.ref.WeakReference;
-import java.util.Locale;
-import java.util.concurrent.TimeUnit;
-
-import butterknife.BindView;
-import io.reactivex.Flowable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
+import tv.danmaku.ijk.media.player.IMediaPlayer;
+import tv.danmaku.ijk.media.player.widget.IjkVideoView;
 
 /**
- * 创建日期：2017/11/27.
- * 描述:视频播放器
+ * 创建日期：2018/1/2.
+ * 描述:视频播放fragment 小屏全屏切换
  * 作者:xiaoma
  */
 
-public class VideoPlayerLibActivity extends BaseActivity implements View.OnClickListener {
-    private VideoPlayerLibActivity context;
-    @BindView(R.id.fl_video)
-    FrameLayout fl_video;
-    @BindView(R.id.iv_play)
-    ImageView iv_play;
-    @BindView(R.id.videoView)
-    PLVideoTextureView videoView;
+public class IJKPlayerFragment extends BaseFragment implements View.OnClickListener {
+    private Activity activity;
+    private FrameLayout fl_video;
+    private ImageView iv_play;
+    private IjkVideoView videoView;
 
-    @BindView(R.id.tv_loading)
-    TextView tv_loading;   //提示即将播放
-    @BindView(R.id.indicator)
-    LoadingView indicator;  //加载进度条
+    private TextView tv_loading;   //提示即将播放
+    private LoadingView indicator;  //加载提示框
 
-    @BindView(R.id.fl_controller)
-    FrameLayout fl_controller;
-    @BindView(R.id.iv_back)
-    ImageView iv_back;
-    @BindView(R.id.tv_videoName)
-    TextView tv_videoName;
-    @BindView(R.id.ll_attribute)
-    LinearLayout ll_attribute;
-    @BindView(R.id.iv_attribute)
-    ImageView iv_attribute;
-    @BindView(R.id.progressBar)
-    RoundRectProgressBar progressBar;
-    @BindView(R.id.ll_progress)
-    LinearLayout ll_progress;
-    @BindView(R.id.iv_direction)
-    ImageView iv_direction;
-    @BindView(R.id.tv_duration)
-    TextView tv_duration;
-    @BindView(R.id.iv_playState)
-    ImageView iv_playState;
-    @BindView(R.id.seekbar)
-    SeekBar seekbar;
-    @BindView(R.id.tv_current)
-    TextView tv_current;
-    @BindView(R.id.tv_videoSize)
-    TextView tv_videoSize;
-    private String videoUrl;
+    private FrameLayout fl_controller;
+    private TextView tv_videoTitle;
+    private LinearLayout ll_attribute;
+    private ImageView iv_attribute;
+    private RoundRectProgressBar progressBar;
+    private LinearLayout ll_progress;
+    private ImageView iv_direction;
+    private TextView tv_duration;
+    private ImageView iv_playState;
+    private SeekBar seekbar;
+    private TextView tv_current;
+    private TextView tv_videoSize;
+    private ImageView iv_expand;
+
+    private String videoUrl, videoTitle;
+    private boolean isFullScreen;
+    private int dp_120, dp_160, dp_20, dp_30;
     private AudioManager mAudioManager;
     private boolean progress_turn, attrbute_turn;
-    private long currentDuration = -1, lastDuration = -1;  //当前播放位置
+    private long currentDuration = -1, duration, lastDuration = -1;  //当前播放位置
     /*** 视频窗口的宽和高*/
     private int playerWidth, playerHeight;
     private int maxVolume, currentVolume = -1;
     private float mBrightness = -1f; // 亮度
-    private PLHandler handler;
     private final int CODE_ATTRBUTE = 1;
     private final int CODE_ENDGESTURE = 2;
-    private Disposable timer;
+    private final int CODE_PROGRESS = 3;
 
-    private boolean isHttp;  //是否是本地文件
     private NetWorkReceiver receiver;
     private MaterialDialog dialog;
     private boolean openPlayer, isPrepared;
     private boolean openWithMobile = false;
 
+    private OnRequestedOrientation onRequestedOrientation;
+
     @Override
-    public int setLayoutResID() {
-        return R.layout.activity_videoplayerlib;
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        activity = (Activity) context;
+        dp_120 = PixelFormat.dp2px(activity, 120);
+        dp_160 = PixelFormat.dp2px(activity, 160);
+        dp_20 = PixelFormat.dp2px(activity, 20);
+        dp_30 = PixelFormat.dp2px(activity, 30);
     }
 
     @Override
-    public void initView() {
-        context = this;
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-        videoUrl = getIntent().getStringExtra("videoUrl");
-        String videoTitle = getIntent().getStringExtra("videoTitle");
-        if (TextUtils.isEmpty(videoUrl)) {
-            toast(context, "视频链接不存在");
-            finish();
-            return;
+    public int createView() {
+        return R.layout.fragment_ijkplayer;
+    }
+
+    @Override
+    public void initView(View view) {
+        findViewById(view);
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            videoUrl = bundle.getString("videoUrl");
+            videoTitle = bundle.getString("videoTitle");
         }
-        if (videoUrl.startsWith("http") || videoUrl.startsWith("https")) {
-            isHttp = true;
-        } else {
-            isHttp = false;
+        if (videoTitle != null && videoTitle.trim().length() > 0) {
+            Spanned spanned = Html.fromHtml(videoTitle);
+            tv_videoTitle.setText(spanned);
         }
-        if (videoTitle == null) {
-            videoTitle = Common.getFileName(videoUrl);
-        }
-        tv_videoName.setText(videoTitle);
+        setAttributeLayout();
         setVideoController();
-        mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        mAudioManager = (AudioManager) activity.getSystemService(Context.AUDIO_SERVICE);
         maxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC); // 获取系统最大音量
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        activity.setVolumeControlStream(AudioManager.STREAM_MUSIC);
         setVideoView();
-        handler = new PLHandler();
-        if (isHttp) {
-            receiver = new NetWorkReceiver();
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-            registerReceiver(receiver, filter);
+        seekbar.setMax(1000);
+        receiver = new NetWorkReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        activity.registerReceiver(receiver, filter);
+    }
+
+    private void findViewById(View view) {
+        fl_video = view.findViewById(R.id.fl_video);
+        iv_play = view.findViewById(R.id.iv_play);
+        videoView = view.findViewById(R.id.videoView);
+        tv_loading = view.findViewById(R.id.tv_loading);
+        indicator = view.findViewById(R.id.indicator);
+        fl_controller = view.findViewById(R.id.fl_controller);
+        tv_videoTitle = view.findViewById(R.id.tv_videoTitle);
+        ll_attribute = view.findViewById(R.id.ll_attribute);
+        iv_attribute = view.findViewById(R.id.iv_attribute);
+        progressBar = view.findViewById(R.id.progressBar);
+        ll_progress = view.findViewById(R.id.ll_progress);
+        iv_direction = view.findViewById(R.id.iv_direction);
+        tv_duration = view.findViewById(R.id.tv_duration);
+        iv_playState = view.findViewById(R.id.iv_playState);
+        seekbar = view.findViewById(R.id.seekbar);
+        tv_current = view.findViewById(R.id.tv_current);
+        tv_videoSize = view.findViewById(R.id.tv_videoSize);
+        iv_expand = view.findViewById(R.id.iv_expand);
+    }
+
+    private void setAttributeLayout() {
+        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) ll_attribute.getLayoutParams();
+        LinearLayout.LayoutParams ivParams = (LinearLayout.LayoutParams) iv_attribute.getLayoutParams();
+        if (isFullScreen) {     //全屏
+            params.width = dp_160;
+            ivParams.width = dp_30;
+            ivParams.height = dp_30;
+            tv_videoTitle.setVisibility(View.VISIBLE);
+        } else {
+            params.width = dp_120;
+            ivParams.width = dp_20;
+            ivParams.height = dp_20;
+            tv_videoTitle.setVisibility(View.GONE);
         }
+        ll_attribute.setLayoutParams(params);
+        iv_attribute.setLayoutParams(ivParams);
     }
 
     private void setVideoController() {
@@ -177,6 +194,7 @@ public class VideoPlayerLibActivity extends BaseActivity implements View.OnClick
             public boolean onDown(MotionEvent e) {
                 firstTouch = true;
                 fl_controller.setVisibility(View.VISIBLE);
+                handler.sendEmptyMessage(CODE_PROGRESS);
                 return false;
             }
 
@@ -264,21 +282,21 @@ public class VideoPlayerLibActivity extends BaseActivity implements View.OnClick
             attrbute_turn = true;
         }
         if (mBrightness < 0) {
-            mBrightness = getWindow().getAttributes().screenBrightness;
+            mBrightness = activity.getWindow().getAttributes().screenBrightness;
             if (mBrightness <= 0.00f) {
                 mBrightness = 0.50f;
             } else if (mBrightness < 0.01f) {
                 mBrightness = 0.01f;
             }
         }
-        WindowManager.LayoutParams lpa = getWindow().getAttributes();
+        WindowManager.LayoutParams lpa = activity.getWindow().getAttributes();
         lpa.screenBrightness = mBrightness + percent;
         if (lpa.screenBrightness > 1.0f) {
             lpa.screenBrightness = 1.0f;
         } else if (lpa.screenBrightness < 0.01f) {
             lpa.screenBrightness = 0.01f;
         }
-        getWindow().setAttributes(lpa);
+        activity.getWindow().setAttributes(lpa);
         if (ll_attribute.getVisibility() != View.VISIBLE) {
             ll_attribute.setVisibility(View.VISIBLE);
         }
@@ -329,16 +347,13 @@ public class VideoPlayerLibActivity extends BaseActivity implements View.OnClick
         if (progress_turn) {
             ll_progress.setVisibility(View.GONE);
             progress_turn = false;
-            videoView.seekTo(currentDuration);
+            videoView.seekTo((int) currentDuration);
         }
         handler.removeMessages(CODE_ENDGESTURE);
         handler.sendEmptyMessageDelayed(CODE_ENDGESTURE, 5000);
     }
 
     private void setVideoView() {
-        AVOptions options = new AVOptions();
-        options.setInteger(AVOptions.KEY_PREPARE_TIMEOUT, 20 * 1000);
-        videoView.setAVOptions(options);
         initIndicator();
         videoView.setBufferingIndicator(indicator);
     }
@@ -350,22 +365,13 @@ public class VideoPlayerLibActivity extends BaseActivity implements View.OnClick
     }
 
     @Override
-    public void initData() {
-        if (NetStatusUtil.isWifi(context)) {   //如果是wifi网络环境直接播放视频
-            openPlayer = true;
-            playVideo();
-        }
-    }
-
-    @Override
     public void setListener() {
-        iv_play.setOnClickListener(context);
-        iv_back.setOnClickListener(context);
-        iv_playState.setOnClickListener(context);
+        iv_play.setOnClickListener(this);
+        iv_playState.setOnClickListener(this);
+        iv_expand.setOnClickListener(this);
         seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
             }
 
             @Override
@@ -375,7 +381,7 @@ public class VideoPlayerLibActivity extends BaseActivity implements View.OnClick
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                videoView.seekTo(seekBar.getProgress());
+                videoView.seekTo((int) ((duration * seekBar.getProgress()) / 1000));
             }
         });
     }
@@ -383,11 +389,8 @@ public class VideoPlayerLibActivity extends BaseActivity implements View.OnClick
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.iv_back:
-                finish();
-                break;
             case R.id.iv_play:
-                if (isHttp && NetStatusUtil.isConnected(context) && !NetStatusUtil.isWifi(context)) {
+                if (NetStatusUtil.isConnected(context) && !NetStatusUtil.isWifi(context)) {
                     netStateTips();
                 } else {
                     if (!openPlayer) {
@@ -402,10 +405,21 @@ public class VideoPlayerLibActivity extends BaseActivity implements View.OnClick
                 if (videoView.isPlaying()) {
                     pause();
                 } else {
-                    if (isHttp && NetStatusUtil.isConnected(context) && !NetStatusUtil.isWifi(context)) {
+                    if (NetStatusUtil.isConnected(context) && !NetStatusUtil.isWifi(context)) {
                         netStateTips();
                     } else {
                         start();
+                    }
+                }
+                break;
+            case R.id.iv_expand:
+                if (!isFullScreen) {
+                    if (onRequestedOrientation != null) {
+                        onRequestedOrientation.onRequested(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                    }
+                } else {
+                    if (onRequestedOrientation != null) {
+                        onRequestedOrientation.onRequested(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                     }
                 }
                 break;
@@ -433,54 +447,39 @@ public class VideoPlayerLibActivity extends BaseActivity implements View.OnClick
             dialog.show();
         } else {
             start();
-            toast(context, "当前网络为非Wi-FI环境，请注意您的流量使用情况");
+            toast("当前网络为非Wi-FI环境，请注意您的流量使用情况");
         }
     }
 
     private void playVideo() {
         idle();
-        videoView.setOnPreparedListener(mPreparedListener);
-        videoView.setOnBufferingUpdateListener(mOnBufferingUpdateListener);
-        videoView.setOnErrorListener(onErrorListener);
-        videoView.setOnCompletionListener(onCompletionListener);
-    }
-
-    private PLMediaPlayer.OnPreparedListener mPreparedListener = new PLMediaPlayer.OnPreparedListener() {
-        @Override
-        public void onPrepared(PLMediaPlayer plMediaPlayer, int preparedTime) {
-            prepared();
-            if (lastDuration > 0) {
-                videoView.seekTo(lastDuration);
+        videoView.setOnPreparedListener(new IMediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(IMediaPlayer iMediaPlayer) {
+                prepared();
+                if (lastDuration > 0) {
+                    videoView.seekTo((int) (lastDuration / 1000));
+                }
+                start();
+                duration = iMediaPlayer.getDuration();
+                tv_videoSize.setText(generateTime(duration));
             }
-            start();
-            long maxDuration = plMediaPlayer.getDuration();
-            seekbar.setMax((int) maxDuration);
-            tv_videoSize.setText(generateTime(maxDuration));
-        }
-    };
-    //缓冲监听
-    private PLMediaPlayer.OnBufferingUpdateListener mOnBufferingUpdateListener = new PLMediaPlayer.OnBufferingUpdateListener() {
-        @Override
-        public void onBufferingUpdate(PLMediaPlayer plMediaPlayer, int precent) {
-            seekbar.setSecondaryProgress((int) (precent * videoView.getCurrentPosition()));
-
-        }
-    };
-    private PLMediaPlayer.OnErrorListener onErrorListener = new PLMediaPlayer.OnErrorListener() {
-        @Override
-        public boolean onError(PLMediaPlayer plMediaPlayer, int errorCode) {
-            lastDuration = plMediaPlayer.getCurrentPosition();
-            error(errorCode);
-            return false;
-        }
-    };
-
-    private PLMediaPlayer.OnCompletionListener onCompletionListener = new PLMediaPlayer.OnCompletionListener() {
-        @Override
-        public void onCompletion(PLMediaPlayer plMediaPlayer) {
-            completed();
-        }
-    };
+        });
+        videoView.setOnErrorListener(new IMediaPlayer.OnErrorListener() {
+            @Override
+            public boolean onError(IMediaPlayer iMediaPlayer, int errorCode, int i1) {
+                lastDuration = iMediaPlayer.getCurrentPosition();
+                error(errorCode);
+                return false;
+            }
+        });
+        videoView.setOnCompletionListener(new IMediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(IMediaPlayer iMediaPlayer) {
+                completed();
+            }
+        });
+    }
 
     private void idle() {
         iv_play.setVisibility(View.GONE);
@@ -495,18 +494,6 @@ public class VideoPlayerLibActivity extends BaseActivity implements View.OnClick
         if (tv_loading.getVisibility() != View.GONE) {
             tv_loading.setVisibility(View.GONE);
         }
-        timer = Flowable.interval(1000, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe(new Consumer<Long>() {
-            @Override
-            public void accept(Long aLong) throws Exception {
-                long position = videoView.getCurrentPosition();
-                long duration = videoView.getDuration();
-                if (duration > 0 && position >= duration) {
-                    position = duration;
-                    completed();
-                }
-                setProgress(duration, position);
-            }
-        });
     }
 
     private void start() {
@@ -524,7 +511,6 @@ public class VideoPlayerLibActivity extends BaseActivity implements View.OnClick
     }
 
     private void completed() {
-        cancelTimer();
         tv_loading.setVisibility(View.GONE);
         lastDuration = 0;
         iv_play.setVisibility(View.VISIBLE);
@@ -533,8 +519,8 @@ public class VideoPlayerLibActivity extends BaseActivity implements View.OnClick
     }
 
     private void error(int errorCode) {
-        if (errorCode == PLMediaPlayer.ERROR_CODE_IO_ERROR) {
-            toast(context, "当前网络不稳定，请检查您的网络设置");
+        if (errorCode == IMediaPlayer.MEDIA_ERROR_IO) {
+            toast("当前网络不稳定，请检查您的网络设置");
         }
         if (!NetStatusUtil.isConnected(context)) {
             videoView.pause();
@@ -550,37 +536,38 @@ public class VideoPlayerLibActivity extends BaseActivity implements View.OnClick
         int seconds = totalSeconds % 60;
         int minutes = (totalSeconds / 60) % 60;
         int hours = totalSeconds / 3600;
-        if (hours > 0) {
-            return String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, seconds).toString();
-        } else {
-            return String.format(Locale.US, "%02d:%02d", minutes, seconds).toString();
-        }
+        return hours > 0 ? String.format("%02d:%02d:%02d", hours, minutes, seconds) : String.format("%02d:%02d", minutes, seconds);
     }
 
-    private class PLHandler extends Handler {
-        private WeakReference<Activity> reference = new WeakReference<Activity>(context);
-
+    private Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
-            VideoPlayerLibActivity activity = (VideoPlayerLibActivity) reference.get();
-            if (activity == null) {
-                return;
-            }
             switch (msg.what) {
                 case CODE_ATTRBUTE:
                     ll_attribute.setVisibility(View.GONE);
                     break;
+                case CODE_PROGRESS:
+                    setProgress();
+                    sendEmptyMessageDelayed(CODE_PROGRESS, 1000);
+                    break;
                 case CODE_ENDGESTURE:
                     fl_controller.setVisibility(View.GONE);
+                    removeMessages(CODE_PROGRESS);
                     break;
             }
         }
-    }
+    };
 
-    private void setProgress(long duration, long position) {
-        seekbar.setProgress((int) position);
+    private void setProgress() {
+        long position = videoView.getCurrentPosition();
+        long duration = videoView.getDuration();
+        long pos = 1000 * position / duration;
+        seekbar.setProgress((int) pos);
+        int percent = videoView.getBufferPercentage();
+        seekbar.setSecondaryProgress(percent * 10);
         tv_current.setText(generateTime(position));
         tv_duration.setText(generateTime(duration));
+        this.duration = duration;
     }
 
     private class NetWorkReceiver extends BroadcastReceiver {
@@ -606,8 +593,30 @@ public class VideoPlayerLibActivity extends BaseActivity implements View.OnClick
             if (NetStatusUtil.isConnected(context)) {
                 if (!NetStatusUtil.isWifi(context)) {
                     start();
-                    toast(context, "当前网络为非Wi-FI环境，请注意您的流量使用情况");
+                    toast("当前网络为非Wi-FI环境，请注意您的流量使用情况");
                 }
+            }
+        }
+    }
+
+    public void setFullScreen(boolean isFullScreen) {
+        this.isFullScreen = isFullScreen;
+        if (!isFullScreen) {
+            iv_expand.setImageResource(R.drawable.quanping);
+        } else {
+            iv_expand.setImageResource(R.drawable.xiaoping);
+        }
+        setAttributeLayout();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (openPlayer) {
+            if (NetStatusUtil.isConnected(context) && !NetStatusUtil.isWifi(context)) {
+                netWorkTips();
+            } else {
+                start();
             }
         }
     }
@@ -637,36 +646,24 @@ public class VideoPlayerLibActivity extends BaseActivity implements View.OnClick
     }
 
     @Override
-    protected void onRestart() {
-        super.onRestart();
-        if (NetStatusUtil.isConnected(context) && !NetStatusUtil.isWifi(context)) {
-            netWorkTips();
-        } else {
-            start();
-        }
-    }
-
-    @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
         pause();
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (receiver != null) {
-            unregisterReceiver(receiver);
-        }
-        cancelTimer();
+    public void onDestroyView() {
         videoView.stopPlayback();
         handler.removeCallbacksAndMessages(null);
+        activity.unregisterReceiver(receiver);
+        super.onDestroyView();
     }
 
-    private void cancelTimer() {
-        if (timer != null && !timer.isDisposed()) {
-            timer.dispose();
-            timer = null;
-        }
+    public interface OnRequestedOrientation {
+        void onRequested(int orientation);
+    }
+
+    public void setOnRequestedOrientation(OnRequestedOrientation onRequestedOrientation) {
+        this.onRequestedOrientation = onRequestedOrientation;
     }
 }

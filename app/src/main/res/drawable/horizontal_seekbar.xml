@@ -8,14 +8,14 @@
     <item android:id="@android:id/secondaryProgress">
         <clip>
             <shape>
-                <solid android:color="@color/seekbar_secondaryProgress" />
+                <solid android:color="@color/tintdefault" />
             </shape>
         </clip>
     </item>
     <item android:id="@android:id/progress">
         <clip>
             <shape>
-                <solid android:color="@color/seekbar_progress" />
+                <solid android:color="@color/defaultColor" />
             </shape>
         </clip>
     </item>

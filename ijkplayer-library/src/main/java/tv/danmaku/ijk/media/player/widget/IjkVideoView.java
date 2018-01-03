@@ -85,10 +85,11 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     private IMediaController mMediaController;
     private IMediaPlayer.OnCompletionListener mOnCompletionListener;
     private IMediaPlayer.OnPreparedListener mOnPreparedListener;
+    private IMediaPlayer.OnBufferingUpdateListener mOnBufferingUpdateListener;
     private int mCurrentBufferPercentage;
     private IMediaPlayer.OnErrorListener mOnErrorListener;
     private IMediaPlayer.OnInfoListener mOnInfoListener;
-    private IjkMediaPlayer.OnBufferingUpdateListener mOnBufferingUpdateListener;
+    private IMediaPlayer.OnSeekCompleteListener mOnSeekCompleteListener;
     private long mSeekWhenPrepared;  // recording the seek position while preparing
     private boolean mCanPause = true;
     private boolean isDebug = true;
@@ -334,7 +335,6 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             if (enableBackgroundPlay) {
                 mMediaPlayer = new TextureMediaPlayer(mMediaPlayer);
             }
-            // TODO: create SubtitleController in MediaPlayer, but we need
             // a context for the subtitle renderers
             final Context context = getContext();
             // REMOVED: SubtitleController
@@ -345,6 +345,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             mMediaPlayer.setOnErrorListener(mErrorListener);
             mMediaPlayer.setOnInfoListener(mInfoListener);
             mMediaPlayer.setOnBufferingUpdateListener(mBufferingUpdateListener);
+            mMediaPlayer.setOnSeekCompleteListener(mSeekCompleteListener);
             mCurrentBufferPercentage = 0;
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
                 mMediaPlayer.setDataSource(mAppContext, mUri, mHeaders);
@@ -395,7 +396,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         }
     }
 
-    IMediaPlayer.OnVideoSizeChangedListener mSizeChangedListener =
+    private IMediaPlayer.OnVideoSizeChangedListener mSizeChangedListener =
             new IMediaPlayer.OnVideoSizeChangedListener() {
                 public void onVideoSizeChanged(IMediaPlayer mp, int width, int height, int sarNum, int sarDen) {
                     mVideoWidth = mp.getVideoWidth();
@@ -413,7 +414,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                 }
             };
 
-    IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedListener() {
+    private IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedListener() {
         public void onPrepared(IMediaPlayer mp) {
             mCurrentState = STATE_PREPARED;
             // Get the capabilities of the player for this stream
@@ -514,14 +515,12 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                     if (mMediaController != null) {
                         mMediaController.hide();
                     }
-
                     /* If an error handler has been supplied, use it and finish. */
                     if (mOnErrorListener != null) {
                         if (mOnErrorListener.onError(mMediaPlayer, framework_err, impl_err)) {
                             return true;
                         }
                     }
-
                     /* Otherwise, pop up an error dialog so the user knows that
                      * something bad has happened. Only try and pop up the dialog
                      * if we're attached to a window. When we're going away and no
@@ -530,11 +529,9 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                     if (getWindowToken() != null) {
                         Resources r = mAppContext.getResources();
                         String message = "Unknown error";
-
                         if (framework_err == MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK) {
                             message = "Invalid progressive playback";
                         }
-
                         new AlertDialog.Builder(getContext())
                                 .setMessage(message)
                                 .setPositiveButton("error",
@@ -558,12 +555,21 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     private IMediaPlayer.OnBufferingUpdateListener mBufferingUpdateListener =
             new IMediaPlayer.OnBufferingUpdateListener() {
                 public void onBufferingUpdate(IMediaPlayer mp, int percent) {
-                    mCurrentBufferPercentage = percent;
                     if (mOnBufferingUpdateListener != null) {
                         mOnBufferingUpdateListener.onBufferingUpdate(mp, percent);
                     }
+                    mCurrentBufferPercentage = percent;
                 }
             };
+
+    private IMediaPlayer.OnSeekCompleteListener mSeekCompleteListener = new IMediaPlayer.OnSeekCompleteListener() {
+        @Override
+        public void onSeekComplete(IMediaPlayer iMediaPlayer) {
+            if (mOnSeekCompleteListener != null) {
+                mOnSeekCompleteListener.onSeekComplete(iMediaPlayer);
+            }
+        }
+    };
 
     /**
      * Register a callback to be invoked when the media file
@@ -607,8 +613,12 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         mOnInfoListener = l;
     }
 
-    public void setOnBufferingUpdateListener(IjkMediaPlayer.OnBufferingUpdateListener l) {
+    public void setOnBufferingUpdateListener(IMediaPlayer.OnBufferingUpdateListener l) {
         mOnBufferingUpdateListener = l;
+    }
+
+    public void setOnSeekCompleteListener(IMediaPlayer.OnSeekCompleteListener l) {
+        mOnSeekCompleteListener = l;
     }
 
     // REMOVED: mSHCallback
