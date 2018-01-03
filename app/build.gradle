@@ -46,6 +46,7 @@ dependencies {
     //    compile project(':android-pdf-viewer') /*pdfViewer*/
     compile 'com.github.barteksc:android-pdf-viewer:3.0.0-beta.3'
     compile project(':zxingLib')
+    compile project(':ijkplayer-library')
     /*gson*/
     compile 'com.google.code.gson:gson:2.8.1'
     /*fileDownloader*/
@@ -70,5 +71,4 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:27.0.2'
     compile 'com.tencent.bugly:crashreport:latest.release'
     //其中latest.release指代最新Bugly SDK版本号，也可以指定明确的版本号，例如2.2.0
-    implementation project(':ijkplayer-library')
 }
