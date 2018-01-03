@@ -61,12 +61,10 @@ public class VideoPlayerLibActivity extends BaseActivity implements View.OnClick
     ImageView iv_play;
     @BindView(R.id.videoView)
     PLVideoTextureView videoView;
-
     @BindView(R.id.tv_loading)
     TextView tv_loading;   //提示即将播放
     @BindView(R.id.indicator)
     LoadingView indicator;  //加载进度条
-
     @BindView(R.id.fl_controller)
     FrameLayout fl_controller;
     @BindView(R.id.iv_back)

@@ -173,9 +173,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                 case VIDEO_HIDECONTROLLBAR:
                     hideControllBar();
                     break;
-                case UPDATE_SEEKBAR:
-                    setVideoProgress();
-                    break;
+
                 case VIDEO_WARN_MESSAGE:
                     if (NONE.equals(netType)) {
                         showWarnControll();
@@ -185,6 +183,13 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                             videoViewStart();
                         }
                     }
+                    break;
+                case TIME_CODE:
+                    setVideoProgress();
+                    videoHandler.sendEmptyMessageDelayed(TIME_CODE, 1000);
+                    break;
+                case TIME_DIS:
+                    videoHandler.removeMessages(TIME_CODE);
                     break;
             }
         }
@@ -199,7 +204,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
 
     @Override
     public void initView() {
-        System.out.println("-------------comes!!");
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         videoId = getIntent().getStringExtra("videoId");
@@ -525,7 +529,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     IMediaPlayer.OnPreparedListener mOnPreparedListener = new IMediaPlayer.OnPreparedListener() {
         @Override
         public void onPrepared(IMediaPlayer iMediaPlayer) {
-            setVideoProgress();
             mVideoView.start();
             length = mVideoView.getDuration();
             videoSeekBar.setMax(mVideoView.getDuration());
@@ -601,6 +604,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         }
     };
 
+
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -612,6 +616,9 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         params.height = height;
         videoLayout.setLayoutParams(params);
     }
+
+    private final int TIME_CODE = 11;
+    private final int TIME_DIS = 12;
 
     class PlayerGestureListener extends
             GestureDetector.SimpleOnGestureListener {
@@ -666,8 +673,10 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         public boolean onSingleTapUp(MotionEvent e) {
             if (isShowing) {
                 hideControllBar();
+                videoHandler.sendEmptyMessage(TIME_DIS);
             } else {
                 showControllBar();
+                videoHandler.sendEmptyMessage(TIME_CODE);
             }
             return true;
         }
@@ -815,7 +824,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         videoHandler.removeMessages(VIDEO_SEEKBARFORWARD);
         videoHandler.sendEmptyMessageDelayed(VIDEO_HIDECENTERBOX,
                 1 * 500);
-        setVideoProgress();
+        videoHandler.sendEmptyMessage(TIME_CODE);
         seekbarEndTrackPosition = -1;
         seekbarStartTrackPosition = -1;
         hideVideoCenterPause();
@@ -933,8 +942,8 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     private long length;
 
     // 设置进度条进度
-    public int setVideoProgress() {
-        int time =  mVideoView.getCurrentPosition();
+    public void setVideoProgress() {
+        int time = mVideoView.getCurrentPosition();
         videoSeekBar.setProgress(time);
         if (time > 0) {
             videoPosition = time;
@@ -944,11 +953,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
             updateVideoTime(mVideoView.getCurrentPosition());
         }
         currentTime.setText(MyUtils.generateTime(mVideoView.getCurrentPosition()) + "/" + MyUtils.generateTime(length));
-        Message msg = new Message();
-        msg.what = UPDATE_SEEKBAR;
-        if (videoHandler != null)
-            videoHandler.sendMessageDelayed(msg, 1000);
-        return time;
     }
 
     //更新当前播放视频缓存

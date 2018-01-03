@@ -34,10 +34,9 @@
                 android:orientation="vertical">
 
                 <com.haoyu.app.view.CircularProgressView
-                    android:layout_width="@dimen/margin_size_40"
-                    android:layout_height="@dimen/margin_size_40"
-                    app:border_Width="@dimen/margin_size_1" />
-
+                    android:layout_width="@dimen/margin_size_45"
+                    android:layout_height="@dimen/margin_size_45"
+                    app:border_Width="@dimen/margin_size_2" />
 
             </LinearLayout>
 
@@ -50,6 +49,7 @@
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_video_grid"
                 android:visibility="gone" />
+
             <include layout="@layout/video_centerbox" />
 
             <include layout="@layout/video_top_bottom" />
