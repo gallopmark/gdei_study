@@ -522,7 +522,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     IMediaPlayer.OnBufferingUpdateListener mOnBufferingUpdateListener = new IMediaPlayer.OnBufferingUpdateListener() {
         @Override
         public void onBufferingUpdate(IMediaPlayer iMediaPlayer, int precent) {
-            videoSeekBar.setSecondaryProgress(precent * mVideoView.getCurrentPosition());
+            videoSeekBar.setSecondaryProgress(precent * mVideoView.getDuration()/100);
         }
     };
 
