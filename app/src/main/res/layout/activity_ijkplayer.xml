@@ -42,16 +42,16 @@
         android:textSize="@dimen/font_size_16"
         android:visibility="gone" />
 
-    <ImageView
+    <android.support.v7.widget.AppCompatImageView
         android:id="@+id/iv_isLocked"
-        android:layout_width="@dimen/margin_size_60"
-        android:layout_height="@dimen/margin_size_60"
+        android:layout_width="@dimen/margin_size_50"
+        android:layout_height="@dimen/margin_size_50"
         android:layout_gravity="center|left"
         android:layout_marginLeft="@dimen/margin_size_16"
         android:padding="@dimen/margin_size_6"
         android:scaleType="centerCrop"
-        android:src="@drawable/playerunlocked"
-        android:visibility="gone" />
+        android:visibility="gone"
+        app:srcCompat="@drawable/ic_lock_open_24dp" />
 
     <FrameLayout
         android:id="@+id/fl_controller"

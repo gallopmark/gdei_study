@@ -54,7 +54,7 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
     private TextView tv_loading;   //提示即将播放
     private View indicator;  //加载提示框
 
-    private ImageView iv_isLocked;
+    private AppCompatImageView iv_isLocked;
     private FrameLayout fl_controller;
     private TextView tv_videoTitle;
     private LinearLayout ll_attribute;
@@ -442,12 +442,12 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
                 break;
             case R.id.iv_isLocked:
                 if (isLocked) {
-                    iv_isLocked.setImageResource(R.drawable.playerunlocked);
+                    iv_isLocked.setImageResource(R.drawable.ic_lock_open_24dp);
                     fl_controller.setVisibility(View.VISIBLE);
                     handler.sendEmptyMessageDelayed(CODE_ENDGESTURE, 5000);
                     isLocked = false;
                 } else {
-                    iv_isLocked.setImageResource(R.drawable.playerlocked);
+                    iv_isLocked.setImageResource(R.drawable.ic_lock_close_24dp);
                     fl_controller.setVisibility(View.GONE);
                     isLocked = true;
                 }
@@ -632,6 +632,7 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
         if (!isFullScreen) {
             iv_expand.setImageResource(R.drawable.ic_fullscreen_24dp);
             iv_isLocked.setVisibility(View.GONE);
+            iv_isLocked.setImageResource(R.drawable.ic_lock_open_24dp);
             isLocked = false;
         } else {
             iv_expand.setImageResource(R.drawable.ic_fullscreen_exit_24dp);
