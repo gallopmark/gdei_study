@@ -68,13 +68,13 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
     @BindView(R.id.ll_attribute)
     LinearLayout ll_attribute;
     @BindView(R.id.iv_attribute)
-    ImageView iv_attribute;
+    AppCompatImageView iv_attribute;
     @BindView(R.id.progressBar)
     RoundRectProgressBar progressBar;
     @BindView(R.id.ll_progress)
     LinearLayout ll_progress;
     @BindView(R.id.iv_direction)
-    ImageView iv_direction;
+    AppCompatImageView iv_direction;
     @BindView(R.id.tv_duration)
     TextView tv_duration;
     @BindView(R.id.iv_playState)
@@ -247,9 +247,9 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
         }
         int showDelta = (int) delta / 1000;
         if (showDelta > 0) {
-            iv_direction.setImageResource(R.drawable.video_btn_fast_forword);
+            iv_direction.setImageResource(R.drawable.ic_fast_forward_24dp);
         } else {
-            iv_direction.setImageResource(R.drawable.video_btn_back_forword);
+            iv_direction.setImageResource(R.drawable.ic_fast_rewind_24dp);
         }
         tv_duration.setText(generateTime(currentDuration) + "/" + generateTime(duration));
     }
@@ -278,7 +278,13 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
         if (ll_attribute.getVisibility() != View.VISIBLE) {
             ll_attribute.setVisibility(View.VISIBLE);
         }
-        iv_attribute.setImageResource(R.drawable.ic_brightness);
+        if (lpa.screenBrightness >= 0.45 && lpa.screenBrightness <= 0.55) {
+            iv_attribute.setImageResource(R.drawable.ic_brightness_mid_24dp);
+        } else if (lpa.screenBrightness > 0.55) {
+            iv_attribute.setImageResource(R.drawable.ic_brightness_high_24dp);
+        } else {
+            iv_attribute.setImageResource(R.drawable.ic_brightness_low_24dp);
+        }
         progressBar.setMax(100);
         progressBar.setProgress((int) (lpa.screenBrightness * 100));
     }
@@ -304,9 +310,9 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
             ll_attribute.setVisibility(View.VISIBLE);
         }
         if (mVolume > 0) {
-            iv_attribute.setImageResource(R.drawable.ic_voice_max);
+            iv_attribute.setImageResource(R.drawable.ic_volume_up_24dp);
         } else {
-            iv_attribute.setImageResource(R.drawable.ic_voice_min);
+            iv_attribute.setImageResource(R.drawable.ic_volume_off_24dp);
         }
         progressBar.setMax(maxVolume);
         progressBar.setProgress(mVolume);

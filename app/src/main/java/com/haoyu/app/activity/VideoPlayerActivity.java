@@ -718,9 +718,9 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
             String s = i + "%";
             showMessage(s);
             if (i > 0) {
-                showImg(R.drawable.ic_voice_max);
+                showImg(R.drawable.ic_volume_up_24dp);
             } else {
-                showImg(R.drawable.ic_voice_min);
+                showImg(R.drawable.ic_volume_off_24dp);
             }
             showCenterBox();
             videoHandler.removeMessages(VIDEO_HIDECENTERBOX);
@@ -792,7 +792,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         if (isLocal || !NONE.equals(netType)) {
             getWindow().setAttributes(lpa);
             showMessage((int) (lpa.screenBrightness * 100) + "%");
-            showImg(R.drawable.ic_brightness);
+            showImg(R.drawable.ic_brightness_high_24dp);
             showCenterBox();
             videoHandler.removeMessages(VIDEO_HIDECENTERBOX);
             videoHandler.sendEmptyMessageDelayed(VIDEO_HIDECENTERBOX, defaultTime);

@@ -58,10 +58,10 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
     private FrameLayout fl_controller;
     private TextView tv_videoTitle;
     private LinearLayout ll_attribute;
-    private ImageView iv_attribute;
+    private AppCompatImageView iv_attribute;
     private RoundRectProgressBar progressBar;
     private LinearLayout ll_progress;
-    private ImageView iv_direction;
+    private AppCompatImageView iv_direction;
     private TextView tv_duration;
     private AppCompatImageView iv_playState;
     private SeekBar seekbar;
@@ -71,7 +71,7 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
 
     private String videoUrl, videoTitle;
     private boolean isFullScreen;
-    private int dp_120, dp_160, dp_20, dp_30, dp_40;
+    private int dp_120, dp_160, dp_25, dp_30, dp_40;
     private AudioManager mAudioManager;
     private boolean progress_turn, attrbute_turn, isLocked;  //isLocked是否锁住屏幕
     private long currentDuration = -1, lastDuration = -1;  //当前播放位置
@@ -96,7 +96,7 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
         activity = (Activity) context;
         dp_120 = PixelFormat.dp2px(activity, 120);
         dp_160 = PixelFormat.dp2px(activity, 160);
-        dp_20 = PixelFormat.dp2px(activity, 20);
+        dp_25 = PixelFormat.dp2px(activity, 25);
         dp_30 = PixelFormat.dp2px(activity, 30);
         dp_40 = PixelFormat.dp2px(activity, 40);
     }
@@ -163,10 +163,11 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
             tv_videoTitle.setVisibility(View.VISIBLE);
         } else {
             params.width = dp_120;
-            ivParams.width = ivParams.height = dp_20;
+            ivParams.width = ivParams.height = dp_25;
             indiParams.width = indiParams.height = dp_30;
             tv_videoTitle.setVisibility(View.GONE);
         }
+        indicator.setLayoutParams(indiParams);
         ll_attribute.setLayoutParams(params);
         iv_attribute.setLayoutParams(ivParams);
     }
@@ -286,9 +287,9 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
         }
         int showDelta = (int) delta / 1000;
         if (showDelta > 0) {
-            iv_direction.setImageResource(R.drawable.video_btn_fast_forword);
+            iv_direction.setImageResource(R.drawable.ic_fast_forward_24dp);
         } else {
-            iv_direction.setImageResource(R.drawable.video_btn_back_forword);
+            iv_direction.setImageResource(R.drawable.ic_fast_rewind_24dp);
         }
         tv_duration.setText(generateTime(currentDuration) + "/" + generateTime(duration));
     }
@@ -317,7 +318,13 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
         if (ll_attribute.getVisibility() != View.VISIBLE) {
             ll_attribute.setVisibility(View.VISIBLE);
         }
-        iv_attribute.setImageResource(R.drawable.ic_brightness);
+        if (lpa.screenBrightness >= 0.45 && lpa.screenBrightness <= 0.55) {
+            iv_attribute.setImageResource(R.drawable.ic_brightness_mid_24dp);
+        } else if (lpa.screenBrightness > 0.55) {
+            iv_attribute.setImageResource(R.drawable.ic_brightness_high_24dp);
+        } else {
+            iv_attribute.setImageResource(R.drawable.ic_brightness_low_24dp);
+        }
         progressBar.setMax(100);
         progressBar.setProgress((int) (lpa.screenBrightness * 100));
     }
@@ -343,9 +350,9 @@ public class IJKPlayerFragment extends BaseFragment implements View.OnClickListe
             ll_attribute.setVisibility(View.VISIBLE);
         }
         if (mVolume > 0) {
-            iv_attribute.setImageResource(R.drawable.ic_voice_max);
+            iv_attribute.setImageResource(R.drawable.ic_volume_up_24dp);
         } else {
-            iv_attribute.setImageResource(R.drawable.ic_voice_min);
+            iv_attribute.setImageResource(R.drawable.ic_volume_off_24dp);
         }
         progressBar.setMax(maxVolume);
         progressBar.setProgress(mVolume);

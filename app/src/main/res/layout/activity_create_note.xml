@@ -70,7 +70,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:drawablePadding="5.0dp"
-            android:drawableRight="@drawable/evenmore2x"
+            android:drawableRight="@drawable/go_into"
             android:text="教育系统突发公共事件简介"
             android:textColor="#ff9da0a7"
             android:textSize="15sp" />
