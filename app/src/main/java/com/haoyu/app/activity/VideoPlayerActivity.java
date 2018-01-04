@@ -8,13 +8,11 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -63,7 +61,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     @BindView(R.id.video_layout)
     RelativeLayout videoLayout;
     @BindView(R.id.linear_centercontroll)
-    RelativeLayout linear_centercontroll;
+    LinearLayout linear_centercontroll;
     @BindView(R.id.bottomControll)
     RelativeLayout bottomControll;
     @BindView(R.id.topControll)
@@ -78,8 +76,8 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     ImageView iv_back;
     @BindView(R.id.video_play)
     AppCompatImageView videoPlay;
-    @BindView(R.id.video_centerpause)
-    ImageView videoCenterPause;
+    @BindView(R.id.iv_play)
+    ImageView iv_play;
     @BindView(R.id.video_seekbar)
     SeekBar videoSeekBar;
     @BindView(R.id.video_framelayout)
@@ -94,8 +92,8 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     TextView warnContinue;
     @BindView(R.id.warn_content)
     TextView warnContent;
-    @BindView(R.id.iv_play)
-    ImageView iv_play;
+    @BindView(R.id.iv_center)
+    AppCompatImageView iv_center;
 
     private boolean running;
     private boolean isShowing;  //控制栏是否是显示
@@ -247,7 +245,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         warnContinue.setOnClickListener(context);
         framelayout.setClickable(true);
         iv_back.setOnClickListener(context);
-        videoCenterPause.setOnClickListener(context);
+        iv_play.setOnClickListener(context);
         videoPlay.setOnClickListener(mStartBtnListener);
         videoPlay.setImageResource(R.drawable.ic_pause_24dp);
         videoSeekBar.setOnSeekBarChangeListener(mSeekBarListener);
@@ -310,7 +308,8 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         if (!NONE.equals(netType) || isLocal) {
             mVideoView.start();
             hideVideoCenterPause();
-            videoPlay.setImageResource(R.drawable.ic_pause_24dp);
+
+            showVideoPlayImg(R.drawable.ic_pause_24dp);
         }
         if (!isLocal && netType != null && NONE.equals(netType)) {
             mVideoView.pause();
@@ -319,12 +318,12 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     }
 
     private void showVideoCenterPause() {
-        videoCenterPause.setVisibility(View.VISIBLE);
+        iv_play.setVisibility(View.VISIBLE);
 
     }
 
     private void hideVideoCenterPause() {
-        videoCenterPause.setVisibility(View.GONE);
+        iv_play.setVisibility(View.GONE);
     }
 
 
@@ -514,7 +513,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
             showToastTips("视频播放完成");
             showVideoCenterPause();
             updateVideoTime(mVideoView.getDuration());
-            videoPlay.setImageResource(R.drawable.ic_play_arrow_24dp);
+            showVideoPlayImg(R.drawable.ic_play_arrow_24dp);
             clearVideoCatch();
         }
     };
@@ -523,7 +522,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     IMediaPlayer.OnBufferingUpdateListener mOnBufferingUpdateListener = new IMediaPlayer.OnBufferingUpdateListener() {
         @Override
         public void onBufferingUpdate(IMediaPlayer iMediaPlayer, int precent) {
-            videoSeekBar.setSecondaryProgress(precent * mVideoView.getDuration()/100);
+            videoSeekBar.setSecondaryProgress(precent * mVideoView.getDuration() / 100);
         }
     };
 
@@ -567,12 +566,12 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         public void onClick(View v) {
             mPause = !mPause;
             if (mPause) {
-                videoPlay.setImageResource(R.drawable.ic_play_arrow_24dp);
+                showVideoPlayImg(R.drawable.ic_play_arrow_24dp);
                 mVideoView.pause();
                 mPauseStartTime = System.currentTimeMillis();
                 showVideoCenterPause();
             } else {
-                videoPlay.setImageResource(R.drawable.ic_pause_24dp);
+                showVideoPlayImg(R.drawable.ic_pause_24dp);
                 mVideoView.start();
                 mPausedTime += System.currentTimeMillis() - mPauseStartTime;
                 mPauseStartTime = 0;
@@ -588,7 +587,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
             switch (what) {
                 case IMediaPlayer.MEDIA_INFO_BUFFERING_START:
                     hideCenterBox();
-                    videoCenterPause.setVisibility(View.GONE);
+                    iv_play.setVisibility(View.GONE);
                     break;
                 case IMediaPlayer.MEDIA_INFO_BUFFERING_END:
                     if (mVideoView.isPlaying()) {
@@ -747,9 +746,9 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         int showDelta = delta / 1000;
         if (showDelta != 0) {
             if (showDelta > 0)
-                showImg(R.drawable.video_btn_fast_forword);
+                showImg(R.drawable.ic_fast_forward_24dp);
             else
-                showImg(R.drawable.video_btn_back_forword);
+                showImg(R.drawable.ic_fast_rewind_24dp);
 
             showMessage(MyUtils.generateTime(newPosition) + "/"
                     + MyUtils.generateTime(mVideoView.getDuration()));
@@ -791,8 +790,17 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
 
         if (isLocal || !NONE.equals(netType)) {
             getWindow().setAttributes(lpa);
-            showMessage((int) (lpa.screenBrightness * 100) + "%");
-            showImg(R.drawable.ic_brightness_high_24dp);
+            int alpha = (int) (lpa.screenBrightness * 100);
+
+            if (alpha <= 0) {
+                showImg(R.drawable.ic_brightness_low_24dp);
+
+            } else if (alpha <= 50) {
+                showImg(R.drawable.ic_brightness_mid_24dp);
+            } else {
+                showImg(R.drawable.ic_brightness_high_24dp);
+            }
+            showMessage(alpha + "%");
             showCenterBox();
             videoHandler.removeMessages(VIDEO_HIDECENTERBOX);
             videoHandler.sendEmptyMessageDelayed(VIDEO_HIDECENTERBOX, defaultTime);
@@ -808,19 +816,13 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         hideVideoCenterPause();
         showCenterBox();
         center_content.setText(MyUtils.generateTime(mVideoView
-                .getCurrentPosition()));
-        Drawable drawable;
-        // / 这一步必须要做,否则不会显示.
-        if (seekbarEndTrackPosition > seekbarStartTrackPosition)
-            drawable = ContextCompat.getDrawable(context,
-                    R.drawable.video_btn_fast_forword);
-        else
-            drawable = ContextCompat.getDrawable(context,
-                    R.drawable.video_btn_back_forword);
-        drawable.setBounds(0, 0, drawable.getMinimumWidth(),
-                drawable.getMinimumHeight());
-        center_content.setCompoundDrawables(drawable, null, null,
-                null);
+                .getCurrentPosition()) + "/" + MyUtils.generateTime(mVideoView.getDuration()));
+        if (seekbarEndTrackPosition > seekbarStartTrackPosition) {
+            showImg(R.drawable.ic_fast_forward_24dp);
+        } else {
+            showImg(R.drawable.ic_fast_rewind_24dp);
+        }
+
         videoHandler.removeMessages(VIDEO_HIDECENTERBOX);
         videoHandler.removeMessages(VIDEO_SEEKBARFORWARD);
         videoHandler.sendEmptyMessageDelayed(VIDEO_HIDECENTERBOX,
@@ -866,7 +868,8 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                 }
                 break;
 
-            case R.id.video_centerpause:
+
+            case R.id.iv_play:
                 //屏幕中间播放按钮
                 if (mVideoView.getCurrentPosition() == mVideoView.getDuration()) {
                     mVideoView.seekTo(0);
@@ -878,7 +881,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                     }
                 }
                 hideVideoCenterPause();
-                videoPlay.setImageResource(R.drawable.ic_pause_24dp);
+                showVideoPlayImg(R.drawable.ic_pause_24dp);
                 break;
             case R.id.pop_close:
                 //课前指导
@@ -897,6 +900,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     // 显示中间按钮
     private void showCenterBox() {
         center_content.setVisibility(View.VISIBLE);
+        iv_center.setVisibility(View.VISIBLE);
         linear_centercontroll.setVisibility(View.VISIBLE);
 
     }
@@ -904,6 +908,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     // 隐藏中间按钮
     private void hideCenterBox() {
         center_content.setVisibility(View.INVISIBLE);
+        iv_center.setVisibility(View.INVISIBLE);
         linear_centercontroll.setVisibility(View.INVISIBLE);
     }
 
@@ -915,11 +920,10 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
 
     // 设置图片
     private void showImg(int imgId) {
-        Drawable drawable = getResources().getDrawable(imgId);
-        // / 这一步必须要做,否则不会显示.
-        drawable.setBounds(0, 0, drawable.getMinimumWidth(),
-                drawable.getMinimumHeight());
-        center_content.setCompoundDrawables(drawable, null, null, null);
+        iv_center.setImageResource(imgId);
+    }
+    private void showVideoPlayImg(int imgId){
+        videoPlay.setImageResource(imgId);
     }
 
 
@@ -1017,7 +1021,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                 if (type.equals("course")) {
                     url = Constants.OUTRT_NET + "/" + activityId + "/study/m/video/user/" + videoId + "/removeVideoStatus";
                 } else if (type.equals("workshop")) {
-                    url = Constants.OUTRT_NET + "/student_" + workshopId + "/m/video/user/{id}/removeVideoStatus";
+                    url = Constants.OUTRT_NET + "/student_" + workshopId + "/m/video/user/"+videoId+"/removeVideoStatus";
                 }
                 addSubscription(OkHttpClientManager.getAsyn(context, url, new OkHttpClientManager.ResultCallback<String>() {
                     @Override

@@ -56,49 +56,51 @@
 
     </RelativeLayout>
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/bottomControll"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:layout_alignParentBottom="true"
         android:background="@android:color/background_dark"
-        android:orientation="horizontal"
-        android:padding="@dimen/margin_size_8"
-        android:visibility="visible">
+        android:visibility="invisible">
 
         <android.support.v7.widget.AppCompatImageView
             android:id="@+id/video_play"
-            android:layout_width="@dimen/margin_size_35"
-            android:layout_height="@dimen/margin_size_35"
-            android:layout_gravity="center"
-            android:scaleType="centerCrop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
             app:srcCompat="@drawable/ic_play_arrow_24dp" />
 
         <SeekBar
             android:id="@+id/video_seekbar"
             style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginLeft="@dimen/margin_size_4"
-            android:layout_marginRight="@dimen/margin_size_5"
-            android:layout_weight="1"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="3dp"
+            android:layout_toLeftOf="@+id/currentTime"
+            android:layout_toRightOf="@+id/video_play"
             android:focusable="true"
-            android:maxHeight="@dimen/margin_size_6"
-            android:minHeight="@dimen/margin_size_6"
+            android:maxHeight="8dp"
+            android:minHeight="5dp"
+            android:paddingLeft="3dp"
             android:progressDrawable="@drawable/mn_player_progress_diy"
             android:thumb="@drawable/mn_player_thumb"
             android:thumbOffset="0dp" />
+
 
         <TextView
             android:id="@+id/currentTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="@dimen/margin_minus_5"
             android:text="00:00"
             android:textColor="@color/colorPlayerProgressSecond"
             android:textSize="@dimen/font_size_16" />
 
-    </LinearLayout>
+
+    </RelativeLayout>
 
 </RelativeLayout>
