@@ -10,7 +10,6 @@ import com.franmontiel.persistentcookiejar.PersistentCookieJar;
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache;
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor;
 import com.haoyu.app.utils.Constants;
-import com.tencent.bugly.crashreport.CrashReport;
 
 import org.wlf.filedownloader.FileDownloadConfiguration;
 import org.wlf.filedownloader.FileDownloader;
@@ -35,7 +34,7 @@ public class GdeiApplication extends Application {
         initFileDownloader();
         StatService.start(this);
         setRxJavaErrorHandler();
-        CrashReport.initCrashReport(this);
+//        CrashReport.initCrashReport(this);
     }
 
     private void initFileDownloader() {

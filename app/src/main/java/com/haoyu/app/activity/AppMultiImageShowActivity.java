@@ -3,14 +3,14 @@ package com.haoyu.app.activity;
 import android.content.Intent;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.AppCompatImageView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.haoyu.app.base.BaseActivity;
 import com.haoyu.app.gdei.student.R;
-import com.haoyu.app.imageloader.GlideImgManager;
 import com.haoyu.app.utils.Common;
 import com.haoyu.app.utils.MediaFile;
 import com.haoyu.app.view.TouchImageView;
@@ -81,9 +81,9 @@ public class AppMultiImageShowActivity extends BaseActivity {
         public Object instantiateItem(ViewGroup container, int position) {
             View view = getLayoutInflater().inflate(R.layout.app_multi_image_item, null);
             TouchImageView imageView = view.findViewById(R.id.touchImageView);
-            ImageView iv_videoType = view.findViewById(R.id.iv_videoType);
+            AppCompatImageView iv_videoType = view.findViewById(R.id.iv_videoType);
             final String path = imgList.get(position);
-            GlideImgManager.loadImage(context,path,R.drawable.ic_placeholder,R.drawable.ic_placeholder,imageView);
+            Glide.with(context).load(path).placeholder(R.drawable.ic_placeholder).error(R.drawable.ic_placeholder).fitCenter().into(imageView);
             if (path != null && path.length() > 0 && MediaFile.isVideoFileType(path)) {
                 iv_videoType.setVisibility(View.VISIBLE);
             } else {
@@ -92,9 +92,9 @@ public class AppMultiImageShowActivity extends BaseActivity {
             iv_videoType.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(context, VideoPlayerActivity.class);
+                    Intent intent = new Intent(context, IJKPlayerActivity.class);
                     intent.putExtra("videoUrl", path);
-                    intent.putExtra("fileName", Common.getFileName(path));
+                    intent.putExtra("videoTitle", Common.getFileName(path));
                     startActivity(intent);
                 }
             });
@@ -109,8 +109,7 @@ public class AppMultiImageShowActivity extends BaseActivity {
         }
 
         @Override
-        public void destroyItem(ViewGroup container, int position,
-                                Object object) {
+        public void destroyItem(ViewGroup container, int position, Object object) {
             container.removeView((View) object);
         }
 
