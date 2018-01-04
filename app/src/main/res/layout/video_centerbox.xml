@@ -7,11 +7,10 @@
     android:gravity="center"
     android:orientation="vertical">
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/linear_centercontroll"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:layout_centerInParent="true"
         android:background="@drawable/my_corner_bg_center"
         android:gravity="center"
@@ -34,11 +33,12 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginLeft="@dimen/margin_size_10"
+            android:layout_toRightOf="@+id/iv_center"
             android:text="00/00"
             android:textColor="@android:color/white"
             android:textSize="@dimen/font_size_18" />
 
-    </LinearLayout>
+    </RelativeLayout>
     <!-- 网络提示 -->
     <LinearLayout
         android:id="@+id/warn_controll"
