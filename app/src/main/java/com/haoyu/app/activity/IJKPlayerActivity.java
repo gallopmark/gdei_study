@@ -58,7 +58,7 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
     View indicator;  //加载进度条
 
     @BindView(R.id.iv_isLocked)
-    ImageView iv_isLocked;
+    AppCompatImageView iv_isLocked;
     @BindView(R.id.fl_controller)
     FrameLayout fl_controller;
     @BindView(R.id.iv_back)
@@ -402,12 +402,12 @@ public class IJKPlayerActivity extends BaseActivity implements View.OnClickListe
                 break;
             case R.id.iv_isLocked:
                 if (isLocked) {
-                    iv_isLocked.setImageResource(R.drawable.playerunlocked);
+                    iv_isLocked.setImageResource(R.drawable.ic_lock_open_24dp);
                     fl_controller.setVisibility(View.VISIBLE);
                     handler.sendEmptyMessageDelayed(CODE_ENDGESTURE, 5000);
                     isLocked = false;
                 } else {
-                    iv_isLocked.setImageResource(R.drawable.playerlocked);
+                    iv_isLocked.setImageResource(R.drawable.ic_lock_close_24dp);
                     fl_controller.setVisibility(View.GONE);
                     isLocked = true;
                 }
