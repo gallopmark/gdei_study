@@ -61,7 +61,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     @BindView(R.id.video_layout)
     RelativeLayout videoLayout;
     @BindView(R.id.linear_centercontroll)
-    LinearLayout linear_centercontroll;
+    RelativeLayout linear_centercontroll;
     @BindView(R.id.bottomControll)
     RelativeLayout bottomControll;
     @BindView(R.id.topControll)
@@ -94,14 +94,11 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     TextView warnContent;
     @BindView(R.id.iv_center)
     AppCompatImageView iv_center;
-
     private boolean running;
     private boolean isShowing;  //控制栏是否是显示
     private boolean mPause = false; //判断当前是否暂停了
     private boolean isLocal = false;//判断播放的事本地视频还是网络视频
-
     private boolean isWarn = false;
-
     private boolean isOpen = false;
     // 处理点击事件
     private boolean isNet;//判断是否非wifi下播放
@@ -132,7 +129,6 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     private final int VIDEO_FORWARD = 2;// 滑动屏幕快进
     private final int VIDEO_SEEKBARFORWARD = 3;// 拖动进度条快进
     private final int VIDEO_HIDECONTROLLBAR = 4;// 隐藏控制栏
-    public final int UPDATE_SEEKBAR = 0;
     public final int VIDEO_WARN_MESSAGE = 5;//网络消息提
     private NetReceiver netReceiver;
     private GestureDetector gestureDetector;
@@ -899,16 +895,12 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
 
     // 显示中间按钮
     private void showCenterBox() {
-        center_content.setVisibility(View.VISIBLE);
-        iv_center.setVisibility(View.VISIBLE);
         linear_centercontroll.setVisibility(View.VISIBLE);
 
     }
 
     // 隐藏中间按钮
     private void hideCenterBox() {
-        center_content.setVisibility(View.INVISIBLE);
-        iv_center.setVisibility(View.INVISIBLE);
         linear_centercontroll.setVisibility(View.INVISIBLE);
     }
 
@@ -922,7 +914,8 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
     private void showImg(int imgId) {
         iv_center.setImageResource(imgId);
     }
-    private void showVideoPlayImg(int imgId){
+
+    private void showVideoPlayImg(int imgId) {
         videoPlay.setImageResource(imgId);
     }
 
@@ -1021,7 +1014,7 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                 if (type.equals("course")) {
                     url = Constants.OUTRT_NET + "/" + activityId + "/study/m/video/user/" + videoId + "/removeVideoStatus";
                 } else if (type.equals("workshop")) {
-                    url = Constants.OUTRT_NET + "/student_" + workshopId + "/m/video/user/"+videoId+"/removeVideoStatus";
+                    url = Constants.OUTRT_NET + "/student_" + workshopId + "/m/video/user/" + videoId + "/removeVideoStatus";
                 }
                 addSubscription(OkHttpClientManager.getAsyn(context, url, new OkHttpClientManager.ResultCallback<String>() {
                     @Override
