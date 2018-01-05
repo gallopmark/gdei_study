@@ -485,15 +485,13 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
                     showToastTips(message);
                     videoHandler.sendEmptyMessageDelayed(VIDEO_WARN_MESSAGE, 2000);
                     break;
-                case IMediaPlayer.MEDIA_ERROR_UNSUPPORTED:
-                    message = "不支持该格式视频";
+                case -10000:
+                    message = "该视频暂时无法播放,请稍后重试";
                     showToastTips(message);
-                    //videoHandler.sendEmptyMessageDelayed(VIDEO_WARN_MESSAGE, 2000);
                     break;
                 default:
                     message = "该视频暂时无法播放,请稍后重试";
                     showToastTips(message);
-                    videoHandler.sendEmptyMessageDelayed(VIDEO_WARN_MESSAGE, 2000);
                     break;
             }
             return false;
