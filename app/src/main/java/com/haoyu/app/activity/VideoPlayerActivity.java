@@ -363,16 +363,13 @@ public class VideoPlayerActivity extends BaseActivity implements View.OnClickLis
         if (summary == null && mFileInfoList.size() == 0) {
             mRead.setVisibility(View.GONE);
         }
-
         mVideoView.setOnInfoListener(mOnInfoListener);
         mVideoView.setOnCompletionListener(mOnCompletionListener);
         mVideoView.setOnBufferingUpdateListener(mOnBufferingUpdateListener);
-
         mVideoView.setKeepScreenOn(true);
         mVideoView.setOnCompletionListener(mOnCompletionListener);
         mVideoView.setOnErrorListener(mOnErrorListener);
         mVideoView.setOnPreparedListener(mOnPreparedListener);
-        //   mVideoView.setDisplayAspectRatio(PLVideoView.ASPECT_RATIO_PAVED_PARENT);
         // 手势监听
         gestureDetector = new GestureDetector(context, new PlayerGestureListener());
         framelayout.setClickable(true);
