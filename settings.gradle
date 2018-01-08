@@ -1,1 +1,1 @@
-include ':app', ':zxingLib',':ijkplayer-library'
+include ':app', ':zxingLib', ':ijkplayer-library'
