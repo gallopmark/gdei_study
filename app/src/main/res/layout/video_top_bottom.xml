@@ -69,6 +69,7 @@
             android:layout_width="@dimen/margin_size_40"
             android:layout_height="@dimen/margin_size_40"
             android:layout_margin="10dp"
+            android:scaleType="centerCrop"
             app:srcCompat="@drawable/ic_play_arrow_24dp" />
 
         <SeekBar
