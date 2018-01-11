@@ -29,8 +29,8 @@
                 android:id="@+id/tv_mFileName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
+                android:ellipsize="middle"
+                android:singleLine="true"
                 android:textSize="@dimen/font_size_16" />
 
             <TextView
