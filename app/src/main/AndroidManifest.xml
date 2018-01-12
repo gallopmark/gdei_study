@@ -112,7 +112,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name="com.haoyu.app.activity.LoginActivity"
             android:windowSoftInputMode="stateHidden|adjustResize" />

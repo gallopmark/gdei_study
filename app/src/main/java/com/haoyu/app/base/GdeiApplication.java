@@ -1,8 +1,8 @@
 package com.haoyu.app.base;
 
 import android.app.Activity;
-import android.app.Application;
 import android.os.Environment;
+import android.support.multidex.MultiDexApplication;
 import android.util.Log;
 
 import com.baidu.mobstat.StatService;
@@ -22,7 +22,7 @@ import io.reactivex.plugins.RxJavaPlugins;
 import okhttp3.CookieJar;
 
 
-public class GdeiApplication extends Application {
+public class GdeiApplication extends MultiDexApplication {
 
     private static GdeiApplication application;
     private List<Activity> activities = new LinkedList<>();
