@@ -29,29 +29,29 @@ class CourseTabActivity : BaseActivity() {
     private var training: Boolean = false
     private var courseId: String? = null
     private var courseType: String? = null
-    private var pageCourseFragment: PageCourseFragment? = null
-    private var pageResourcesFragment: PageResourcesFragment? = null
-    private var pageDiscussionFragment: PageDiscussionFragment? = null
-    private var pageQuestionFragment: PageQuestionFragment? = null
-    private var pageProgressFragment: PageProgressFragment? = null
+    private var f1: PageCourseFragment? = null
+    private var f2: PageResourcesFragment? = null
+    private var f3: PageDiscussionFragment? = null
+    private var f4: PageQuestionFragment? = null
+    private var f5: PageProgressFragment? = null
 
     override fun setLayoutResID(): Int {
         return R.layout.activity_course_tab
     }
 
     override fun initView() {
-        context = this;
+        context = this
         training = intent.getBooleanExtra("training", false)
-        courseId = intent.getStringExtra("courseId");// 课程Id，通过intent获取
+        courseId = intent.getStringExtra("courseId")// 课程Id，通过intent获取
         courseType = intent.getStringExtra("courseType")  //课程类型（微课）
         val courseTitle = intent.getStringExtra("courseTitle")
         val toolBar = findViewById<AppToolBar>(R.id.toolBar)
         radioGroup = findViewById(R.id.radioGroup)
-        val bt_download = findViewById<Button>(R.id.bt_download)
+        val btDownload = findViewById<Button>(R.id.bt_download)
         toolBar.setTitle_text(courseTitle)
         toolBar.setOnLeftClickListener { finish() }
         setTab(PAGE_COURSE)
-        radioGroup.setOnCheckedChangeListener { group, checkedId ->
+        radioGroup.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
                 R.id.rb_section -> {
                     setTab(PAGE_COURSE)
@@ -70,7 +70,7 @@ class CourseTabActivity : BaseActivity() {
                 }
             }
         }
-        bt_download.setOnClickListener({
+        btDownload.setOnClickListener({
             val intent = Intent()
             intent.setClass(context, AppDownloadActivity::class.java)
             startActivity(intent)
@@ -82,71 +82,83 @@ class CourseTabActivity : BaseActivity() {
         hideFragments(transaction)
         when (index) {
             PAGE_COURSE -> {
-                if (pageCourseFragment == null) {
-                    pageCourseFragment = PageCourseFragment()
-                    val bundle = Bundle()
-                    bundle.putBoolean("training", training)
-                    bundle.putString("entityId", courseId)
-                    bundle.putString("courseType", courseType)
-                    pageCourseFragment!!.setArguments(bundle)
-                    transaction.add(R.id.content, pageCourseFragment)
-                    fragments.add(pageCourseFragment!!)
+                if (f1 == null) {
+                    f1 = PageCourseFragment()
+                    f1?.let {
+                        val bundle = Bundle()
+                        bundle.putBoolean("training", training)
+                        bundle.putString("entityId", courseId)
+                        bundle.putString("courseType", courseType)
+                        it.arguments = bundle
+                        transaction.add(R.id.content, it)
+                        fragments.add(it)
+                    }
                 } else {
-                    transaction.show(pageCourseFragment)
+                    transaction.show(f1)
                 }
             }
             PAGE_RESOURCES -> {
-                if (pageResourcesFragment == null) {
-                    pageResourcesFragment = PageResourcesFragment()
-                    val bundle = Bundle()
-                    bundle.putString("entityId", courseId)
-                    pageResourcesFragment!!.setArguments(bundle)
-                    transaction.add(R.id.content, pageResourcesFragment)
-                    fragments.add(pageResourcesFragment!!)
+                if (f2 == null) {
+                    f2 = PageResourcesFragment()
+                    f2?.let {
+                        val bundle = Bundle()
+                        bundle.putString("entityId", courseId)
+                        it.arguments = bundle
+                        transaction.add(R.id.content, it)
+                        fragments.add(it)
+                    }
                 } else {
-                    transaction.show(pageResourcesFragment)
+                    transaction.show(f2)
                 }
             }
             PAGE_DISCUSSION -> {
-                if (pageDiscussionFragment == null) {
-                    pageDiscussionFragment = PageDiscussionFragment()
-                    val bundle = Bundle()
-                    bundle.putString("entityId", courseId)
-                    pageDiscussionFragment!!.setArguments(bundle)
-                    transaction.add(R.id.content, pageDiscussionFragment)
-                    fragments.add(pageDiscussionFragment!!)
+                if (f3 == null) {
+                    f3 = PageDiscussionFragment()
+                    f3?.let {
+                        val bundle = Bundle()
+                        bundle.putString("entityId", courseId)
+                        it.arguments = bundle
+                        transaction.add(R.id.content, it)
+                        fragments.add(it)
+                    }
                 } else {
-                    transaction.show(pageDiscussionFragment)
+                    transaction.show(f3)
                 }
             }
             PAGE_QUESTION -> {
-                if (pageQuestionFragment == null) {
-                    pageQuestionFragment = PageQuestionFragment()
-                    val bundle = Bundle()
-                    bundle.putString("entityId", courseId)
-                    pageQuestionFragment!!.setArguments(bundle)
-                    transaction.add(R.id.content, pageQuestionFragment)
-                    fragments.add(pageQuestionFragment!!)
+                if (f4 == null) {
+                    f4 = PageQuestionFragment()
+                    f4?.let {
+                        val bundle = Bundle()
+                        bundle.putString("entityId", courseId)
+                        it.arguments = bundle
+                        transaction.add(R.id.content, it)
+                        fragments.add(it)
+                    }
                 } else {
-                    transaction.show(pageQuestionFragment)
+                    transaction.show(f4)
                 }
             }
             PAGE_PROGRESS -> {
-                if (pageProgressFragment == null) {
-                    pageProgressFragment = PageProgressFragment()
-                    pageProgressFragment!!.setOnSelectCallBack({
-                        radioGroup.check(R.id.rb_section)
-                        setTab(PAGE_COURSE)
-                    })
-                    val bundle = Bundle()
-                    bundle.putBoolean("training", training)
-                    bundle.putString("entityId", courseId)
-                    bundle.putString("courseType", courseType)
-                    pageProgressFragment!!.setArguments(bundle)
-                    transaction.add(R.id.content, pageProgressFragment)
-                    fragments.add(pageProgressFragment!!)
+                if (f5 == null) {
+                    f5 = PageProgressFragment()
+                    f5?.let {
+                        it.setOnSelectCallBack(object : PageProgressFragment.OnSelectCallBack {
+                            override fun onClickCallBack() {
+                                radioGroup.check(R.id.rb_section)
+                                setTab(PAGE_COURSE)
+                            }
+                        })
+                        val bundle = Bundle()
+                        bundle.putBoolean("training", training)
+                        bundle.putString("entityId", courseId)
+                        bundle.putString("courseType", courseType)
+                        it.arguments = bundle
+                        transaction.add(R.id.content, it)
+                        fragments.add(it)
+                    }
                 } else {
-                    transaction.show(pageProgressFragment)
+                    transaction.show(f5)
                 }
             }
         }
@@ -155,9 +167,7 @@ class CourseTabActivity : BaseActivity() {
 
     private fun hideFragments(transaction: FragmentTransaction) {
         for (fragment in fragments) {
-            if (fragment != null) {
-                transaction.hide(fragment)
-            }
+            transaction.hide(fragment)
         }
     }
 }

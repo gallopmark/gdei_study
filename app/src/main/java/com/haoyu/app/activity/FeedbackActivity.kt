@@ -73,7 +73,7 @@ class FeedbackActivity : BaseActivity() {
         val dialog = MaterialDialog(context)
         dialog.setTitle("反馈结果")
         dialog.setMessage("感谢您提交的反馈信息！\n您的意见将有助于改进我们的平台。")
-        dialog.setNegativeButton("返回上一级") { v, dialog -> finish() }
+        dialog.setNegativeButton("返回上一级") { _, _ -> finish() }
         dialog.setPositiveButton("留在此页", null)
         dialog.show()
     }
