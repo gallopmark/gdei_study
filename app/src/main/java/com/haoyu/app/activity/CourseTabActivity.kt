@@ -10,7 +10,6 @@ import com.haoyu.app.base.BaseActivity
 import com.haoyu.app.fragment.*
 import com.haoyu.app.gdei.student.R
 import com.haoyu.app.view.AppToolBar
-import java.util.*
 
 /**
  * 创建日期：2018/1/12.
@@ -20,20 +19,11 @@ import java.util.*
 class CourseTabActivity : BaseActivity() {
     private lateinit var context: CourseTabActivity
     private lateinit var radioGroup: RadioGroup
-    private val PAGE_COURSE = 0  //学习
-    private val PAGE_RESOURCES = 1    //资源
-    private val PAGE_DISCUSSION = 2   //讨论
-    private val PAGE_QUESTION = 3 //问答
-    private val PAGE_PROGRESS = 4 //进度
-    private val fragments = ArrayList<Fragment>()
     private var training: Boolean = false
     private var courseId: String? = null
     private var courseType: String? = null
-    private var f1: PageCourseFragment? = null
-    private var f2: PageResourcesFragment? = null
-    private var f3: PageDiscussionFragment? = null
-    private var f4: PageQuestionFragment? = null
-    private var f5: PageProgressFragment? = null
+    private val tabs = intArrayOf(1, 2, 3, 4, 5) //学习、资源、讨论、问答、进度
+    private val fragments = arrayOfNulls<Fragment>(5)
 
     override fun setLayoutResID(): Int {
         return R.layout.activity_course_tab
@@ -50,23 +40,23 @@ class CourseTabActivity : BaseActivity() {
         val btDownload = findViewById<Button>(R.id.bt_download)
         toolBar.setTitle_text(courseTitle)
         toolBar.setOnLeftClickListener { finish() }
-        setTab(PAGE_COURSE)
+        setTab(tabs[0])
         radioGroup.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
                 R.id.rb_section -> {
-                    setTab(PAGE_COURSE)
+                    setTab(tabs[0])
                 }
                 R.id.rb_resources -> {
-                    setTab(PAGE_RESOURCES)
+                    setTab(tabs[1])
                 }
                 R.id.rb_discuss -> {
-                    setTab(PAGE_DISCUSSION)
+                    setTab(tabs[2])
                 }
                 R.id.rb_wenda -> {
-                    setTab(PAGE_QUESTION)
+                    setTab(tabs[3])
                 }
                 R.id.rb_progress -> {
-                    setTab(PAGE_PROGRESS)
+                    setTab(tabs[4])
                 }
             }
         }
@@ -81,72 +71,68 @@ class CourseTabActivity : BaseActivity() {
         val transaction = supportFragmentManager.beginTransaction()
         hideFragments(transaction)
         when (index) {
-            PAGE_COURSE -> {
-                if (f1 == null) {
-                    f1 = PageCourseFragment()
-                    f1?.let {
+            tabs[0] -> {
+                if (fragments[0] == null) {
+                    fragments[0] = PageCourseFragment()
+                    fragments[0]?.let {
                         val bundle = Bundle()
                         bundle.putBoolean("training", training)
                         bundle.putString("entityId", courseId)
                         bundle.putString("courseType", courseType)
                         it.arguments = bundle
                         transaction.add(R.id.content, it)
-                        fragments.add(it)
                     }
                 } else {
-                    transaction.show(f1)
+                    transaction.show(fragments[0])
                 }
             }
-            PAGE_RESOURCES -> {
-                if (f2 == null) {
-                    f2 = PageResourcesFragment()
-                    f2?.let {
+            tabs[1] -> {
+                if (fragments[1] == null) {
+                    fragments[1] = PageResourcesFragment()
+                    fragments[1]?.let {
                         val bundle = Bundle()
                         bundle.putString("entityId", courseId)
                         it.arguments = bundle
                         transaction.add(R.id.content, it)
-                        fragments.add(it)
                     }
                 } else {
-                    transaction.show(f2)
+                    transaction.show(fragments[1])
                 }
             }
-            PAGE_DISCUSSION -> {
-                if (f3 == null) {
-                    f3 = PageDiscussionFragment()
-                    f3?.let {
+            tabs[2] -> {
+                if (fragments[2] == null) {
+                    fragments[2] = PageDiscussionFragment()
+                    fragments[2]?.let {
                         val bundle = Bundle()
                         bundle.putString("entityId", courseId)
                         it.arguments = bundle
                         transaction.add(R.id.content, it)
-                        fragments.add(it)
                     }
                 } else {
-                    transaction.show(f3)
+                    transaction.show(fragments[2])
                 }
             }
-            PAGE_QUESTION -> {
-                if (f4 == null) {
-                    f4 = PageQuestionFragment()
-                    f4?.let {
+            tabs[3] -> {
+                if (fragments[3] == null) {
+                    fragments[3] = PageQuestionFragment()
+                    fragments[3]?.let {
                         val bundle = Bundle()
                         bundle.putString("entityId", courseId)
                         it.arguments = bundle
                         transaction.add(R.id.content, it)
-                        fragments.add(it)
                     }
                 } else {
-                    transaction.show(f4)
+                    transaction.show(fragments[3])
                 }
             }
-            PAGE_PROGRESS -> {
-                if (f5 == null) {
-                    f5 = PageProgressFragment()
-                    f5?.let {
-                        it.setOnSelectCallBack(object : PageProgressFragment.OnSelectCallBack {
+            tabs[4] -> {
+                if (fragments[4] == null) {
+                    fragments[4] = PageProgressFragment()
+                    fragments[4]?.let {
+                        (it as PageProgressFragment).setOnSelectCallBack(object : PageProgressFragment.OnSelectCallBack {
                             override fun onClickCallBack() {
                                 radioGroup.check(R.id.rb_section)
-                                setTab(PAGE_COURSE)
+                                setTab(tabs[0])
                             }
                         })
                         val bundle = Bundle()
@@ -155,10 +141,9 @@ class CourseTabActivity : BaseActivity() {
                         bundle.putString("courseType", courseType)
                         it.arguments = bundle
                         transaction.add(R.id.content, it)
-                        fragments.add(it)
                     }
                 } else {
-                    transaction.show(f5)
+                    transaction.show(fragments[4])
                 }
             }
         }
@@ -166,8 +151,10 @@ class CourseTabActivity : BaseActivity() {
     }
 
     private fun hideFragments(transaction: FragmentTransaction) {
-        for (fragment in fragments) {
-            transaction.hide(fragment)
+        for (i in 0 until fragments.size) {
+            fragments[i]?.let {
+                transaction.hide(it)
+            }
         }
     }
 }
