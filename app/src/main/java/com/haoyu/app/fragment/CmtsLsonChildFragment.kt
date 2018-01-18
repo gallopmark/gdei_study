@@ -175,7 +175,7 @@ class CmtsLsonChildFragment : BaseFragment(), XRecyclerView.LoadingListener {
                         adapter.notifyDataSetChanged()
                     }
                     mDatas[position].isSupport = true
-                } else if (response?.responseMsg.isNullOrEmpty()) {
+                } else if (response?.responseMsg != null) {
                     mDatas[position].isSupport = true
                     toast("您已点赞过")
                 } else {
@@ -212,7 +212,7 @@ class CmtsLsonChildFragment : BaseFragment(), XRecyclerView.LoadingListener {
                 override fun onResponse(response: ReplyResult?) {
                     hideTipDialog()
                     response?.responseData?.let {
-                        if (mDatas[position].getmDiscussionRelations().size > 0) {
+                        if (mDatas[position].getmDiscussionRelations() != null && mDatas[position].getmDiscussionRelations().size > 0) {
                             val replyNum = mDatas[position].getmDiscussionRelations()[0].replyNum + 1
                             mDatas[position].getmDiscussionRelations()[0].replyNum = replyNum
                             adapter.notifyDataSetChanged()
