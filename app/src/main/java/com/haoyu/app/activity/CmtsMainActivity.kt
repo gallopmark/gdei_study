@@ -18,7 +18,7 @@ import com.haoyu.app.view.AppToolBar
  * 作者:xiaoma
  */
 class CmtsMainActivity : BaseActivity() {
-    private lateinit var context: CmtsMainActivity
+    private val context = this
     private lateinit var toolBar: AppToolBar
     private val lines = arrayOfNulls<View>(3)
     private val fragments = arrayOfNulls<Fragment>(3)
