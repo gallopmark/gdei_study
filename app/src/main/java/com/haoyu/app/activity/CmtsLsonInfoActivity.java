@@ -38,8 +38,8 @@ import com.haoyu.app.entity.Paginator;
 import com.haoyu.app.entity.ReplyEntity;
 import com.haoyu.app.entity.ReplyListResult;
 import com.haoyu.app.entity.ReplyResult;
-import com.haoyu.app.entity.TeachingLessonData;
-import com.haoyu.app.entity.TeachingLessonEntity;
+import com.haoyu.app.entity.CmtsLessonData;
+import com.haoyu.app.entity.CmtsLessonEntity;
 import com.haoyu.app.filePicker.LFilePicker;
 import com.haoyu.app.gdei.student.R;
 import com.haoyu.app.imageloader.GlideImgManager;
@@ -139,7 +139,7 @@ public class CmtsLsonInfoActivity extends BaseActivity implements View.OnClickLi
     @BindView(R.id.bottomView)
     TextView bottomView; //底部提建议按钮
     private String lessonId, relationId;  //创课id，关联关系id
-    private TeachingLessonEntity lessonEntity;
+    private CmtsLessonEntity lessonEntity;
     private int supportNum, adviseNum;  //点赞数，提建议数
     private List<ReplyEntity> adviseList = new ArrayList<>();
     private AppDiscussionAdapter adviseAdapter;
@@ -187,7 +187,7 @@ public class CmtsLsonInfoActivity extends BaseActivity implements View.OnClickLi
     @Override
     public void initData() {
         final String url = Constants.OUTRT_NET + "/m/lesson/cmts/view/" + lessonId;
-        addSubscription(OkHttpClientManager.getAsyn(context, url, new OkHttpClientManager.ResultCallback<BaseResponseResult<TeachingLessonData>>() {
+        addSubscription(OkHttpClientManager.getAsyn(context, url, new OkHttpClientManager.ResultCallback<BaseResponseResult<CmtsLessonData>>() {
             @Override
             public void onBefore(Request request) {
                 loadingView.setVisibility(View.VISIBLE);
@@ -200,7 +200,7 @@ public class CmtsLsonInfoActivity extends BaseActivity implements View.OnClickLi
             }
 
             @Override
-            public void onResponse(BaseResponseResult<TeachingLessonData> result) {
+            public void onResponse(BaseResponseResult<CmtsLessonData> result) {
                 loadingView.setVisibility(View.VISIBLE);
                 if (result != null && result.getResponseData() != null && result.getResponseData().getmLesson() != null) {
                     updateUI(result.getResponseData().getmLesson());
@@ -213,7 +213,7 @@ public class CmtsLsonInfoActivity extends BaseActivity implements View.OnClickLi
         }));
     }
 
-    private void updateUI(TeachingLessonEntity entity) {
+    private void updateUI(CmtsLessonEntity entity) {
         ssv_content.setVisibility(View.VISIBLE);
         lessonEntity = entity;
         if (lessonEntity.getmDiscussionRelations() != null && lessonEntity.getmDiscussionRelations().size() > 0) {
