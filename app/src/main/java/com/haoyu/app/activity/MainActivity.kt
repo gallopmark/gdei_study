@@ -122,10 +122,7 @@ class MainActivity : BaseActivity(), View.OnClickListener {
 
     private fun initMenuView(menuView: View) {
         val llUserInfo = menuView.findViewById<LinearLayout>(R.id.ll_userInfo)
-        llUserInfo.setOnClickListener({
-            intent.setClass(context, AppUserInfoActivity::class.java)
-            startActivityForResult(intent, 2)
-        })
+        llUserInfo.setOnClickListener { startActivity(Intent(context, AppUserInfoActivity::class.java)) }
         val ivUserIco = menuView.findViewById<ImageView>(R.id.iv_userIco)
         GlideImgManager.loadCircleImage(context, avatar, R.drawable.user_default, R.drawable.user_default, ivUserIco)
         val tvUserName = menuView.findViewById<TextView>(R.id.tv_userName)
@@ -578,7 +575,6 @@ class MainActivity : BaseActivity(), View.OnClickListener {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
         when (requestCode) {
             1 ->
                 /* 处理二维码扫描结果*/
