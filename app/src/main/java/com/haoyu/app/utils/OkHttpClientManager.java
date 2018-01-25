@@ -528,6 +528,7 @@ public class OkHttpClientManager {
                     Log.e("json", json);
                     return onResponse(json, resCallBack);
                 } else {
+                    Log.e("json", json);
                     return onResponse(json, resCallBack);
                 }
             }
