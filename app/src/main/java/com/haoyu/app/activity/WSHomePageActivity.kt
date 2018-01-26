@@ -93,7 +93,6 @@ class WSHomePageActivity : BaseActivity(), View.OnClickListener, RecyclerTouchLi
         recyclerView = findViewById(R.id.recyclerView)
         tvEmptyTask = findViewById(R.id.tv_emptyTask)
         tvBottom = findViewById(R.id.tv_bottom)
-        tvBottom.setOnClickListener(context)
     }
 
     private fun setToolBar() {
@@ -845,6 +844,11 @@ class WSHomePageActivity : BaseActivity(), View.OnClickListener, RecyclerTouchLi
         }
     }
 
+    override fun setListener() {
+        loadFailView.setOnRetryListener { initData() }
+        tvBottom.setOnClickListener(context)
+    }
+
     override fun onClick(v: View) {
         when (v.id) {
             R.id.ll_question -> {
@@ -898,7 +902,7 @@ class WSHomePageActivity : BaseActivity(), View.OnClickListener, RecyclerTouchLi
         }
         llIntroduct.setOnClickListener {
             pw.dismiss()
-            val intent = Intent(context, WorkShopDetailActivity::class.java)
+            val intent = Intent(context, WSDetailActivity::class.java)
             intent.putExtra("workshopId", workshopId)
             startActivity(intent)
         }
