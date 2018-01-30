@@ -102,26 +102,11 @@
                         android:textSize="@dimen/font_size_16" />
                 </LinearLayout>
             </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/llChild"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_size_6"
-                android:background="@drawable/comment_reply"
-                android:orientation="vertical"
-                android:paddingBottom="@dimen/margin_size_10"
-                android:paddingLeft="@dimen/margin_size_10"
-                android:paddingRight="@dimen/margin_size_10"
-                android:paddingTop="@dimen/margin_size_14">
-
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/recyclerView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:nestedScrollingEnabled="false"
-                    android:overScrollMode="never" />
-            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/margin_size_1"
+        android:background="@color/spaceColor" />
 </LinearLayout>
