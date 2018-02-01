@@ -61,7 +61,7 @@
                     android:drawableLeft="@drawable/course_enroll"
                     android:drawablePadding="3dp"
                     android:ellipsize="middle"
-                    android:maxLines="1"
+                    android:singleLine="true"
                     android:text="122,120人报读"
                     android:textColor="#8A8E9B"
                     android:textSize="@dimen/font_size_14" />
