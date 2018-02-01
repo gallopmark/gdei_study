@@ -3,15 +3,9 @@ package com.haoyu.app.activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.support.v4.util.ArrayMap;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.Gravity;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -23,6 +17,7 @@ import com.haoyu.app.adapter.DepartmentAdapter;
 import com.haoyu.app.adapter.DictEntryAdapter;
 import com.haoyu.app.adapter.RegionAdapter;
 import com.haoyu.app.base.BaseActivity;
+import com.haoyu.app.dialog.CommentDialog;
 import com.haoyu.app.dialog.FileUploadDialog;
 import com.haoyu.app.entity.DepartmentListResult;
 import com.haoyu.app.entity.DictEntryMobileEntity;
@@ -795,44 +790,16 @@ public class AppUserInfoActivity extends BaseActivity implements View.OnClickLis
     }
 
     private void alterDialog(String text) {
-        View view = getLayoutInflater().inflate(R.layout.dialog_alter_userinfo, null);
-        final AlertDialog dialog = new AlertDialog.Builder(context).create();
-        dialog.setCanceledOnTouchOutside(true);
-        dialog.setView(view);
-        dialog.show();
-        Window window = dialog.getWindow();
-        window.setContentView(R.layout.dialog_alter_userinfo);
-        final EditText et_imput = dialog.findViewById(R.id.et_content);
-        et_imput.setText(text);
-        et_imput.requestFocus();
-        et_imput.setFocusable(true);
-        final Button bt_save = dialog.findViewById(R.id.bt_save);
-        bt_save.setEnabled(false);
-        et_imput.addTextChangedListener(new TextWatcher() {
+        String hint;
+        if (alterName) {
+            hint = "此处输入姓名";
+        } else {
+            hint = "此处输入邮箱";
+        }
+        CommentDialog dialog = new CommentDialog(context, hint, text, "保存");
+        dialog.setSendCommentListener(new CommentDialog.OnSendCommentListener() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s.toString().trim().length() > 0) {
-                    bt_save.setEnabled(true);
-                } else {
-                    bt_save.setEnabled(false);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
-
-        bt_save.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String content = et_imput.getText().toString().trim();
+            public void sendComment(String content) {
                 if (alterName) {
                     alterInfo(content, null, null, null, null);
                 } else if (alterEmail) {
@@ -841,12 +808,9 @@ public class AppUserInfoActivity extends BaseActivity implements View.OnClickLis
                     else
                         showMaterialDialog("提示", "邮箱格式不正确，请重新输入！");
                 }
-                dialog.dismiss();
             }
         });
-        window.setLayout(ScreenUtils.getScreenWidth(context), WindowManager.LayoutParams.WRAP_CONTENT);
-        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-        window.setGravity(Gravity.BOTTOM);
+        dialog.show();
     }
 
     private void alterInfo(String realName, String deptId, String stage, String subject, String email) {
