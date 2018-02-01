@@ -5,6 +5,7 @@ import android.content.Intent
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.text.SpannableString
+import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
 import android.view.MotionEvent
@@ -103,7 +104,6 @@ class WSFreeChatActiviy : BaseActivity(), XRecyclerView.LoadingListener, Recycle
             result
         }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
             loadingView.visibility = View.GONE
-            if (tvBottom.visibility != View.VISIBLE) tvBottom.visibility = View.VISIBLE
             if (it?.getResponseData()?.getmComments() != null && it.getResponseData().getmComments().size > 0) {
                 updateUI(it.getResponseData().getmComments(), it.getResponseData().paginator)
             } else {
@@ -158,6 +158,7 @@ class WSFreeChatActiviy : BaseActivity(), XRecyclerView.LoadingListener, Recycle
         ssb.setSpan(clickableSpan, start, end, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
         ssb.setSpan(ForegroundColorSpan(ContextCompat.getColor(context, R.color.defaultColor)),
                 start, end, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
+        tvEmpty.movementMethod = LinkMovementMethod.getInstance()
         tvEmpty.text = ssb
     }
 
