@@ -145,6 +145,7 @@ class WSFreeChatActiviy : BaseActivity(), XRecyclerView.LoadingListener, Recycle
 
     private fun onEmptyData() {
         xRecyclerView.visibility = View.GONE
+        tvEmpty.visibility = View.VISIBLE
         val text = "目前还没人参与交流，\n赶紧去发起您的疑问吧！"
         val ssb = SpannableString(text)
         val start = text.indexOf("去") + 1
